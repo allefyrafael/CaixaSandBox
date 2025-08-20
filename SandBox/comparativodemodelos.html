@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sandbox CAIXA - Modelos de Experimentação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f0f4f8;
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .comparison-item {
+            transition: all 0.3s ease;
+        }
+        
+        .comparison-item:hover {
+            background-color: #f0f9ff;
+        }
+        
+        .step-card {
+            transition: all 0.3s ease;
+        }
+        
+        .step-card:hover {
+            transform: scale(1.03);
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Animated gradient backgrounds for tabs */
+        .tab-btn.active-always {
+            background: linear-gradient(-45deg, #d1fae5, #a7f3d0, #6ee7b7, #34d399);
+            background-size: 400% 400%;
+            animation: gradient 3s ease infinite;
+            color: #065f46 !important;
+            border-color: #10b981 !important;
+            font-weight: 700;
+        }
+        
+        .tab-btn.active-edital {
+            background: linear-gradient(-45deg, #ffedd5, #fed7aa, #fdba74, #fb923c);
+            background-size: 400% 400%;
+            animation: gradient 3s ease infinite;
+            color: #9a3412 !important;
+            border-color: #f97316 !important;
+            font-weight: 700;
+        }
+        
+        .tab-btn.active-compare {
+            background: linear-gradient(-45deg, #dbeafe, #bfdbfe, #93c5fd, #60a5fa);
+            background-size: 400% 400%;
+            animation: gradient 3s ease infinite;
+            color: #1e40af !important;
+            border-color: #3b82f6 !important;
+            font-weight: 700;
+        }
+        
+        /* Enhanced hover effect for tab buttons with specific colors */
+        #tab-always:hover {
+            color: #065f46 !important;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        
+        #tab-edital:hover {
+            color: #9a3412 !important;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        
+        #tab-compare:hover {
+            color: #1e40af !important;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        /* Collapsible quiz section */
+        .collapsible-section {
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        
+        .collapsible-content.expanded {
+            max-height: 1000px;
+        }
+        
+        .collapsible-header {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .collapsible-header:hover {
+            background-color: #f0f9ff;
+        }
+        
+        .rotate-icon {
+            transition: transform 0.3s ease;
+        }
+        
+        .rotate-icon.rotated {
+            transform: rotate(180deg);
+        }
+        
+        /* Animated title frame */
+        .title-frame {
+            position: relative;
+            width: 100%;
+            padding: 30px 20px;
+            background: linear-gradient(145deg, #ffffff, #f0f4f8);
+            box-shadow: 0 10px 30px rgba(0, 105, 225, 0.2);
+            overflow: hidden;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .title-frame::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                transparent, 
+                rgba(30, 64, 175, 0), 
+                rgba(30, 64, 175, 0.3), 
+                rgba(30, 64, 175, 0.7), 
+                rgba(30, 64, 175, 0.3), 
+                rgba(30, 64, 175, 0), 
+                transparent
+            );
+            animation: rotate 4s linear infinite;
+            z-index: -1;
+        }
+        
+        .title-frame::after {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            background: white;
+            border-radius: 12px;
+            z-index: -1;
+        }
+        
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Animated gradient line */
+        .gradient-line {
+            height: 6px;
+            width: 100%;
+            background: linear-gradient(90deg, 
+                #3b82f6, #60a5fa, #93c5fd, #bfdbfe, 
+                #10b981, #34d399, #6ee7b7, #a7f3d0,
+                #f97316, #fb923c, #fdba74, #fed7aa,
+                #3b82f6);
+            background-size: 200% 100%;
+            animation: gradientMove 3s linear infinite;
+            margin-top: auto;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border-radius: 0 0 15px 15px;
+        }
+        
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: 200% 0%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header with animated frame -->
+        <div class="text-center mb-12">
+            <div class="title-frame">
+                <h1 class="text-4xl font-bold text-blue-800 mb-4">Modelos de Experimentação do Sandbox CAIXA</h1>
+                <div class="gradient-line"></div>
+            </div>
+        </div>
+        
+        <!-- Main Infographic -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-12">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <div class="w-full md:w-1/2 p-4">
+                    <h2 class="text-2xl font-bold text-blue-700 mb-4">O que é o Sandbox CAIXA?</h2>
+                    <p class="text-gray-700 mb-4">
+                        O Sandbox CAIXA é um ambiente controlado para experimentação de soluções inovadoras, 
+                        que permite testar novas ideias com clientes reais antes de implementá-las em larga escala.
+                    </p>
+                    <p class="text-gray-700">
+                        Existem dois modelos principais de experimentação, ambos seguindo o mesmo fluxo 
+                        (Discovery, Delivery e Scale), mas com diferentes formas de iniciação e gestão.
+                    </p>
+                </div>
+                <div class="w-full md:w-1/2 p-4 flex justify-center">
+                    <svg width="300" height="300" viewBox="0 0 300 300">
+                        <circle cx="150" cy="150" r="120" fill="#e6f7ff" />
+                        <circle cx="150" cy="150" r="90" fill="#bae7ff" />
+                        <circle cx="150" cy="150" r="60" fill="#91d5ff" />
+                        
+                        <!-- Discovery Icon -->
+                        <g transform="translate(150, 80)">
+                            <circle cx="0" cy="0" r="25" fill="#0050b3" />
+                            <path d="M-10 -5 L-10 5 L10 0 Z" fill="white" />
+                        </g>
+                        
+                        <!-- Delivery Icon -->
+                        <g transform="translate(195, 180)">
+                            <circle cx="0" cy="0" r="25" fill="#096dd9" />
+                            <rect x="-12" y="-12" width="24" height="24" fill="white" />
+                        </g>
+                        
+                        <!-- Scale Icon -->
+                        <g transform="translate(105, 180)">
+                            <circle cx="0" cy="0" r="25" fill="#1890ff" />
+                            <path d="M-12 12 L0 -12 L12 12 Z" fill="white" />
+                        </g>
+                        
+                        <!-- Connecting Lines -->
+                        <path d="M150 105 L195 155" stroke="#0050b3" stroke-width="3" stroke-dasharray="5,5" />
+                        <path d="M195 155 L195 155" stroke="#096dd9" stroke-width="3" stroke-dasharray="5,5" />
+                        <path d="M195 155 L130 180" stroke="#1890ff" stroke-width="3" stroke-dasharray="5,5" />
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Tabs Navigation -->
+            <div class="flex border-b border-gray-200 mb-8">
+                <button id="tab-always" class="tab-btn py-3 px-6 font-medium text-lg border-b-2 active-always rounded-t-lg">
+                    Always On
+                </button>
+                <button id="tab-edital" class="tab-btn py-3 px-6 font-medium text-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 rounded-t-lg">
+                    Edital de Experimentação
+                </button>
+                <button id="tab-compare" class="tab-btn py-3 px-6 font-medium text-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 rounded-t-lg">
+                    Comparativo
+                </button>
+            </div>
+            
+            <!-- Always On Content -->
+            <div id="content-always" class="tab-content active">
+                <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 mb-8">
+                    <div class="flex flex-col md:flex-row items-center">
+                        <div class="w-full md:w-1/4 flex justify-center mb-6 md:mb-0">
+                            <div class="bg-green-500 rounded-full p-6 w-32 h-32 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-3/4 md:pl-8">
+                            <h3 class="text-2xl font-bold text-green-600 mb-4">Sandbox CAIXA Always On</h3>
+                            <p class="text-gray-700 mb-4">
+                                Um modelo contínuo e descentralizado que permite que qualquer Unidade CAIXA ou empregado 
+                                proponha e execute experimentos a qualquer momento, sem necessidade de edital.
+                            </p>
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <h4 class="font-semibold text-green-600 mb-2">Características principais:</h4>
+                                <ul class="list-disc pl-5 space-y-2 text-gray-700">
+                                    <li><span class="font-medium">Início livre:</span> Pode ser iniciado a qualquer momento, por iniciativa própria.</li>
+                                    <li><span class="font-medium">Proponentes:</span> Unidades CAIXA.</li>
+                                    <li><span class="font-medium">Priorização:</span> A própria Unidade Gestora do Experimento define a prioridade.</li>
+                                    <li><span class="font-medium">Validação:</span> Não há seleção ou validação prévia pela GEINA.</li>
+                                    <li><span class="font-medium">Comunicação:</span> A GEINA é apenas cientificada sobre o início do experimento.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="text-xl font-bold text-green-600 mb-4">Etapas do Always On</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="step-card bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                        <div class="flex items-center mb-2">
+                            <div class="bg-green-100 rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                                <span class="font-bold text-green-600">1</span>
+                            </div>
+                            <h4 class="font-semibold">Proposta</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Estruturação do experimento (formulário MO15185)</p>
+                    </div>
+                    
+                    <div class="step-card bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                        <div class="flex items-center mb-2">
+                            <div class="bg-green-100 rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                                <span class="font-bold text-green-600">2</span>
+                            </div>
+                            <h4 class="font-semibold">Execução</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Realização em ambiente controlado</p>
+                    </div>
+                    
+                    <div class="step-card bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                        <div class="flex items-center mb-2">
+                            <div class="bg-green-100 rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                                <span class="font-bold text-green-600">3</span>
+                            </div>
+                            <h4 class="font-semibold">Relatórios</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Relatórios de evolução (formulário MO15183)</p>
+                    </div>
+                    
+                    <div class="step-card bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                        <div class="flex items-center mb-2">
+                            <div class="bg-green-100 rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                                <span class="font-bold text-green-600">4</span>
+                            </div>
+                            <h4 class="font-semibold">Integração</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Integração da solução validada aos processos da CAIXA</p>
+                    </div>
+                </div>
+                
+                <div class="bg-green-50 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-green-600 mb-4">Vantagens do Always On</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white rounded-lg p-4 shadow-sm flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            <div>
+                                <h4 class="font-semibold">Agilidade</h4>
+                                <p class="text-sm text-gray-600">Ideal para ideias que já têm maturidade ou urgência</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg p-4 shadow-sm flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            <div>
+                                <h4 class="font-semibold">Autonomia</h4>
+                                <p class="text-sm text-gray-600">A Unidade Gestora tem total controle sobre o experimento</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg p-4 shadow-sm flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <h4 class="font-semibold">Flexibilidade</h4>
+                                <p class="text-sm text-gray-600">Não depende de cronogramas de editais</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg p-4 shadow-sm flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            <div>
+                                <h4 class="font-semibold">Inovação Contínua</h4>
+                                <p class="text-sm text-gray-600">Permite testar ideias a qualquer momento</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Edital Content -->
+            <div id="content-edital" class="tab-content">
+                <div class="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-lg p-6 mb-8">
+                    <div class="flex flex-col md:flex-row items-center">
+                        <div class="w-full md:w-1/4 flex justify-center mb-6 md:mb-0">
+                            <div class="bg-orange-500 rounded-full p-6 w-32 h-32 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-3/4 md:pl-8">
+                            <h3 class="text-2xl font-bold text-orange-600 mb-4">Sandbox CAIXA por Edital de Experimentação</h3>
+                            <p class="text-gray-700 mb-4">
+                                Um modelo estruturado e competitivo, lançado por meio de editais da GEINA, 
+                                que seleciona propostas alinhadas a desafios estratégicos da CAIXA.
+                            </p>
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <h4 class="font-semibold text-orange-600 mb-2">Características principais:</h4>
+                                <ul class="list-disc pl-5 space-y-2 text-gray-700">
+                                    <li><span class="font-medium">Início programado:</span> Depende da publicação de edital pela GEINA.</li>
+                                    <li><span class="font-medium">Proponentes:</span> Intraempreendedores ou Unidades CAIXA que se inscrevem.</li>
+                                    <li><span class="font-medium">Priorização:</span> A GEINA realiza a seleção e priorização das propostas.</li>
+                                    <li><span class="font-medium">Validação:</span> As propostas passam por etapas formais de avaliação e pitch.</li>
+                                    <li><span class="font-medium">Acompanhamento:</span> A GEINA coordena e acompanha todas as fases.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="text-xl font-bold text-orange-600 mb-4">Etapas do Edital de Experimentação</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+                    <div class="step-card bg-white rounded-lg shadow p-4 border-l-4 border-orange-500">
+                        <div class="flex items-center mb-2">
+                            <div class="bg-orange-100 rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                                <span class="font-bold text-orange-600">1</span>
+                            </div>
+                            <h4 class="font-semibold">Publicação</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Publicação do edital pela GEINA</p>
+                    </div>
+                    
+                    <div class="step-card bg-white rounded-lg shadow p-4 border-l-4 border-orange-500">
+                        <div class="flex items-center mb-2">
+                            <div class="bg-orange-100 rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                                <span class="font-bold text-orange-600">2</span>
+                            </div>
+                            <h4 class="font-semibold">Inscrição</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Submissão da proposta</p>
+                    </div>
+                    
+                    <div class="step-card bg-white rounded-lg shadow p-4 border-l-4 border-orange-500">
+                        <div class="flex items-center mb-2">
+                            <div class="bg-orange-100 rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                                <span class="font-bold text-orange-600">3</span>
+                            </div>
+                            <h4 class="font-semibold">Seleção</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Priorização pela GEINA</p>
+                    </div>
+                    
+                    <div class="step-card bg-white rounded-lg shadow p-4 border-l-4 border-orange-500">
+                        <div class="flex items-center mb-2">
+                            <div class="bg-orange-100 rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                                <span class="font-bold text-orange-600">4</span>
+                            </div>
+                            <h4 class="font-semibold">Estruturação</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Estruturação do experimento</p>
+                    </div>
+                    
+                    <div class="step-card bg-white rounded-lg shadow p-4 border-l-4 border-orange-500">
+                        <div class="flex items-center mb-2">
+                            <div class="bg-orange-100 rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                                <span class="font-bold text-orange-600">5</span>
+                            </div>
+                            <h4 class="font-semibold">Execução</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Validação com clientes</p>
+                    </div>
+                    
+                    <div class="step-card bg-white rounded-lg shadow p-4 border-l-4 border-orange-500">
+                        <div class="flex items-center mb-2">
+                            <div class="bg-orange-100 rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                                <span class="font-bold text-orange-600">6</span>
+                            </div>
+                            <h4 class="font-semibold">Integração</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Relatórios e integração da solução</p>
+                    </div>
+                </div>
+                
+                <div class="bg-orange-50 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-orange-600 mb-4">Vantagens do Edital de Experimentação</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white rounded-lg p-4 shadow-sm flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <div>
+                                <h4 class="font-semibold">Alinhamento Estratégico</h4>
+                                <p class="text-sm text-gray-600">Foco em temas prioritários definidos pela organização</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg p-4 shadow-sm flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <div>
+                                <h4 class="font-semibold">Suporte Estruturado</h4>
+                                <p class="text-sm text-gray-600">Acompanhamento direto da GEINA em todas as fases</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg p-4 shadow-sm flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <div>
+                                <h4 class="font-semibold">Processo Estruturado</h4>
+                                <p class="text-sm text-gray-600">Etapas formais de avaliação garantem qualidade</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg p-4 shadow-sm flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                            </svg>
+                            <div>
+                                <h4 class="font-semibold">Visibilidade</h4>
+                                <p class="text-sm text-gray-600">Maior visibilidade para as propostas selecionadas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Comparative Content -->
+            <div id="content-compare" class="tab-content">
+                <h3 class="text-2xl font-bold text-blue-700 mb-6 text-center">Comparativo entre os Modelos</h3>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white rounded-lg overflow-hidden shadow">
+                        <thead class="bg-blue-600 text-white">
+                            <tr>
+                                <th class="py-3 px-4 text-left">Aspecto</th>
+                                <th class="py-3 px-4 text-center">
+                                    <div class="flex items-center justify-center">
+                                        <div class="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
+                                        Always On
+                                    </div>
+                                </th>
+                                <th class="py-3 px-4 text-center">
+                                    <div class="flex items-center justify-center">
+                                        <div class="w-4 h-4 rounded-full bg-orange-500 mr-2"></div>
+                                        Edital de Experimentação
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="comparison-item border-b">
+                                <td class="py-3 px-4 font-medium">Início</td>
+                                <td class="py-3 px-4 text-center bg-green-50">A qualquer momento</td>
+                                <td class="py-3 px-4 text-center bg-orange-50">Após publicação de edital</td>
+                            </tr>
+                            <tr class="comparison-item border-b">
+                                <td class="py-3 px-4 font-medium">Proponentes</td>
+                                <td class="py-3 px-4 text-center bg-green-50">Unidades CAIXA</td>
+                                <td class="py-3 px-4 text-center bg-orange-50">Intraempreendedores ou Unidades CAIXA</td>
+                            </tr>
+                            <tr class="comparison-item border-b">
+                                <td class="py-3 px-4 font-medium">Priorização</td>
+                                <td class="py-3 px-4 text-center bg-green-50">Pela Unidade Gestora</td>
+                                <td class="py-3 px-4 text-center bg-orange-50">Pela GEINA</td>
+                            </tr>
+                            <tr class="comparison-item border-b">
+                                <td class="py-3 px-4 font-medium">Validação prévia</td>
+                                <td class="py-3 px-4 text-center bg-green-50">Não há</td>
+                                <td class="py-3 px-4 text-center bg-orange-50">Sim, com pitch e critérios definidos</td>
+                            </tr>
+                            <tr class="comparison-item border-b">
+                                <td class="py-3 px-4 font-medium">Papel da GEINA</td>
+                                <td class="py-3 px-4 text-center bg-green-50">Coordenação geral</td>
+                                <td class="py-3 px-4 text-center bg-orange-50">Coordenação ativa e seleção</td>
+                            </tr>
+                            <tr class="comparison-item">
+                                <td class="py-3 px-4 font-medium">Foco</td>
+                                <td class="py-3 px-4 text-center bg-green-50">Agilidade e autonomia</td>
+                                <td class="py-3 px-4 text-center bg-orange-50">Alinhamento com desafios estratégicos</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-8">
+                    <h3 class="text-xl font-bold text-blue-700 mb-4">Qual modelo escolher?</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-6 shadow-sm">
+                            <h4 class="text-lg font-semibold text-green-700 mb-3">Escolha o Always On quando:</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Sua ideia precisa ser testada com urgência</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Você prefere maior autonomia na condução</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Sua unidade já tem recursos para executar</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Não quer esperar pelo próximo edital</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-6 shadow-sm">
+                            <h4 class="text-lg font-semibold text-orange-700 mb-3">Escolha o Edital quando:</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-600 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Sua ideia se alinha a desafios estratégicos</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-600 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Você deseja maior suporte da GEINA</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-600 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Busca maior visibilidade para sua proposta</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-600 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Prefere um processo mais estruturado</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Common Flow Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-12">
+            <h2 class="text-2xl font-bold text-blue-700 mb-6 text-center">Fluxo Comum de Experimentação</h2>
+            
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <div class="w-full md:w-1/2 p-4">
+                    <p class="text-gray-700 mb-4">
+                        Independentemente do modelo escolhido, todos os experimentos seguem o mesmo fluxo 
+                        de experimentação, dividido em três fases principais:
+                    </p>
+                </div>
+                <div class="w-full md:w-1/2 p-4">
+                    <div class="flex justify-center">
+                        <!-- Fixed SVG with proper width to prevent cutting off -->
+                        <svg width="400" height="100" viewBox="0 0 400 100" class="overflow-visible">
+                            <!-- Discovery -->
+                            <g>
+                                <rect x="10" y="20" width="80" height="60" rx="5" fill="#e6f7ff" stroke="#1890ff" stroke-width="2" />
+                                <text x="50" y="50" text-anchor="middle" font-size="12" font-weight="bold" fill="#1890ff">Discovery</text>
+                                <text x="50" y="70" text-anchor="middle" font-size="10" fill="#666">Descoberta</text>
+                            </g>
+                            
+                            <!-- Arrow -->
+                            <path d="M95 50 L115 50" stroke="#1890ff" stroke-width="2" />
+                            <polygon points="115,45 125,50 115,55" fill="#1890ff" />
+                            
+                            <!-- Delivery -->
+                            <g>
+                                <rect x="130" y="20" width="80" height="60" rx="5" fill="#e6f7ff" stroke="#1890ff" stroke-width="2" />
+                                <text x="170" y="50" text-anchor="middle" font-size="12" font-weight="bold" fill="#1890ff">Delivery</text>
+                                <text x="170" y="70" text-anchor="middle" font-size="10" fill="#666">Entrega</text>
+                            </g>
+                            
+                            <!-- Arrow -->
+                            <path d="M215 50 L235 50" stroke="#1890ff" stroke-width="2" />
+                            <polygon points="235,45 245,50 235,55" fill="#1890ff" />
+                            
+                            <!-- Scale -->
+                            <g>
+                                <rect x="250" y="20" width="80" height="60" rx="5" fill="#e6f7ff" stroke="#1890ff" stroke-width="2" />
+                                <text x="290" y="50" text-anchor="middle" font-size="12" font-weight="bold" fill="#1890ff">Scale</text>
+                                <text x="290" y="70" text-anchor="middle" font-size="10" fill="#666">Escala</text>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-blue-50 rounded-lg p-6 shadow-sm">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-blue-700">Discovery</h3>
+                    </div>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Identificação do problema</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Definição da hipótese</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Pesquisa com usuários</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Ideação da solução</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-blue-50 rounded-lg p-6 shadow-sm">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-blue-700">Delivery</h3>
+                    </div>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Desenvolvimento do MVP</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Testes com usuários</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Iterações e melhorias</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Validação da solução</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-blue-50 rounded-lg p-6 shadow-sm">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-blue-700">Scale</h3>
+                    </div>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Análise de resultados</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Planejamento de escala</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Integração aos processos</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Implementação em larga escala</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Decision Helper - Now Collapsible -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-12">
+            <div class="collapsible-header flex justify-between items-center cursor-pointer p-2 rounded-lg hover:bg-blue-50">
+                <h2 class="text-2xl font-bold text-blue-700">Qual modelo é ideal para você?</h2>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 rotate-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            
+            <div class="collapsible-content">
+                <div class="pt-4">
+                    <p class="text-gray-700 text-center mb-6">
+                        Responda às perguntas abaixo para descobrir qual modelo de experimentação 
+                        pode ser mais adequado para sua necessidade:
+                    </p>
+                    
+                    <div class="max-w-2xl mx-auto bg-blue-50 rounded-lg p-6">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">1. Sua ideia precisa ser testada com urgência?</label>
+                            <div class="flex space-x-4">
+                                <label class="flex items-center">
+                                    <input type="radio" name="question1" value="yes" class="mr-2 question-input">
+                                    <span>Sim</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="question1" value="no" class="mr-2 question-input">
+                                    <span>Não</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">2. Você prefere maior autonomia na condução do experimento?</label>
+                            <div class="flex space-x-4">
+                                <label class="flex items-center">
+                                    <input type="radio" name="question2" value="yes" class="mr-2 question-input">
+                                    <span>Sim</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="question2" value="no" class="mr-2 question-input">
+                                    <span>Não</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">3. Sua ideia se alinha a desafios estratégicos da CAIXA?</label>
+                            <div class="flex space-x-4">
+                                <label class="flex items-center">
+                                    <input type="radio" name="question3" value="yes" class="mr-2 question-input">
+                                    <span>Sim</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="question3" value="no" class="mr-2 question-input">
+                                    <span>Não</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">4. Você deseja maior suporte da GEINA durante o processo?</label>
+                            <div class="flex space-x-4">
+                                <label class="flex items-center">
+                                    <input type="radio" name="question4" value="yes" class="mr-2 question-input">
+                                    <span>Sim</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="question4" value="no" class="mr-2 question-input">
+                                    <span>Não</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button id="calculate-btn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+                            Ver Recomendação
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="result" class="hidden max-w-2xl mx-auto mt-6">
+                    <div id="always-result" class="hidden bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-6 shadow-sm">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-green-500 rounded-full p-3 mr-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-green-700">Recomendação: Sandbox CAIXA Always On</h3>
+                        </div>
+                        <p class="text-gray-700 mb-4">
+                            Baseado nas suas respostas, o modelo Always On parece ser mais adequado para sua necessidade.
+                            Você valoriza agilidade e autonomia, e provavelmente tem uma ideia que precisa ser testada rapidamente.
+                        </p>
+                        <p class="text-gray-700">
+                            Próximos passos: Preencha o formulário MO15185 e inicie seu experimento a qualquer momento!
+                        </p>
+                    </div>
+                    
+                    <div id="edital-result" class="hidden bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-6 shadow-sm">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-orange-500 rounded-full p-3 mr-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-orange-700">Recomendação: Sandbox CAIXA por Edital</h3>
+                        </div>
+                        <p class="text-gray-700 mb-4">
+                            Baseado nas suas respostas, o modelo por Edital de Experimentação parece ser mais adequado.
+                            Você valoriza suporte estruturado e alinhamento estratégico para sua ideia.
+                        </p>
+                        <p class="text-gray-700">
+                            Próximos passos: Fique atento à publicação do próximo edital pela GEINA e prepare sua proposta!
+                        </p>
+                    </div>
+                    
+                    <div id="neutral-result" class="hidden bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-6 shadow-sm">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-blue-500 rounded-full p-3 mr-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-blue-700">Ambos os modelos podem funcionar</h3>
+                        </div>
+                        <p class="text-gray-700 mb-4">
+                            Baseado nas suas respostas, tanto o modelo Always On quanto o modelo por Edital 
+                            poderiam atender às suas necessidades.
+                        </p>
+                        <p class="text-gray-700">
+                            Considere fatores como urgência, disponibilidade de recursos e alinhamento estratégico 
+                            para tomar sua decisão. Você também pode consultar a GEINA para orientações adicionais.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center text-gray-600 text-sm">
+            <p>© 2025 CAIXA - Gerência Nacional de Inovação</p>
+        </div>
+    </div>
+
+    <script>
+        // Tab functionality with color matching
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active-always', 'active-edital', 'active-compare');
+                    btn.classList.add('border-transparent', 'text-gray-500');
+                });
+                
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Add active class to clicked button and corresponding content
+                const tabId = button.id.split('-')[1];
+                button.classList.add(`active-${tabId}`);
+                button.classList.remove('border-transparent', 'text-gray-500');
+                
+                const contentId = 'content-' + tabId;
+                document.getElementById(contentId).classList.add('active');
+            });
+        });
+        
+        // Decision helper functionality
+        const calculateBtn = document.getElementById('calculate-btn');
+        const resultDiv = document.getElementById('result');
+        const alwaysResult = document.getElementById('always-result');
+        const editalResult = document.getElementById('edital-result');
+        const neutralResult = document.getElementById('neutral-result');
+        
+        calculateBtn.addEventListener('click', () => {
+            let alwaysScore = 0;
+            let editalScore = 0;
+            
+            // Question 1: Urgency (yes = always, no = edital)
+            const q1 = document.querySelector('input[name="question1"]:checked');
+            if (q1) {
+                if (q1.value === 'yes') alwaysScore++;
+                else editalScore++;
+            }
+            
+            // Question 2: Autonomy (yes = always, no = edital)
+            const q2 = document.querySelector('input[name="question2"]:checked');
+            if (q2) {
+                if (q2.value === 'yes') alwaysScore++;
+                else editalScore++;
+            }
+            
+            // Question 3: Strategic alignment (yes = edital, no = always)
+            const q3 = document.querySelector('input[name="question3"]:checked');
+            if (q3) {
+                if (q3.value === 'yes') editalScore++;
+                else alwaysScore++;
+            }
+            
+            // Question 4: GEINA support (yes = edital, no = always)
+            const q4 = document.querySelector('input[name="question4"]:checked');
+            if (q4) {
+                if (q4.value === 'yes') editalScore++;
+                else alwaysScore++;
+            }
+            
+            // Show result
+            resultDiv.classList.remove('hidden');
+            alwaysResult.classList.add('hidden');
+            editalResult.classList.add('hidden');
+            neutralResult.classList.add('hidden');
+            
+            if (alwaysScore > editalScore) {
+                alwaysResult.classList.remove('hidden');
+            } else if (editalScore > alwaysScore) {
+                editalResult.classList.remove('hidden');
+            } else {
+                neutralResult.classList.remove('hidden');
+            }
+            
+            // Scroll to result
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // Collapsible quiz section
+        const collapsibleHeader = document.querySelector('.collapsible-header');
+        const collapsibleContent = document.querySelector('.collapsible-content');
+        const rotateIcon = document.querySelector('.rotate-icon');
+        
+        // Initialize as collapsed
+        collapsibleContent.classList.remove('expanded');
+        
+        collapsibleHeader.addEventListener('click', () => {
+            collapsibleContent.classList.toggle('expanded');
+            rotateIcon.classList.toggle('rotated');
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'95f151acd5601cd3',t:'MTc1MjQ5OTI0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

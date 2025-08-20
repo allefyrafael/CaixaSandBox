@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linha do Tempo - Sandbox CAIXA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        .timeline-container {
+            position: relative;
+        }
+        
+        .timeline-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 6px;
+            transform: translateX(-50%);
+            z-index: 0;
+            overflow: hidden;
+            /* Height will be set dynamically with JS */
+        }
+        
+        .timeline-line::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, 
+                #1a56db 0%, #1a56db 20%, 
+                #1a56db 20%, #8a9de3 30%,
+                #f0b429 30%, #f0b429 50%,
+                #f0b429 50%, #e3c98a 60%,
+                #31c48d 60%, #31c48d 100%);
+            background-size: 100% 300%;
+            animation: flowLine 8s linear infinite;
+        }
+        
+        @keyframes flowLine {
+            0% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: 0% 300%;
+            }
+        }
+        
+        .timeline-item {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s ease-out;
+            position: relative;
+            z-index: 1; /* Above the line */
+        }
+        
+        .timeline-item.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            z-index: 2;
+        }
+        
+        .phase-card {
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            background-color: white;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .phase-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .phase-1-card {
+            animation: glow-blue 2s infinite alternate;
+        }
+        
+        .phase-2-card {
+            animation: glow-yellow 2s infinite alternate;
+        }
+        
+        .phase-3-card {
+            animation: glow-green 2s infinite alternate;
+        }
+        
+        @keyframes glow-blue {
+            0% {
+                box-shadow: 0 4px 20px rgba(26, 86, 219, 0.2);
+            }
+            100% {
+                box-shadow: 0 4px 30px rgba(26, 86, 219, 0.6);
+            }
+        }
+        
+        @keyframes glow-yellow {
+            0% {
+                box-shadow: 0 4px 20px rgba(240, 180, 41, 0.2);
+            }
+            100% {
+                box-shadow: 0 4px 30px rgba(240, 180, 41, 0.6);
+            }
+        }
+        
+        @keyframes glow-green {
+            0% {
+                box-shadow: 0 4px 20px rgba(49, 196, 141, 0.2);
+            }
+            100% {
+                box-shadow: 0 4px 30px rgba(49, 196, 141, 0.6);
+            }
+        }
+        
+        .milestone {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 12px;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.5s ease;
+        }
+        
+        .milestone.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .milestone:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 18px;
+            height: 18px;
+            background-color: #fff;
+            border: 2px solid;
+            border-radius: 50%;
+        }
+        
+        .phase-1 .milestone:before {
+            border-color: #1a56db;
+        }
+        
+        .phase-2 .milestone:before {
+            border-color: #f0b429;
+        }
+        
+        .phase-3 .milestone:before {
+            border-color: #31c48d;
+        }
+        
+        .deliverable {
+            border-left: 3px solid;
+            padding-left: 15px;
+            margin-left: 8px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease 0.2s;
+        }
+        
+        .deliverable.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .phase-1 .deliverable {
+            border-color: #1a56db;
+        }
+        
+        .phase-2 .deliverable {
+            border-color: #f0b429;
+        }
+        
+        .phase-3 .deliverable {
+            border-color: #31c48d;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(26, 86, 219, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(26, 86, 219, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(26, 86, 219, 0);
+            }
+        }
+        
+        .phase-1 .pulse {
+            animation: pulse-blue 2s infinite;
+        }
+        
+        @keyframes pulse-blue {
+            0% {
+                box-shadow: 0 0 0 0 rgba(26, 86, 219, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(26, 86, 219, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(26, 86, 219, 0);
+            }
+        }
+        
+        .phase-2 .pulse {
+            animation: pulse-yellow 2s infinite;
+        }
+        
+        @keyframes pulse-yellow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(240, 180, 41, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(240, 180, 41, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(240, 180, 41, 0);
+            }
+        }
+        
+        .phase-3 .pulse {
+            animation: pulse-green 2s infinite;
+        }
+        
+        @keyframes pulse-green {
+            0% {
+                box-shadow: 0 0 0 0 rgba(49, 196, 141, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(49, 196, 141, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(49, 196, 141, 0);
+            }
+        }
+        
+        .timeline-value {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            z-index: 3;
+            opacity: 0;
+            transition: all 0.8s ease;
+        }
+        
+        .timeline-value.active {
+            opacity: 1;
+        }
+        
+        .timeline-value .emoji {
+            font-size: 2rem;
+            margin-bottom: 4px;
+        }
+        
+        .timeline-value .label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1;
+            max-width: 90%;
+            word-wrap: break-word;
+        }
+        
+        /* Timeline animation */
+        @keyframes grow {
+            from { height: 0; }
+            to { height: 100%; }
+        }
+        
+        .emoji-title {
+            display: inline-block;
+            font-size: 1.5rem;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        /* Flowing emojis animation */
+        .timeline-flow-emoji {
+            position: absolute;
+            left: 50%;
+            font-size: 1.2rem;
+            transform: translateX(-50%);
+            z-index: 1;
+            opacity: 0;
+            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.8));
+        }
+        
+        /* Dynamic timeline colors with flowing glow effect */
+        .timeline-dynamic-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 6px;
+            transform: translateX(-50%);
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        /* Modern gradient animation for timeline */
+        .timeline-modern-gradient {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 6px;
+            transform: translateX(-50%);
+            z-index: 0;
+            height: 100%;
+            background: linear-gradient(to bottom, 
+                rgba(26, 86, 219, 0.9), 
+                rgba(26, 86, 219, 0.7), 
+                rgba(240, 180, 41, 0.9), 
+                rgba(240, 180, 41, 0.7), 
+                rgba(49, 196, 141, 0.9), 
+                rgba(49, 196, 141, 0.7));
+            background-size: 100% 200%;
+            animation: gradientFlow 8s linear infinite;
+            overflow: hidden;
+        }
+        
+        @keyframes gradientFlow {
+            0% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: 0% 200%;
+            }
+        }
+        
+        /* Shimmering effect overlay */
+        .timeline-modern-gradient::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, 
+                transparent 0%,
+                rgba(255, 255, 255, 0.4) 50%,
+                transparent 100%);
+            background-size: 100% 200%;
+            animation: shimmerFlow 3s linear infinite;
+        }
+        
+        @keyframes shimmerFlow {
+            0% {
+                background-position: 0% -100%;
+            }
+            100% {
+                background-position: 0% 200%;
+            }
+        }
+        
+        .timeline-section {
+            position: absolute;
+            width: 100%;
+            left: 0;
+            overflow: hidden;
+        }
+        
+        .timeline-section::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.7), transparent);
+            transform: translateY(-100%);
+            animation: flowGlow 3s linear infinite;
+        }
+        
+        @keyframes flowGlow {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(100%);
+            }
+        }
+        
+        .timeline-section-1 {
+            background-color: #1a56db;
+            top: 0;
+            height: calc(var(--section1-height, 33%) - 20px);
+        }
+        
+        .timeline-section-transition-1 {
+            background: linear-gradient(to bottom, #1a56db, #f0b429);
+            top: calc(var(--section1-height, 33%) - 20px);
+            height: 40px;
+            overflow: hidden;
+        }
+        
+        .timeline-section-transition-1::after {
+            animation-delay: 0.5s;
+        }
+        
+        .timeline-section-2 {
+            background-color: #f0b429;
+            top: calc(var(--section1-height, 33%) + 20px);
+            height: calc(var(--section2-height, 33%) - 40px);
+        }
+        
+        .timeline-section-2::after {
+            animation-delay: 1s;
+        }
+        
+        .timeline-section-transition-2 {
+            background: linear-gradient(to bottom, #f0b429, #31c48d);
+            top: calc(var(--section1-height, 33%) + var(--section2-height, 33%) - 20px);
+            height: 40px;
+            overflow: hidden;
+        }
+        
+        .timeline-section-transition-2::after {
+            animation-delay: 1.5s;
+        }
+        
+        .timeline-section-3 {
+            background-color: #31c48d;
+            top: calc(var(--section1-height, 33%) + var(--section2-height, 33%) + 20px);
+            height: calc(var(--section3-height, 34%));
+        }
+        
+        .timeline-section-3::after {
+            animation-delay: 2s;
+        }
+        
+        /* Final value with enhanced glow */
+        .timeline-value.final-value {
+            animation: finalGlow 2s infinite alternate;
+            width: 90px;
+            height: 90px;
+        }
+        
+        @keyframes finalGlow {
+            0% {
+                box-shadow: 0 4px 15px rgba(49, 196, 141, 0.3);
+            }
+            100% {
+                box-shadow: 0 4px 25px rgba(49, 196, 141, 0.8);
+            }
+        }
+        
+        /* Hide the observations section line */
+        .timeline-item:last-child .timeline-dot {
+            display: none;
+        }
+        
+        /* Flowing emojis with staggered positions */
+        .flow-emoji-1 {
+            animation: flowEmoji1 15s linear infinite;
+            animation-delay: 0s;
+        }
+        
+        .flow-emoji-2 {
+            animation: flowEmoji2 18s linear infinite;
+            animation-delay: 3s;
+        }
+        
+        .flow-emoji-3 {
+            animation: flowEmoji3 12s linear infinite;
+            animation-delay: 6s;
+        }
+        
+        .flow-emoji-4 {
+            animation: flowEmoji4 20s linear infinite;
+            animation-delay: 9s;
+        }
+        
+        .flow-emoji-5 {
+            animation: flowEmoji5 16s linear infinite;
+            animation-delay: 12s;
+        }
+        
+        .flow-emoji-6 {
+            animation: flowEmoji6 14s linear infinite;
+            animation-delay: 15s;
+        }
+        
+        @keyframes flowEmoji1 {
+            0% {
+                top: -30px;
+                opacity: 0;
+                transform: translateX(-50%) rotate(0deg);
+            }
+            5% {
+                opacity: 1;
+                transform: translateX(calc(-50% - 10px)) rotate(0deg);
+            }
+            95% {
+                opacity: 1;
+                transform: translateX(calc(-50% - 10px)) rotate(360deg);
+            }
+            100% {
+                top: calc(var(--timeline-end-position) - 40px);
+                opacity: 0;
+                transform: translateX(-50%) rotate(360deg);
+            }
+        }
+        
+        @keyframes flowEmoji2 {
+            0% {
+                top: -30px;
+                opacity: 0;
+                transform: translateX(-50%) rotate(0deg);
+            }
+            5% {
+                opacity: 1;
+                transform: translateX(calc(-50% + 10px)) rotate(0deg);
+            }
+            95% {
+                opacity: 1;
+                transform: translateX(calc(-50% + 10px)) rotate(-360deg);
+            }
+            100% {
+                top: calc(var(--timeline-end-position) - 40px);
+                opacity: 0;
+                transform: translateX(-50%) rotate(-360deg);
+            }
+        }
+        
+        @keyframes flowEmoji3 {
+            0% {
+                top: -30px;
+                opacity: 0;
+                transform: translateX(-50%) rotate(0deg);
+            }
+            5% {
+                opacity: 1;
+                transform: translateX(calc(-50% - 15px)) rotate(0deg);
+            }
+            95% {
+                opacity: 1;
+                transform: translateX(calc(-50% - 15px)) rotate(180deg);
+            }
+            100% {
+                top: calc(var(--timeline-end-position) - 40px);
+                opacity: 0;
+                transform: translateX(-50%) rotate(180deg);
+            }
+        }
+        
+        @keyframes flowEmoji4 {
+            0% {
+                top: -30px;
+                opacity: 0;
+                transform: translateX(-50%) rotate(0deg);
+            }
+            5% {
+                opacity: 1;
+                transform: translateX(calc(-50% + 15px)) rotate(0deg);
+            }
+            95% {
+                opacity: 1;
+                transform: translateX(calc(-50% + 15px)) rotate(-180deg);
+            }
+            100% {
+                top: calc(var(--timeline-end-position) - 40px);
+                opacity: 0;
+                transform: translateX(-50%) rotate(-180deg);
+            }
+        }
+        
+        @keyframes flowEmoji5 {
+            0% {
+                top: -30px;
+                opacity: 0;
+                transform: translateX(-50%) rotate(0deg);
+            }
+            5% {
+                opacity: 1;
+                transform: translateX(calc(-50% - 5px)) rotate(0deg);
+            }
+            95% {
+                opacity: 1;
+                transform: translateX(calc(-50% - 5px)) rotate(270deg);
+            }
+            100% {
+                top: calc(var(--timeline-end-position) - 40px);
+                opacity: 0;
+                transform: translateX(-50%) rotate(270deg);
+            }
+        }
+        
+        @keyframes flowEmoji6 {
+            0% {
+                top: -30px;
+                opacity: 0;
+                transform: translateX(-50%) rotate(0deg);
+            }
+            5% {
+                opacity: 1;
+                transform: translateX(calc(-50% + 5px)) rotate(0deg);
+            }
+            95% {
+                opacity: 1;
+                transform: translateX(calc(-50% + 5px)) rotate(-270deg);
+            }
+            100% {
+                top: calc(var(--timeline-end-position) - 40px);
+                opacity: 0;
+                transform: translateX(-50%) rotate(-270deg);
+            }
+        }
+        
+        /* Continuous timeline line that extends to the bottom of the page */
+        .timeline-continuous-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 6px;
+            transform: translateX(-50%);
+            background-color: #31c48d;
+            z-index: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .timeline-continuous-line::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.7), transparent);
+            transform: translateY(-100%);
+            animation: flowGlow 5s linear infinite;
+        }
+        
+        /* Footer spacer to ensure the line extends beyond visible content */
+        .footer-spacer {
+            height: 200px;
+            position: relative;
+        }
+        
+        /* Fix for the gap in the timeline line */
+        .timeline-connector {
+            position: absolute;
+            left: 50%;
+            width: 6px;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+        
+        /* Phase 1 connector - Blue */
+        .timeline-connector-1 {
+            background: linear-gradient(to bottom, #1a56db, #1a56db);
+        }
+        
+        /* Phase 2 connector - Yellow */
+        .timeline-connector-2 {
+            background: linear-gradient(to bottom, #f0b429, #f0b429);
+        }
+        
+        /* Phase 3 connector - Green */
+        .timeline-connector-3 {
+            background: linear-gradient(to bottom, #31c48d, #31c48d);
+        }
+        
+        /* Transition connector between Phase 2 and Phase 3 */
+        .timeline-connector-transition {
+            position: absolute;
+            left: 50%;
+            width: 6px;
+            transform: translateX(-50%);
+            z-index: 0;
+            background: linear-gradient(to bottom, #f0b429, #31c48d);
+            overflow: hidden;
+        }
+        
+        .timeline-connector-transition::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.7), transparent);
+            transform: translateY(-100%);
+            animation: flowGlow 3s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-12 max-w-6xl">
+        <header class="text-center mb-16">
+            <h1 class="text-4xl font-bold mb-4 text-gray-800">Linha do Tempo do Experimento</h1>
+            <h2 class="text-2xl font-semibold text-blue-700 mb-6">Sandbox CAIXA</h2>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                Acompanhamento de ponta a ponta do processo de experimentação, desde a ideação até a integração da solução ao portfólio institucional.
+            </p>
+        </header>
+        
+        <div class="timeline-container relative pb-20">
+            <!-- Modern gradient timeline with animation -->
+            <div class="timeline-modern-gradient" id="timeline-modern-gradient"></div>
+            
+            <!-- Dynamic colored timeline with flowing glow effect -->
+            <div class="timeline-dynamic-line" id="timeline-line">
+                <div class="timeline-section timeline-section-1" id="timeline-section-1"></div>
+                <div class="timeline-section timeline-section-transition-1"></div>
+                <div class="timeline-section timeline-section-2" id="timeline-section-2"></div>
+                <div class="timeline-section timeline-section-transition-2"></div>
+                <div class="timeline-section timeline-section-3" id="timeline-section-3"></div>
+            </div>
+            
+            <!-- Continuous line that extends to the bottom of the page -->
+            <div class="timeline-continuous-line" id="timeline-continuous-line"></div>
+            
+            <!-- Additional connectors to fix any gaps -->
+            <div class="timeline-connector timeline-connector-1" id="timeline-connector-1"></div>
+            <div class="timeline-connector timeline-connector-2" id="timeline-connector-2"></div>
+            <div class="timeline-connector timeline-connector-transition" id="timeline-connector-transition"></div>
+            <div class="timeline-connector timeline-connector-3" id="timeline-connector-3"></div>
+            
+            <!-- Flowing emojis -->
+            <div class="timeline-flow-emoji flow-emoji-1">💡</div> <!-- Ideia -->
+            <div class="timeline-flow-emoji flow-emoji-2">🧩</div> <!-- Solução -->
+            <div class="timeline-flow-emoji flow-emoji-3">🔍</div> <!-- Pesquisa -->
+            <div class="timeline-flow-emoji flow-emoji-4">📱</div> <!-- Produto -->
+            <div class="timeline-flow-emoji flow-emoji-5">🛠️</div> <!-- Ferramenta -->
+            <div class="timeline-flow-emoji flow-emoji-6">📊</div> <!-- Dados -->
+            
+            <!-- Fase 1 -->
+            <div class="timeline-item mb-24 relative" id="phase1-item">
+                <div class="timeline-dot bg-blue-600 pulse"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="md:text-right md:pr-12">
+                        <h3 class="text-3xl font-bold text-blue-600 mb-2">
+                            <span class="emoji-title">🔬</span> Fase 1
+                        </h3>
+                        <h4 class="text-xl font-semibold mb-4">Discovery</h4>
+                        <p class="text-gray-600 mb-2"><span class="font-semibold">Duração:</span> até 90 dias</p>
+                        <p class="text-gray-700">Estruturar e validar hipóteses iniciais com base em pesquisa, diagnóstico e prototipação.</p>
+                    </div>
+                    <div class="phase-card phase-1-card p-6 md:pl-12 phase-1">
+                        <h5 class="font-semibold text-blue-600 mb-4">Principais Marcos:</h5>
+                        <div class="milestone">Submissão do Formulário de Proposta de Cadastramento (MO15185)</div>
+                        <div class="milestone">Cadastramento na Esteira de Experimentação</div>
+                        <div class="milestone">Estruturação do experimento (plano de ação, hipóteses, métricas)</div>
+                        <div class="milestone">Análise de impacto e riscos</div>
+                        <div class="milestone">Execução do experimento em ambiente controlado</div>
+                        <div class="milestone">Apresentação do Pitch com protótipo ou POC</div>
+                        <div class="milestone">Envio de Relatórios de Evolução (MO15183)</div>
+                        
+                        <h5 class="font-semibold text-blue-600 mt-6 mb-4">Entregáveis esperados:</h5>
+                        <div class="deliverable mb-3">Protótipo ou POC validado</div>
+                        <div class="deliverable mb-3">Hipóteses testadas</div>
+                        <div class="deliverable">Lições aprendidas documentadas</div>
+                    </div>
+                </div>
+                
+                <!-- Valor entregue: Protótipo -->
+                <div class="timeline-value" style="top: 100%;" id="prototype-value">
+                    <div class="emoji">🔍</div>
+                    <div class="label">Protótipo</div>
+                </div>
+            </div>
+            
+            <!-- Fase 2 -->
+            <div class="timeline-item mb-24 relative" id="phase2-item">
+                <div class="timeline-dot bg-yellow-500 pulse"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="md:order-2 md:text-left md:pl-12">
+                        <h3 class="text-3xl font-bold text-yellow-500 mb-2">
+                            <span class="emoji-title">🧪</span> Fase 2
+                        </h3>
+                        <h4 class="text-xl font-semibold mb-4">Delivery</h4>
+                        <p class="text-gray-600 mb-2"><span class="font-semibold">Duração:</span> até 180 dias</p>
+                        <p class="text-gray-700">Construir e validar MVP com clientes reais, com apoio da GEINA.</p>
+                    </div>
+                    <div class="phase-card phase-2-card p-6 md:pr-12 md:order-1 md:text-right phase-2">
+                        <h5 class="font-semibold text-yellow-500 mb-4">Principais Marcos:</h5>
+                        <div class="milestone">Especificação da iniciativa com base no protótipo</div>
+                        <div class="milestone">Lançamento do MVP ou POC junto ao público-alvo</div>
+                        <div class="milestone">Estabelecimento de parcerias (se necessário)</div>
+                        <div class="milestone">Coleta de dados e feedbacks dos clientes</div>
+                        <div class="milestone">Monitoramento de indicadores (NPS, CSAT, etc.)</div>
+                        <div class="milestone">Envio contínuo de Relatórios de Evolução (MO15183)</div>
+                        
+                        <h5 class="font-semibold text-yellow-500 mt-6 mb-4">Entregáveis esperados:</h5>
+                        <div class="deliverable mb-3">MVP funcional testado com clientes</div>
+                        <div class="deliverable mb-3">Resultados e aprendizados consolidados</div>
+                        <div class="deliverable">Evidência de valor e viabilidade</div>
+                    </div>
+                </div>
+                
+                <!-- Valor entregue: MVP -->
+                <div class="timeline-value" style="top: 100%;" id="mvp-value">
+                    <div class="emoji">🚀</div>
+                    <div class="label">MVP</div>
+                </div>
+            </div>
+            
+            <!-- Fase 3 -->
+            <div class="timeline-item mb-24 relative" id="phase3-item">
+                <div class="timeline-dot bg-green-500 pulse"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="md:text-right md:pr-12">
+                        <h3 class="text-3xl font-bold text-green-500 mb-2">
+                            <span class="emoji-title">📈</span> Fase 3
+                        </h3>
+                        <h4 class="text-xl font-semibold mb-4">Scale</h4>
+                        <p class="text-gray-600 mb-2"><span class="font-semibold">Duração:</span> até 360 dias</p>
+                        <p class="text-gray-700">Escalar a solução, integrando-a ao portfólio da CAIXA com sustentação e governança.</p>
+                    </div>
+                    <div class="phase-card phase-3-card p-6 md:pl-12 phase-3">
+                        <h5 class="font-semibold text-green-500 mb-4">Principais Marcos:</h5>
+                        <div class="milestone">Elaboração da Estratégia de Go-to-Market (item 4.6.1)</div>
+                        <div class="milestone">Apresentação de Informe ao Comitê responsável (OR134)</div>
+                        <div class="milestone">Definição do plano de sustentação e integração</div>
+                        <div class="milestone">Estudo de viabilidade econômica e definição de limite de perda</div>
+                        <div class="milestone">Registro de perdas no SITOP (se aplicável)</div>
+                        <div class="milestone">Transição para ambiente de produção</div>
+                        
+                        <h5 class="font-semibold text-green-500 mt-6 mb-4">Entregáveis esperados:</h5>
+                        <div class="deliverable mb-3">Solução integrada ao portfólio institucional</div>
+                        <div class="deliverable mb-3">Sustentação definida</div>
+                        <div class="deliverable">Indicadores de desempenho acompanhados</div>
+                    </div>
+                </div>
+                
+                <!-- Valor entregue: Solução Escalável -->
+                <div class="timeline-value final-value" id="final-destination" style="top: 100%;">
+                    <div class="emoji">🌐</div>
+                    <div class="label">Solução<br>Escalável</div>
+                </div>
+            </div>
+            
+            <!-- Observações -->
+            <div class="timeline-item">
+                <div class="phase-card p-8 max-w-3xl mx-auto">
+                    <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Observações Gerais
+                    </h3>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start">
+                            <span class="text-xl mr-2">⏱️</span>
+                            <span>Os prazos são estimados e podem variar conforme a maturidade da solução.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-xl mr-2">🧩</span>
+                            <span>A Unidade Gestora do Experimento pode iniciar diretamente pela fase de Delivery, se houver justificativa técnica.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Footer spacer to ensure the line extends beyond visible content -->
+            <div class="footer-spacer"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate timeline items on scroll
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            const milestones = document.querySelectorAll('.milestone');
+            const deliverables = document.querySelectorAll('.deliverable');
+            const timelineValues = document.querySelectorAll('.timeline-value');
+            
+            // Calculate and set the timeline sections heights
+            function setTimelineSections() {
+                const timelineLine = document.getElementById('timeline-line');
+                const modernGradient = document.getElementById('timeline-modern-gradient');
+                const continuousLine = document.getElementById('timeline-continuous-line');
+                const phase1Item = document.getElementById('phase1-item');
+                const phase2Item = document.getElementById('phase2-item');
+                const phase3Item = document.getElementById('phase3-item');
+                const prototypeValue = document.getElementById('prototype-value');
+                const mvpValue = document.getElementById('mvp-value');
+                const finalDestination = document.getElementById('final-destination');
+                const connector1 = document.getElementById('timeline-connector-1');
+                const connector2 = document.getElementById('timeline-connector-2');
+                const connectorTransition = document.getElementById('timeline-connector-transition');
+                const connector3 = document.getElementById('timeline-connector-3');
+                
+                if (timelineLine && phase1Item && phase2Item && phase3Item && finalDestination && continuousLine) {
+                    const containerRect = document.querySelector('.timeline-container').getBoundingClientRect();
+                    const phase1Rect = phase1Item.getBoundingClientRect();
+                    const phase2Rect = phase2Item.getBoundingClientRect();
+                    const phase3Rect = phase3Item.getBoundingClientRect();
+                    const prototypeRect = prototypeValue.getBoundingClientRect();
+                    const mvpRect = mvpValue.getBoundingClientRect();
+                    const finalDestRect = finalDestination.getBoundingClientRect();
+                    
+                    // Calculate positions relative to container
+                    const phase1Position = phase1Rect.top - containerRect.top + (phase1Rect.height / 2);
+                    const phase2Position = phase2Rect.top - containerRect.top + (phase2Rect.height / 2);
+                    const phase3Position = phase3Rect.top - containerRect.top + (phase3Rect.height / 2);
+                    const prototypePosition = prototypeRect.top - containerRect.top + (prototypeRect.height / 2);
+                    const mvpPosition = mvpRect.top - containerRect.top + (mvpRect.height / 2);
+                    const finalPosition = finalDestRect.top - containerRect.top + (finalDestRect.height / 2);
+                    
+                    // Set the total height of the timeline - ensure it reaches the center of the final destination
+                    timelineLine.style.height = `${finalPosition}px`;
+                    
+                    // Set the modern gradient height to match the timeline
+                    if (modernGradient) {
+                        modernGradient.style.height = `${finalPosition}px`;
+                    }
+                    
+                    // Calculate section heights as percentages
+                    const totalHeight = finalPosition;
+                    const section1Height = ((prototypePosition) / totalHeight) * 100;
+                    const section2Height = ((mvpPosition - prototypePosition) / totalHeight) * 100;
+                    const section3Height = ((finalPosition - mvpPosition) / totalHeight) * 100;
+                    
+                    // Set CSS variables for section heights
+                    document.documentElement.style.setProperty('--section1-height', `${section1Height}%`);
+                    document.documentElement.style.setProperty('--section2-height', `${section2Height}%`);
+                    document.documentElement.style.setProperty('--section3-height', `${section3Height}%`);
+                    document.documentElement.style.setProperty('--timeline-end-position', `${finalPosition}px`);
+                    
+                    // Set actual section heights
+                    const section1 = document.getElementById('timeline-section-1');
+                    const section2 = document.getElementById('timeline-section-2');
+                    const section3 = document.getElementById('timeline-section-3');
+                    
+                    if (section1 && section2 && section3) {
+                        section1.style.height = `${prototypePosition}px`;
+                        section2.style.height = `${mvpPosition - prototypePosition}px`;
+                        section2.style.top = `${prototypePosition}px`;
+                        section3.style.height = `${finalPosition - mvpPosition}px`;
+                        section3.style.top = `${mvpPosition}px`;
+                    }
+                    
+                    // Set the continuous line to extend from the final destination to the bottom of the page
+                    const documentHeight = Math.max(
+                        document.body.scrollHeight,
+                        document.body.offsetHeight,
+                        document.documentElement.clientHeight,
+                        document.documentElement.scrollHeight,
+                        document.documentElement.offsetHeight
+                    );
+                    
+                    // Position the continuous line to start at the final destination
+                    continuousLine.style.top = `${finalPosition}px`;
+                    continuousLine.style.height = `${documentHeight - containerRect.top - finalPosition}px`;
+                    
+                    // Add connectors to fix any gaps in the timeline
+                    // Connector between phase 1 dot and prototype value
+                    if (connector1) {
+                        connector1.style.top = `${phase1Position}px`;
+                        connector1.style.height = `${prototypePosition - phase1Position}px`;
+                    }
+                    
+                    // Connector between prototype value and phase 2 dot
+                    if (connector2) {
+                        connector2.style.top = `${prototypePosition}px`;
+                        connector2.style.height = `${phase2Position - prototypePosition}px`;
+                    }
+                    
+                    // Transition connector between phase 2 dot and MVP value (yellow to green)
+                    if (connectorTransition) {
+                        connectorTransition.style.top = `${phase2Position}px`;
+                        connectorTransition.style.height = `${mvpPosition - phase2Position}px`;
+                    }
+                    
+                    // Connector between MVP value and phase 3 dot
+                    if (connector3) {
+                        connector3.style.top = `${mvpPosition}px`;
+                        connector3.style.height = `${phase3Position - mvpPosition}px`;
+                    }
+                }
+            }
+            
+            // Initial animation for first phase
+            setTimeout(() => {
+                timelineItems[0].classList.add('active');
+                
+                // Animate milestones and deliverables of first phase with delay
+                const phase1Milestones = document.querySelectorAll('.phase-1 .milestone');
+                const phase1Deliverables = document.querySelectorAll('.phase-1 .deliverable');
+                
+                phase1Milestones.forEach((milestone, index) => {
+                    setTimeout(() => {
+                        milestone.classList.add('active');
+                    }, 300 + (index * 150));
+                });
+                
+                setTimeout(() => {
+                    phase1Deliverables.forEach((deliverable, index) => {
+                        setTimeout(() => {
+                            deliverable.classList.add('active');
+                        }, 300 + (index * 150));
+                    });
+                    
+                    // Show first value icon after deliverables
+                    setTimeout(() => {
+                        timelineValues[0].classList.add('active');
+                    }, 1000);
+                }, 1500);
+                
+                // Set the timeline sections
+                setTimelineSections();
+            }, 500);
+            
+            // Scroll animation
+            function checkScroll() {
+                const triggerBottom = window.innerHeight * 0.8;
+                
+                timelineItems.forEach((item, index) => {
+                    const itemTop = item.getBoundingClientRect().top;
+                    
+                    if (itemTop < triggerBottom) {
+                        item.classList.add('active');
+                        
+                        // Animate milestones with delay
+                        const currentMilestones = item.querySelectorAll('.milestone');
+                        currentMilestones.forEach((milestone, i) => {
+                            setTimeout(() => {
+                                milestone.classList.add('active');
+                            }, 300 + (i * 150));
+                        });
+                        
+                        // Animate deliverables with delay
+                        const currentDeliverables = item.querySelectorAll('.deliverable');
+                        setTimeout(() => {
+                            currentDeliverables.forEach((deliverable, i) => {
+                                setTimeout(() => {
+                                    deliverable.classList.add('active');
+                                }, 300 + (i * 150));
+                            });
+                            
+                            // Show value icon after deliverables
+                            if (index < timelineValues.length) {
+                                setTimeout(() => {
+                                    timelineValues[index].classList.add('active');
+                                }, currentDeliverables.length * 150 + 1000);
+                            }
+                        }, 1500);
+                    }
+                });
+            }
+            
+            window.addEventListener('scroll', checkScroll);
+            window.addEventListener('resize', setTimelineSections);
+            checkScroll(); // Check on load
+            
+            // Call setTimelineSections again after a short delay to ensure all elements are properly rendered
+            setTimeout(setTimelineSections, 1000);
+            // And once more after all content is likely loaded
+            setTimeout(setTimelineSections, 3000);
+            
+            // Add event listener for window resize to adjust the continuous line
+            window.addEventListener('resize', function() {
+                const continuousLine = document.getElementById('timeline-continuous-line');
+                if (continuousLine) {
+                    const documentHeight = Math.max(
+                        document.body.scrollHeight,
+                        document.body.offsetHeight,
+                        document.documentElement.clientHeight,
+                        document.documentElement.scrollHeight,
+                        document.documentElement.offsetHeight
+                    );
+                    const containerRect = document.querySelector('.timeline-container').getBoundingClientRect();
+                    const finalDestRect = document.getElementById('final-destination').getBoundingClientRect();
+                    const finalPosition = finalDestRect.top - containerRect.top + (finalDestRect.height / 2);
+                    
+                    continuousLine.style.height = `${documentHeight - containerRect.top - finalPosition}px`;
+                }
+            });
+            
+            // Additional check to fix any gaps in the timeline
+            function checkAndFixTimelineGaps() {
+                // Force recalculation of timeline sections
+                setTimelineSections();
+            }
+            
+            // Call this function after a delay to ensure all elements are rendered
+            setTimeout(checkAndFixTimelineGaps, 2000);
+            // And once more after scrolling might have occurred
+            setTimeout(checkAndFixTimelineGaps, 5000);
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'95f372f5725d7a84',t:'MTc1MjUyMTU3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

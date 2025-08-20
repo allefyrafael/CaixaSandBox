@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Critérios de Avaliação do Sandbox CAIXA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+        
+        :root {
+            /* Cores principais da CAIXA */
+            --caixa-blue: #005CA9;
+            --caixa-light-blue: #0078D7;
+            --caixa-dark-blue: #004A87;
+            
+            /* Cores para as etapas */
+            --etapa1-color: #2563EB; /* Azul */
+            --etapa2-color: #7C3AED; /* Roxo */
+            --etapa3-color: #059669; /* Verde */
+            
+            /* Cores para os pesos (verde para alto, vermelho para baixo) */
+            --peso-5: #10B981; /* Verde */
+            --peso-4: #60A5FA; /* Azul */
+            --peso-3: #FBBF24; /* Amarelo */
+            --peso-2: #F97316; /* Laranja */
+            --peso-1: #EF4444; /* Vermelho */
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f0f4f8;
+        }
+        
+        .etapa-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .etapa-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .criterio-card {
+            transition: all 0.3s ease;
+            height: 100%;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .criterio-card:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .peso-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            color: white;
+            z-index: 10; /* Garantir que o badge fique acima */
+        }
+        
+        .criterio-title {
+            padding-right: 40px; /* Espaço para o badge de peso */
+        }
+        
+        .peso-5 { background-color: var(--peso-5); }
+        .peso-4 { background-color: var(--peso-4); }
+        .peso-3 { background-color: var(--peso-3); }
+        .peso-2 { background-color: var(--peso-2); }
+        .peso-1 { background-color: var(--peso-1); }
+        
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #E0E0E0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            width: 0; /* Começa em 0 para animação */
+            transition: width 1.5s ease-out;
+        }
+        
+        .progress-fill-5 {
+            background-color: var(--peso-5);
+        }
+        
+        .progress-fill-4 {
+            background-color: var(--peso-4);
+        }
+        
+        .progress-fill-3 {
+            background-color: var(--peso-3);
+        }
+        
+        .progress-fill-2 {
+            background-color: var(--peso-2);
+        }
+        
+        .progress-fill-1 {
+            background-color: var(--peso-1);
+        }
+        
+        .tab-button {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tab-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            z-index: 1;
+        }
+        
+        .tab-button.active-etapa1 {
+            background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            color: white;
+            font-weight: 600;
+            animation: pulseShadow-etapa1 2s infinite;
+        }
+        
+        .tab-button.active-etapa2 {
+            background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+            color: white;
+            font-weight: 600;
+            animation: pulseShadow-etapa2 2s infinite;
+        }
+        
+        .tab-button.active-etapa3 {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            font-weight: 600;
+            animation: pulseShadow-etapa3 2s infinite;
+        }
+        
+        @keyframes pulseShadow-etapa1 {
+            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+        
+        @keyframes pulseShadow-etapa2 {
+            0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(124, 58, 237, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+        }
+        
+        @keyframes pulseShadow-etapa3 {
+            0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(5, 150, 105, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header-etapa1 {
+            color: var(--etapa1-color);
+        }
+        
+        .header-etapa2 {
+            color: var(--etapa2-color);
+        }
+        
+        .header-etapa3 {
+            color: var(--etapa3-color);
+        }
+        
+        .border-etapa1 {
+            border-color: var(--etapa1-color);
+        }
+        
+        .border-etapa2 {
+            border-color: var(--etapa2-color);
+        }
+        
+        .border-etapa3 {
+            border-color: var(--etapa3-color);
+        }
+        
+        .bg-etapa1 {
+            background-color: var(--etapa1-color);
+        }
+        
+        .bg-etapa2 {
+            background-color: var(--etapa2-color);
+        }
+        
+        .bg-etapa3 {
+            background-color: var(--etapa3-color);
+        }
+        
+        .text-etapa1 {
+            color: var(--etapa1-color);
+        }
+        
+        .text-etapa2 {
+            color: var(--etapa2-color);
+        }
+        
+        .text-etapa3 {
+            color: var(--etapa3-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <header class="mb-8 text-center">
+            <div class="flex justify-center items-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#005CA9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                <h1 class="text-4xl font-bold text-gray-800 ml-4">Critérios de Avaliação do Sandbox CAIXA</h1>
+            </div>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">Conheça os critérios utilizados para avaliar os experimentos em cada etapa do processo de inovação, conforme o normativo OR219.</p>
+        </header>
+        
+        <div class="mb-8">
+            <div class="flex flex-wrap justify-center gap-4 mb-6">
+                <button class="tab-button active-etapa1 px-6 py-3 rounded-full border-2 border-[#2563EB] text-white hover:bg-[#2563EB] hover:text-white transition-all" data-tab="etapa1" data-etapa="etapa1">
+                    <span class="mr-2 relative z-10">🎯</span> <span class="relative z-10">Etapa 1: Priorização</span>
+                </button>
+                <button class="tab-button px-6 py-3 rounded-full border-2 border-[#7C3AED] text-[#7C3AED] hover:bg-[#7C3AED] hover:text-white transition-all" data-tab="etapa2" data-etapa="etapa2">
+                    <span class="mr-2 relative z-10">📋</span> <span class="relative z-10">Etapa 2: Estruturação</span>
+                </button>
+                <button class="tab-button px-6 py-3 rounded-full border-2 border-[#059669] text-[#059669] hover:bg-[#059669] hover:text-white transition-all" data-tab="etapa3" data-etapa="etapa3">
+                    <span class="mr-2 relative z-10">🚀</span> <span class="relative z-10">Etapa 3: Validação do Protótipo</span>
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-lg">
+                <!-- Etapa 1 -->
+                <div id="etapa1" class="tab-content active">
+                    <div class="mb-6">
+                        <div class="p-4 bg-blue-50 rounded-lg mb-6 border-l-4 border-etapa1">
+                            <h2 class="text-2xl font-bold header-etapa1 mb-2">Etapa 1: Priorização de Experimentos</h2>
+                            <p class="text-gray-700 mb-4"><strong>Objetivo:</strong> Selecionar as ideias com maior alinhamento estratégico e viabilidade de execução.</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                            <!-- Critério 1 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa1 relative">
+                                <div class="peso-badge peso-5">5</div>
+                                <h3 class="text-xl font-semibold text-etapa1 mb-2 criterio-title">Avaliação de impacto da ideia</h3>
+                                <p class="text-gray-600">Analisa o alinhamento com os objetivos estratégicos da CAIXA, o potencial de transformação do negócio e a relevância da dor ou oportunidade abordada.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">5/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-5" data-width="100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 2 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa1 relative">
+                                <div class="peso-badge peso-5">5</div>
+                                <h3 class="text-xl font-semibold text-etapa1 mb-2 criterio-title">Viabilidade</h3>
+                                <p class="text-gray-600">Considera a disponibilidade de tecnologia, infraestrutura e recursos técnicos necessários para a execução do experimento.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">5/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-5" data-width="100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Etapa 2 -->
+                <div id="etapa2" class="tab-content">
+                    <div class="mb-6">
+                        <div class="p-4 bg-purple-50 rounded-lg mb-6 border-l-4 border-etapa2">
+                            <h2 class="text-2xl font-bold header-etapa2 mb-2">Etapa 2: Validação da Estruturação do Experimento</h2>
+                            <p class="text-gray-700 mb-4"><strong>Objetivo:</strong> Confirmar que a proposta está madura, viável e bem estruturada para execução.</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+                            <!-- Critério 1 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa2 relative">
+                                <div class="peso-badge peso-5">5</div>
+                                <h3 class="text-xl font-semibold text-etapa2 mb-2 criterio-title">Viabilidade financeira</h3>
+                                <p class="text-gray-600">Avalia se os custos estão dimensionados, se há orçamento disponível e se a proposta apresenta bom custo-benefício.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">5/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-5" data-width="100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 2 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa2 relative">
+                                <div class="peso-badge peso-5">5</div>
+                                <h3 class="text-xl font-semibold text-etapa2 mb-2 criterio-title">Contribuição para a satisfação do cliente</h3>
+                                <p class="text-gray-600">Mede o impacto positivo na jornada do cliente, com foco em usabilidade, personalização e resolução de dores reais.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">5/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-5" data-width="100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 3 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa2 relative">
+                                <div class="peso-badge peso-4">4</div>
+                                <h3 class="text-xl font-semibold text-etapa2 mb-2 criterio-title">Viabilidade de mensuração dos resultados</h3>
+                                <p class="text-gray-600">Verifica se há KPIs claros, mecanismos de coleta de dados e plano de monitoramento estruturado.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">4/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-4" data-width="80%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 4 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa2 relative">
+                                <div class="peso-badge peso-3">3</div>
+                                <h3 class="text-xl font-semibold text-etapa2 mb-2 criterio-title">Classificação do Horizonte de Inovação</h3>
+                                <p class="text-gray-600">Identifica se a proposta é incremental (H1), adjacente (H2) ou disruptiva (H3), priorizando H2 e H3.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">3/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-3" data-width="60%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 5 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa2 relative">
+                                <div class="peso-badge peso-3">3</div>
+                                <h3 class="text-xl font-semibold text-etapa2 mb-2 criterio-title">Sombreamento – ausência de ações paralelas</h3>
+                                <p class="text-gray-600">Garante que não existam iniciativas similares em andamento, evitando sobreposição de esforços.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">3/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-3" data-width="60%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 6 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa2 relative">
+                                <div class="peso-badge peso-2">2</div>
+                                <h3 class="text-xl font-semibold text-etapa2 mb-2 criterio-title">Disponibilidade de equipes com capacidade técnica</h3>
+                                <p class="text-gray-600">Considera a qualificação e a dedicação da equipe responsável pela execução do experimento.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">2/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-2" data-width="40%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 7 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa2 relative">
+                                <div class="peso-badge peso-1">1</div>
+                                <h3 class="text-xl font-semibold text-etapa2 mb-2 criterio-title">Geração de conhecimentos relevantes para a CAIXA</h3>
+                                <p class="text-gray-600">Avalia o potencial de aprendizado institucional, mesmo que as hipóteses não sejam validadas.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">1/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-1" data-width="20%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Etapa 3 -->
+                <div id="etapa3" class="tab-content">
+                    <div class="mb-6">
+                        <div class="p-4 bg-green-50 rounded-lg mb-6 border-l-4 border-etapa3">
+                            <h2 class="text-2xl font-bold header-etapa3 mb-2">Etapa 3: Validação do Protótipo (Pitch)</h2>
+                            <p class="text-gray-700 mb-4"><strong>Objetivo:</strong> Avaliar a solução construída e decidir sobre o avanço para a fase de Delivery.</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+                            <!-- Critério 1 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa3 relative">
+                                <div class="peso-badge peso-5">5</div>
+                                <h3 class="text-xl font-semibold text-etapa3 mb-2 criterio-title">Resolução da dor</h3>
+                                <p class="text-gray-600">Verifica se o protótipo resolve de forma clara e eficaz o problema identificado.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">5/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-5" data-width="100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 2 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa3 relative">
+                                <div class="peso-badge peso-5">5</div>
+                                <h3 class="text-xl font-semibold text-etapa3 mb-2 criterio-title">Valor percebido pelo cliente</h3>
+                                <p class="text-gray-600">Mede o interesse, utilidade e engajamento do público-alvo com a solução.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">5/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-5" data-width="100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 3 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa3 relative">
+                                <div class="peso-badge peso-4">4</div>
+                                <h3 class="text-xl font-semibold text-etapa3 mb-2 criterio-title">Viabilidade técnica</h3>
+                                <p class="text-gray-600">Avalia se a solução é tecnicamente viável com os recursos e diretrizes da CAIXA.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">4/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-4" data-width="80%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 4 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa3 relative">
+                                <div class="peso-badge peso-4">4</div>
+                                <h3 class="text-xl font-semibold text-etapa3 mb-2 criterio-title">Experiência do usuário</h3>
+                                <p class="text-gray-600">Considera a usabilidade, clareza e fluidez da interação com o protótipo.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">4/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-4" data-width="80%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 5 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa3 relative">
+                                <div class="peso-badge peso-4">4</div>
+                                <h3 class="text-xl font-semibold text-etapa3 mb-2 criterio-title">Capacidade de aprendizado</h3>
+                                <p class="text-gray-600">Mede o quanto o protótipo gera insights relevantes para evolução da solução.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">4/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-4" data-width="80%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 6 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa3 relative">
+                                <div class="peso-badge peso-3">3</div>
+                                <h3 class="text-xl font-semibold text-etapa3 mb-2 criterio-title">Maturidade da solução</h3>
+                                <p class="text-gray-600">Verifica o nível de fidelidade e robustez do protótipo em relação ao MVP.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">3/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-3" data-width="60%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 7 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa3 relative">
+                                <div class="peso-badge peso-3">3</div>
+                                <h3 class="text-xl font-semibold text-etapa3 mb-2 criterio-title">Conformidade e segurança</h3>
+                                <p class="text-gray-600">Avalia o atendimento às diretrizes de segurança da informação e compliance.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">3/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-3" data-width="60%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 8 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa3 relative">
+                                <div class="peso-badge peso-2">2</div>
+                                <h3 class="text-xl font-semibold text-etapa3 mb-2 criterio-title">Potencial de escalabilidade</h3>
+                                <p class="text-gray-600">Analisa a possibilidade de expansão da solução para outros públicos ou canais.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">2/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-2" data-width="40%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 9 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa3 relative">
+                                <div class="peso-badge peso-2">2</div>
+                                <h3 class="text-xl font-semibold text-etapa3 mb-2 criterio-title">Alinhamento estratégico com a CAIXA</h3>
+                                <p class="text-gray-600">Verifica a aderência da solução às diretrizes e metas institucionais.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">2/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-2" data-width="40%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Critério 10 -->
+                            <div class="criterio-card bg-white rounded-lg p-6 shadow-md border-l-4 border-etapa3 relative">
+                                <div class="peso-badge peso-2">2</div>
+                                <h3 class="text-xl font-semibold text-etapa3 mb-2 criterio-title">Custo e simplicidade de execução</h3>
+                                <p class="text-gray-600">Considera o esforço necessário para desenvolver e testar o protótipo com agilidade e baixo custo.</p>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">Peso</span>
+                                        <span class="text-sm font-medium text-gray-700">2/5</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill progress-fill-2" data-width="40%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 bg-white rounded-xl p-6 shadow-lg">
+            <h2 class="text-2xl font-bold text-[#005CA9] mb-4">Legenda de Pesos</h2>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center">
+                    <div class="w-6 h-6 rounded-full bg-[#10B981] mr-2"></div>
+                    <span>Peso 5 - Crítico</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-6 h-6 rounded-full bg-[#60A5FA] mr-2"></div>
+                    <span>Peso 4 - Muito importante</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-6 h-6 rounded-full bg-[#FBBF24] mr-2"></div>
+                    <span>Peso 3 - Importante</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-6 h-6 rounded-full bg-[#F97316] mr-2"></div>
+                    <span>Peso 2 - Relevante</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-6 h-6 rounded-full bg-[#EF4444] mr-2"></div>
+                    <span>Peso 1 - Considerável</span>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="mt-8 text-center text-gray-600">
+            <p>Baseado no normativo OR219 - Item 4.4 - Critérios de Avaliação de Experimentos</p>
+        </footer>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // Inicializar a primeira etapa
+            animateCardsSequentially('etapa1');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    const etapa = button.getAttribute('data-etapa');
+                    
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active-etapa1', 'active-etapa2', 'active-etapa3');
+                        
+                        // Reset button styles to default
+                        const btnEtapa = btn.getAttribute('data-etapa');
+                        if (btnEtapa === 'etapa1') {
+                            btn.classList.add('text-[#2563EB]');
+                        } else if (btnEtapa === 'etapa2') {
+                            btn.classList.add('text-[#7C3AED]');
+                        } else if (btnEtapa === 'etapa3') {
+                            btn.classList.add('text-[#059669]');
+                        }
+                    });
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to current button and content
+                    button.classList.add(`active-${etapa}`);
+                    button.classList.remove(`text-[#${etapa === 'etapa1' ? '2563EB' : etapa === 'etapa2' ? '7C3AED' : '059669'}]`);
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // Reset and animate cards for the selected tab
+                    resetCards(tabId);
+                    animateCardsSequentially(tabId);
+                });
+            });
+            
+            // Função para animar os cartões sequencialmente um por um
+            function animateCardsSequentially(tabId) {
+                const cards = document.querySelectorAll(`#${tabId} .criterio-card`);
+                
+                // Reset all cards first
+                cards.forEach(card => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                });
+                
+                // Animate each card with a significant delay between them
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                        card.style.animation = 'fadeInUp 0.5s ease forwards';
+                        
+                        // Animate the progress bar after the card appears
+                        setTimeout(() => {
+                            const progressBar = card.querySelector('.progress-fill');
+                            if (progressBar) {
+                                const width = progressBar.getAttribute('data-width');
+                                progressBar.style.width = width;
+                            }
+                        }, 300);
+                        
+                    }, 300 * (index + 1)); // 300ms delay between each card
+                });
+            }
+            
+            // Função para resetar os cartões antes da animação
+            function resetCards(tabId) {
+                const cards = document.querySelectorAll(`#${tabId} .criterio-card`);
+                const progressBars = document.querySelectorAll(`#${tabId} .progress-fill`);
+                
+                cards.forEach(card => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                });
+                
+                progressBars.forEach(bar => {
+                    bar.style.width = '0';
+                });
+            }
+            
+            // Adicionar efeito hover aos cartões
+            const criterioCards = document.querySelectorAll('.criterio-card');
+            criterioCards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    if (card.style.opacity === '1') {
+                        card.style.transform = 'translateY(-5px)';
+                        card.style.boxShadow = '0 10px 15px rgba(0, 0, 0, 0.1)';
+                    }
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    if (card.style.opacity === '1') {
+                        card.style.transform = 'translateY(0)';
+                        card.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                    }
+                });
+            });
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'95f145e431e91cd3',t:'MTc1MjQ5ODc2MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
