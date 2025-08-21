@@ -30,7 +30,7 @@ const CollaboratorNavbar = () => {
       className={`fixed w-full top-0 z-50 transition-all duration-300 ${
         scrolled 
           ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200' 
-          : 'bg-transparent'
+          : 'bg-white/80 backdrop-blur-sm border-b border-gray-100'
       }`}
     >
       <div className="container-max section-padding py-4">

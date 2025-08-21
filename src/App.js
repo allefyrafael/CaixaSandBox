@@ -10,12 +10,14 @@ import MyIdeasPage from './pages/MyIdeasPage';
 import Navbar from './components/Navbar';
 import CollaboratorNavbar from './components/CollaboratorNavbar';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import DashboardApp from './dashboard/DashboardApp';
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
+        <ScrollToTop />
         <Routes>
           {/* Public Site Routes */}
           <Route path="/" element={

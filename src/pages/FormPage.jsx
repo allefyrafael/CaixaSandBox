@@ -140,11 +140,15 @@ const FormPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 pt-24">
-      {/* ChatBot - Fixed position on desktop, minimizable */}
-      <div className={`fixed top-20 left-0 z-40 transition-all duration-300 ${
-        isChatMinimized ? 'w-auto' : 'w-80 lg:w-96'
-      } h-[calc(100vh-80px)]`}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      {/* ChatBot - Responsive positioning */}
+      <div className={`
+        fixed z-40 transition-all duration-300
+        ${isChatMinimized 
+          ? 'bottom-4 left-4 w-auto h-auto' 
+          : 'bottom-0 left-0 right-0 h-[45vh] md:top-20 md:left-0 md:w-80 lg:w-96 md:h-[calc(100vh-80px)] md:bottom-auto md:right-auto'
+        }
+      `}>
         <ChatBot
           onFormFieldUpdate={handleFormFieldUpdate}
           formData={watchedValues}
@@ -154,9 +158,11 @@ const FormPage = () => {
       </div>
 
       {/* Main Content - Adjusted margin for chat */}
-      <div className={`transition-all duration-300 ${
-        isChatMinimized ? 'ml-0 lg:ml-20' : 'ml-0 lg:ml-80 xl:ml-96'
-      } pt-20`}>
+      <div className={`transition-all duration-300 pt-20 ${
+        isChatMinimized 
+          ? 'pb-4 md:ml-0' 
+          : 'pb-[45vh] md:pb-4 md:ml-80 lg:ml-96'
+      }`}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             
         {/* Header */}

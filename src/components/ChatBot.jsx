@@ -118,17 +118,68 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize })
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        className="p-4"
+        className="p-4 relative"
       >
+        {/* Futuristic Gradient Arc */}
+        <motion.div
+          animate={{ 
+            rotate: 360
+          }}
+          transition={{ 
+            duration: 5, 
+            repeat: Infinity, 
+            ease: "linear" 
+          }}
+          className="absolute inset-2 w-16 h-16 pointer-events-none"
+        >
+          <svg 
+            width="64" 
+            height="64" 
+            viewBox="0 0 64 64" 
+            className="absolute inset-0"
+          >
+            <defs>
+              <linearGradient id="futuristicGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#0B5CFF" stopOpacity="0" />
+                <stop offset="20%" stopColor="#0B5CFF" stopOpacity="0.8" />
+                <stop offset="50%" stopColor="#FF6B35" stopOpacity="1" />
+                <stop offset="80%" stopColor="#10B981" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0" />
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                <feMerge> 
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <circle
+              cx="32"
+              cy="32"
+              r="28"
+              fill="none"
+              stroke="url(#futuristicGradient)"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeDasharray="64 159"
+              filter="url(#glow)"
+              style={{
+                transformOrigin: '32px 32px'
+              }}
+            />
+          </svg>
+        </motion.div>
+
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={onToggleMinimize}
-          className="w-12 h-12 bg-gradient-to-r from-caixa-blue to-caixa-blue-700 rounded-full flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300"
+          className="relative z-10 w-12 h-12 bg-gradient-to-r from-caixa-blue to-caixa-blue-700 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
         >
           <MessageCircle className="w-6 h-6 text-white" />
           {messages.length > 1 && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-caixa-orange rounded-full flex items-center justify-center">
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-caixa-orange to-caixa-orange-dark rounded-full flex items-center justify-center border-2 border-white">
               <span className="text-white text-xs font-bold">{messages.length - 1}</span>
             </div>
           )}
@@ -142,31 +193,31 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize })
       initial={{ x: -300, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: -300, opacity: 0 }}
-      className="h-full bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden m-4"
+      className="h-full bg-white border border-gray-200 flex flex-col overflow-hidden rounded-t-lg md:rounded-2xl shadow-xl md:shadow-2xl md:m-4"
     >
       {/* Chat Header */}
-      <div className="bg-gradient-to-r from-caixa-blue to-caixa-blue-700 p-4 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-            <Bot className="w-6 h-6 text-white" />
+      <div className="bg-gradient-to-r from-caixa-blue to-caixa-blue-700 p-3 md:p-4 flex items-center justify-between shrink-0">
+        <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+            <Bot className="w-4 h-4 md:w-6 md:h-6 text-white" />
           </div>
-          <div>
-            <h3 className="font-semibold text-white">Assistente Sandbox</h3>
-            <p className="text-blue-100 text-sm">Powered by IBM Watson</p>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold text-white text-sm md:text-base truncate">Assistente Sandbox</h3>
+            <p className="text-blue-100 text-xs md:text-sm truncate">Powered by IBM Watson</p>
           </div>
         </div>
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={onToggleMinimize}
-          className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+          className="p-1.5 md:p-2 hover:bg-white/20 rounded-lg transition-colors shrink-0"
         >
-          <Minimize2 className="w-5 h-5 text-white" />
+          <Minimize2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
         </motion.button>
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-2 md:p-4 space-y-3 md:space-y-4 bg-gray-50">
         <AnimatePresence>
           {messages.map((message) => (
             <motion.div
@@ -176,26 +227,26 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize })
               exit={{ opacity: 0, y: -20 }}
               className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`flex items-start space-x-2 max-w-[80%] ${
+              <div className={`flex items-start space-x-1.5 md:space-x-2 max-w-[85%] md:max-w-[80%] ${
                 message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''
               }`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 ${
                   message.type === 'user' 
                     ? 'bg-caixa-blue text-white' 
                     : 'bg-caixa-orange text-white'
                 }`}>
                   {message.type === 'user' ? (
-                    <User className="w-4 h-4" />
+                    <User className="w-3 h-3 md:w-4 md:h-4" />
                   ) : (
-                    <Brain className="w-4 h-4" />
+                    <Brain className="w-3 h-3 md:w-4 md:h-4" />
                   )}
                 </div>
-                <div className={`rounded-2xl p-3 ${
+                <div className={`rounded-2xl p-2.5 md:p-3 ${
                   message.type === 'user'
                     ? 'bg-caixa-blue text-white rounded-br-sm'
                     : 'bg-white text-gray-800 rounded-bl-sm shadow-sm border'
                 }`}>
-                  <p className="text-sm leading-relaxed">{message.content}</p>
+                  <p className="text-xs md:text-sm leading-relaxed break-words">{message.content}</p>
                   {message.fieldUpdate && (
                     <div className="mt-2 p-2 bg-caixa-blue/10 rounded-lg">
                       <p className="text-xs text-caixa-blue font-medium">
@@ -252,15 +303,15 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize })
       </div>
 
       {/* Quick Suggestions */}
-      <div className="p-4 bg-white border-t">
-        <div className="flex flex-wrap gap-2 mb-3">
+      <div className="p-2 md:p-4 bg-white border-t shrink-0">
+        <div className="flex flex-wrap gap-1.5 md:gap-2 mb-2 md:mb-3">
           {quickSuggestions.map((suggestion, index) => (
             <motion.button
               key={index}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setInputValue(suggestion)}
-              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full transition-colors"
+              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 md:px-3 py-1 rounded-full transition-colors whitespace-nowrap"
             >
               {suggestion}
             </motion.button>
@@ -269,27 +320,27 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize })
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-white border-t">
+      <div className="p-2 md:p-4 bg-white border-t shrink-0">
         <div className="flex items-end space-x-2">
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <textarea
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Digite sua mensagem ou pergunta sobre o Sandbox..."
-              className="w-full resize-none border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-caixa-blue focus:border-transparent"
+              placeholder="Digite sua mensagem..."
+              className="w-full resize-none border border-gray-300 rounded-xl px-3 md:px-4 py-2 md:py-3 focus:outline-none focus:ring-2 focus:ring-caixa-blue focus:border-transparent text-sm"
               rows="2"
               disabled={isTyping}
             />
           </div>
           <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isTyping}
-            className="p-3 bg-gradient-to-r from-caixa-blue to-caixa-blue-700 text-white rounded-xl hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2.5 md:p-3 bg-gradient-to-r from-caixa-blue to-caixa-blue-700 text-white rounded-xl hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
           >
-            <Send className="w-5 h-5" />
+            <Send className="w-4 h-4 md:w-5 md:h-5" />
           </motion.button>
         </div>
       </div>

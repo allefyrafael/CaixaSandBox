@@ -5,12 +5,7 @@ import {
   Users, 
   Shield, 
   ArrowRight, 
-  Lightbulb, 
-  BarChart3,
-  Clock,
-  Target,
-  CheckCircle,
-  Star
+  Lightbulb
 } from 'lucide-react';
 
 const RoleSelectionPage = () => {
@@ -97,36 +92,9 @@ const RoleSelectionPage = () => {
                 Sou Colaborador
               </h3>
               
-              <p className="text-gray-600 text-center mb-8">
-                Tenho uma ideia inovadora e quero submetê-la ao Sandbox CAIXA
+              <p className="text-gray-600 text-center mb-12">
+                Submeta suas ideias e acompanhe o desenvolvimento
               </p>
-
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                  </div>
-                  <span className="text-gray-700">Submeter ideias inovadoras</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                  </div>
-                  <span className="text-gray-700">Acompanhar status das ideias</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                  </div>
-                  <span className="text-gray-700">Receber feedback dos gestores</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                  </div>
-                  <span className="text-gray-700">Chatbot IA para auxílio</span>
-                </div>
-              </div>
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -156,36 +124,9 @@ const RoleSelectionPage = () => {
                 Sou Gestor
               </h3>
               
-              <p className="text-gray-600 text-center mb-8">
-                Gerencio o processo de inovação e análise das ideias submetidas
+              <p className="text-gray-600 text-center mb-12">
+                Analise ideias e gerencie o processo de inovação
               </p>
-
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                  </div>
-                  <span className="text-gray-700">Dashboard gerencial completo</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                  </div>
-                  <span className="text-gray-700">Análise de ideias com IA</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                  </div>
-                  <span className="text-gray-700">Classificação em fases</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                  </div>
-                  <span className="text-gray-700">Controle de usuários</span>
-                </div>
-              </div>
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -200,43 +141,7 @@ const RoleSelectionPage = () => {
           </motion.div>
         </div>
 
-        {/* Features Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="mt-20 text-center"
-        >
-          <h2 className="text-3xl font-bold text-gray-900 mb-12">
-            Processo de Inovação Sandbox CAIXA
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Lightbulb className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Discovery</h3>
-              <p className="text-gray-600">Validação inicial e prototipagem</p>
-            </div>
-            
-            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Target className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Delivery</h3>
-              <p className="text-gray-600">Desenvolvimento de MVP e testes</p>
-            </div>
-            
-            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Star className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Scale</h3>
-              <p className="text-gray-600">Escalonamento e implementação nacional</p>
-            </div>
-          </div>
-        </motion.div>
+
       </main>
     </div>
   );

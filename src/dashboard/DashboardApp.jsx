@@ -9,10 +9,12 @@ import IdeaDetailsPage from './pages/IdeaDetailsPage';
 
 // Dashboard Components
 import ProtectedRoute from './components/ProtectedRoute';
+import ScrollToTop from '../components/ScrollToTop';
 
 const DashboardApp = () => {
   return (
     <>
+      <ScrollToTop />
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />

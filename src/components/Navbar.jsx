@@ -31,7 +31,7 @@ const Navbar = () => {
       className={`fixed w-full top-0 z-50 transition-all duration-300 ${
         scrolled 
           ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200' 
-          : 'bg-transparent'
+          : 'bg-white/80 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none'
       }`}
     >
       <div className="container-max section-padding py-4">
@@ -112,7 +112,11 @@ const Navbar = () => {
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={toggleMenu}
-            className="md:hidden p-2 rounded-lg text-gray-600 hover:text-caixa-blue hover:bg-gray-100 transition-colors"
+            className={`md:hidden p-2 rounded-lg transition-colors ${
+              scrolled 
+                ? 'text-gray-600 hover:text-caixa-blue hover:bg-gray-100' 
+                : 'text-gray-700 hover:text-caixa-blue hover:bg-white/50 bg-white/20 backdrop-blur-sm border border-white/30'
+            }`}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </motion.button>
