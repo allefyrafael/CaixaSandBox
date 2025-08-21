@@ -51,54 +51,54 @@ const MetricsPage = () => {
 
   const kpiCards = [
     {
-      title: 'Experimentos Ativos',
-      value: '42',
-      change: '+12%',
+      title: 'Experimentos Cadastrados',
+      value: '73',
+      change: '+100%',
       trend: 'up',
       icon: Rocket,
       color: 'from-blue-500 to-blue-600',
       bgColor: 'bg-blue-50'
     },
     {
-      title: 'Taxa de Sucesso',
-      value: '87%',
-      change: '+5%',
+      title: 'Empregados Envolvidos',
+      value: '4.000',
+      change: '+12 VP',
       trend: 'up',
-      icon: Target,
+      icon: Users,
       color: 'from-green-500 to-green-600',
       bgColor: 'bg-green-50'
     },
     {
-      title: 'Tempo Médio',
-      value: '45 dias',
-      change: '-8%',
-      trend: 'down',
+      title: 'Tempo de Aprovação',
+      value: '48h',
+      change: 'IA Otimizada',
+      trend: 'up',
       icon: Clock,
       color: 'from-orange-500 to-orange-600',
       bgColor: 'bg-orange-50'
     },
     {
-      title: 'ROI Médio',
-      value: '340%',
-      change: '+23%',
+      title: 'Taxa de Satisfação',
+      value: '92%',
+      change: 'Alta Aceitação',
       trend: 'up',
-      icon: TrendingUp,
+      icon: Target,
       color: 'from-purple-500 to-purple-600',
       bgColor: 'bg-purple-50'
     },
     {
-      title: 'Colaboradores Engajados',
-      value: '158',
-      change: '+18%',
+      title: 'Eficiência Implementação',
+      value: '85%',
+      change: 'Fase Scale',
       trend: 'up',
-      icon: Users,
+      icon: TrendingUp,
       color: 'from-cyan-500 to-cyan-600',
       bgColor: 'bg-cyan-50'
     },
     {
-      title: 'Valor Gerado',
-      value: 'R$ 15M',
-      change: '+45%',
+      title: 'Soluções Escaladas',
+      value: '25+',
+      change: 'Portfólio CAIXA',
       trend: 'up',
       icon: Award,
       color: 'from-emerald-500 to-emerald-600',
@@ -107,20 +107,20 @@ const MetricsPage = () => {
   ];
 
   const experimentsData = [
-    { month: 'Jan', discovery: 12, delivery: 8, scale: 3 },
-    { month: 'Fev', discovery: 15, delivery: 10, scale: 5 },
-    { month: 'Mar', discovery: 18, delivery: 12, scale: 7 },
-    { month: 'Abr', discovery: 22, delivery: 15, scale: 9 },
-    { month: 'Mai', discovery: 20, delivery: 18, scale: 12 },
-    { month: 'Jun', discovery: 25, delivery: 20, scale: 15 }
+    { month: 'Ago', discovery: 25, delivery: 15, scale: 8 },
+    { month: 'Set', discovery: 30, delivery: 20, scale: 12 },
+    { month: 'Out', discovery: 35, delivery: 25, scale: 15 },
+    { month: 'Nov', discovery: 40, delivery: 30, scale: 18 },
+    { month: 'Dez', discovery: 45, delivery: 35, scale: 22 },
+    { month: 'Jan', discovery: 50, delivery: 40, scale: 25 }
   ];
 
   const categoriesData = [
-    { name: 'IA & Automação', value: 35, color: '#3B82F6' },
-    { name: 'UX & Design', value: 25, color: '#10B981' },
-    { name: 'Dados & Analytics', value: 20, color: '#F59E0B' },
-    { name: 'Blockchain', value: 12, color: '#8B5CF6' },
-    { name: 'IoT & Sensores', value: 8, color: '#EF4444' }
+    { name: 'Atendimento ao Cliente', value: 30, color: '#3B82F6' },
+    { name: 'Processos Internos', value: 25, color: '#10B981' },
+    { name: 'Tecnologia & IA', value: 20, color: '#F59E0B' },
+    { name: 'Produtos & Serviços', value: 15, color: '#8B5CF6' },
+    { name: 'Sustentabilidade', value: 10, color: '#EF4444' }
   ];
 
   const performanceData = [
@@ -134,44 +134,44 @@ const MetricsPage = () => {
 
   const topProjects = [
     {
-      name: 'Assistente Virtual IA',
+      name: 'Redução de Comprovantes',
       phase: 'Scale',
       progress: 95,
       impact: 'Alto',
-      team: 'GIGID',
-      roi: '450%'
+      team: 'Operações',
+      roi: 'R$ 3M/ano'
     },
     {
-      name: 'Blockchain Certificados',
+      name: 'IA Conversacional Transform It',
+      phase: 'Delivery',
+      progress: 85,
+      impact: 'Médio-Alto',
+      team: 'Tecnologia',
+      roi: 'Eficiência +40%'
+    },
+    {
+      name: 'Flexibilização de Normativos',
+      phase: 'Discovery',
+      progress: 70,
+      impact: 'Alto',
+      team: 'Compliance',
+      roi: 'Agilidade +60%'
+    },
+    {
+      name: 'Testes com 1% Base Clientes',
+      phase: 'Scale',
+      progress: 90,
+      impact: 'Transformacional',
+      team: 'Produtos',
+      roi: 'Validação Rápida'
+    },
+    {
+      name: 'Hub GovTech Brasília',
       phase: 'Delivery',
       progress: 75,
-      impact: 'Médio-Alto',
-      team: 'GESTI',
-      roi: '280%'
-    },
-    {
-      name: 'Analytics Preditivo',
-      phase: 'Discovery',
-      progress: 60,
-      impact: 'Alto',
-      team: 'GITED',
-      roi: '380%'
-    },
-    {
-      name: 'App Investimentos',
-      phase: 'Scale',
-      progress: 88,
-      impact: 'Transformacional',
-      team: 'GECAD',
-      roi: '520%'
-    },
-    {
-      name: 'Onboarding Digital',
-      phase: 'Delivery',
-      progress: 70,
       impact: 'Médio',
-      team: 'GICLI',
-      roi: '200%'
+      team: 'Inovação',
+      roi: 'Parcerias Estratégicas'
     }
   ];
 
@@ -210,10 +210,10 @@ const MetricsPage = () => {
         >
           <div>
             <h1 className="text-responsive-3xl font-bold gradient-text mb-2">
-              Dashboard de Métricas
+              Dashboard do Sandbox CAIXA
             </h1>
             <p className="text-responsive-lg text-gray-600">
-              Acompanhe o desempenho e impacto dos experimentos em tempo real
+              Acompanhe o desempenho e impacto dos experimentos do primeiro edital
             </p>
           </div>
 

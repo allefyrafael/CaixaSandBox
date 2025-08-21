@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
@@ -10,9 +10,39 @@ import {
   Users,
   Target
 } from 'lucide-react';
-import Sandbox3D from './Sandbox3D';
+import ThreeModelViewer from './ThreeModelViewer';
 
 const HeroSection = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 1200,
+    height: typeof window !== 'undefined' ? window.innerHeight : 800
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const getModelSize = () => {
+    const isMobile = windowSize.width < 768;
+    const isTablet = windowSize.width >= 768 && windowSize.width < 1024;
+    
+    if (isMobile) {
+      return { width: Math.min(windowSize.width * 0.9, 400), height: 300 };
+    } else if (isTablet) {
+      return { width: Math.min(windowSize.width * 0.7, 600), height: 450 };
+    } else {
+      return { width: Math.min(windowSize.width * 0.5, 800), height: 600 };
+    }
+  };
+
   const floatingIcons = [
     { Icon: Sparkles, delay: 0, className: "top-20 left-10" },
     { Icon: TrendingUp, delay: 0.5, className: "top-32 right-20" },
@@ -110,16 +140,16 @@ const HeroSection = () => {
                 <span className="gradient-text">Ideias em Valor</span>
               </motion.h1>
               
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="text-xl text-gray-600 mt-6 leading-relaxed"
-              >
-                O <strong>Sandbox CAIXA</strong> é o ambiente que empodera você a inovar com 
-                responsabilidade, autonomia e impacto real. Experimente, aprenda e escale 
-                suas soluções de forma revolucionária.
-              </motion.p>
+                          <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-xl text-gray-600 mt-6 leading-relaxed"
+            >
+              O <strong>Sandbox CAIXA</strong> é um ambiente de experimentação interna da Caixa Econômica Federal 
+              focado em intraempreendedorismo. Capturando ideias dos 87.000 empregados, 
+              transforma-os em experimentos estruturados e promove mudança cultural para inovação ágil.
+            </motion.p>
             </div>
 
             {/* CTA Buttons */}
@@ -143,14 +173,18 @@ const HeroSection = () => {
                 </Link>
               </motion.div>
               
-              <motion.button
+              <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="btn btn-secondary group text-lg px-8 py-4"
               >
-                <Play className="w-5 h-5 mr-2" />
-                <span>Ver Demo</span>
-              </motion.button>
+                <Link 
+                  to="/demo" 
+                  className="btn btn-secondary group text-lg px-8 py-4"
+                >
+                  <Play className="w-5 h-5 mr-2" />
+                  <span>Ver Demo</span>
+                </Link>
+              </motion.div>
             </motion.div>
 
             {/* Quick Stats */}
@@ -161,16 +195,16 @@ const HeroSection = () => {
               className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200"
             >
               <div className="text-center sm:text-left">
-                <div className="text-2xl font-bold text-caixa-blue">50+</div>
-                <div className="text-sm text-gray-600">Experimentos Ativos</div>
+                <div className="text-2xl font-bold text-caixa-blue">73</div>
+                <div className="text-sm text-gray-600">Experimentos Cadastrados</div>
               </div>
               <div className="text-center sm:text-left">
-                <div className="text-2xl font-bold text-caixa-green">95%</div>
-                <div className="text-sm text-gray-600">Taxa de Sucesso</div>
+                <div className="text-2xl font-bold text-caixa-green">4.000</div>
+                <div className="text-sm text-gray-600">Empregados Envolvidos</div>
               </div>
               <div className="text-center sm:text-left">
-                <div className="text-2xl font-bold text-caixa-orange">24h</div>
-                <div className="text-sm text-gray-600">Aprovação Média</div>
+                <div className="text-2xl font-bold text-caixa-orange">12+</div>
+                <div className="text-sm text-gray-600">Vice-Presidências</div>
               </div>
             </motion.div>
           </motion.div>
@@ -180,9 +214,29 @@ const HeroSection = () => {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
+            className="relative flex items-center justify-center"
           >
-            <Sandbox3D />
+            <div className="relative w-full max-w-2xl h-[300px] md:h-[450px] lg:h-[600px]">
+              <ThreeModelViewer
+                modelUrl="/sandBOX.glb"
+                width={getModelSize().width}
+                height={getModelSize().height}
+                cameraPosition={{ x: 15, y: 5, z: 15 }}
+                modelPosition={{ x: 0, y: -1, z: 0 }}
+                modelRotation={{ x: 0, y: 0, z: 0 }}
+                modelScale={{ x: 1, y: 1, z: 1 }}
+                enableControls={true}
+                autoRotate={false}
+                style={{ 
+                  position: 'absolute', 
+                  inset: 0, 
+                  background: 'transparent', 
+                  border: 'none',
+                  width: '100%',
+                  height: '100%'
+                }}
+              />
+            </div>
           </motion.div>
         </div>
       </div>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Rocket, FileText, BarChart3, Settings } from 'lucide-react';
+import { Menu, X, Rocket, FileText, Eye, User } from 'lucide-react';
 
-const Navbar = () => {
+const CollaboratorNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
@@ -17,9 +17,8 @@ const Navbar = () => {
   }, []);
 
   const navigation = [
-    { name: 'Início', href: '/', icon: Rocket },
-    { name: 'Classificação', href: '/classificacao', icon: Settings },
-    { name: 'Métricas', href: '/metricas', icon: BarChart3 },
+    { name: 'Nova Ideia', href: '/colaborador/formulario', icon: FileText },
+    { name: 'Minhas Ideias', href: '/colaborador/minhas-ideias', icon: Eye },
   ];
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -37,19 +36,19 @@ const Navbar = () => {
       <div className="container-max section-padding py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
+          <Link to="/colaborador/formulario" className="flex items-center space-x-3">
             <motion.div
               whileHover={{ scale: 1.05, rotate: 5 }}
               className="relative"
             >
               <div className="w-10 h-10 bg-gradient-to-br from-caixa-blue to-caixa-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                <Rocket className="w-6 h-6 text-white" />
+                <User className="w-6 h-6 text-white" />
               </div>
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-caixa-orange rounded-full animate-pulse"></div>
             </motion.div>
             <div>
-              <h1 className="text-xl font-bold gradient-text">Sandbox CAIXA</h1>
-              <p className="text-xs text-gray-500 hidden sm:block">Inovação Revolucionária</p>
+              <h1 className="text-xl font-bold gradient-text">Colaborador</h1>
+              <p className="text-xs text-gray-500 hidden sm:block">Sandbox CAIXA</p>
             </div>
           </Link>
 
@@ -92,21 +91,21 @@ const Navbar = () => {
             })}
           </div>
 
-          {/* CTA Button - Desktop */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-            className="hidden md:block"
-          >
-            <Link
-              to="/demo"
-              className="btn btn-primary group"
+          {/* Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3 }}
             >
-              <span>Iniciar Experimento</span>
-              <Rocket className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </motion.div>
+              <Link
+                to="/"
+                className="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all"
+              >
+                Voltar ao Site
+              </Link>
+            </motion.div>
+          </div>
 
           {/* Mobile menu button */}
           <motion.button
@@ -156,7 +155,7 @@ const Navbar = () => {
                   );
                 })}
                 
-                {/* Mobile CTA */}
+                {/* Mobile Actions */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -164,12 +163,11 @@ const Navbar = () => {
                   className="pt-4 border-t border-gray-200"
                 >
                   <Link
-                    to="/demo"
+                    to="/"
                     onClick={() => setIsOpen(false)}
-                    className="btn btn-primary w-full group"
+                    className="btn btn-secondary w-full"
                   >
-                    <span>Iniciar Experimento</span>
-                    <Rocket className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    Voltar ao Site
                   </Link>
                 </motion.div>
               </div>
@@ -181,4 +179,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default CollaboratorNavbar;

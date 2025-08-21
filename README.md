@@ -1,14 +1,14 @@
-# Sandbox CAIXA - Plataforma Revolucionária de Inovação
+# Sandbox CAIXA - Ambiente de Experimentação Interna da CEF
 
-Uma aplicação React moderna e responsiva que revoluciona a forma como os colaboradores da CAIXA submetem e gerenciam experimentos de inovação através do programa Sandbox.
+Uma aplicação React moderna e responsiva que apresenta o Sandbox Caixa, ambiente de experimentação interna da Caixa Econômica Federal focado em intraempreendedorismo. Lançado em 2 de agosto, o programa captura ideias dos 87.000 empregados, transforma-as em experimentos estruturados e promove mudança cultural para inovação ágil.
 
 ## 🚀 Funcionalidades Principais
 
-### 🏠 **Homepage Atrativa**
+### 🏠 **Homepage Informativa**
 - Design moderno com animações fluidas
 - Seções informativas sobre o Sandbox CAIXA
-- Estatísticas em tempo real
-- Depoimentos de usuários
+- Estatísticas do primeiro edital (73 experimentos, 4.000 empregados)
+- Processo estruturado em 3 fases (Discovery, Delivery, Aceleração)
 - Call-to-actions intuitivos
 
 ### 📋 **Formulário Inteligente Multi-etapas**
@@ -25,12 +25,12 @@ Uma aplicação React moderna e responsiva que revoluciona a forma como os colab
 - Recomendações personalizadas
 - Visualização de projetos similares
 
-### 📊 **Dashboard de Métricas Avançado**
+### 📊 **Dashboard de Métricas do Sandbox**
 - Gráficos interativos com Recharts
-- KPIs em tempo real
-- Análise de tendências
+- KPIs do primeiro edital
+- Análise de tendências por fases
 - Comparação de performance
-- Ranking de projetos
+- Projetos de exemplo (Redução de Comprovantes, IA Transform It, etc.)
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -121,10 +121,10 @@ src/
 
 ## 🎯 Fluxo da Aplicação
 
-1. **Homepage** → Apresentação do Sandbox CAIXA
+1. **Homepage** → Apresentação do Sandbox CAIXA e estatísticas do primeiro edital
 2. **Formulário** → Submissão de experimento (5 etapas)
 3. **Classificação** → Análise por IA simulada
-4. **Métricas** → Dashboard com visualizações
+4. **Métricas** → Dashboard com visualizações dos resultados
 
 ## 🔧 Funcionalidades Técnicas
 
@@ -146,14 +146,14 @@ src/
 - Classificação automática baseada em inputs
 - Geração de métricas dinâmicas
 
-## 📊 Integração Futura com IA
+## 📊 Tecnologias do Sandbox CAIXA
 
-O projeto está preparado para integração com serviços de IA reais:
+O projeto reflete as tecnologias reais utilizadas no Sandbox:
 
-- **IBM Watson** para processamento de linguagem natural
-- **APIs de Machine Learning** para classificação automática
-- **Análise preditiva** para recomendações
-- **Processamento de dados** em tempo real
+- **Transform It (Meet It)** - Plataforma com IA conversacional
+- **Dashboard de monitoramento** para acompanhamento de experimentos
+- **Testes com 1% da base de clientes** para validação
+- **Flexibilização normativa** para agilidade
 
 ## 🔒 Segurança
 
@@ -190,30 +190,30 @@ O projeto está preparado para integração com serviços de IA reais:
 
 ## 🚀 Próximos Passos
 
-1. **Backend Integration**
-   - APIs para formulários
-   - Autenticação de usuários
-   - Banco de dados real
+1. **Expansão do Sandbox**
+   - Ampliação para todos os 87.000 empregados
+   - Novos editais e ciclos
+   - Mais experimentos e soluções escaladas
 
-2. **IA Real**
-   - Integração com IBM Watson
-   - Classificação automática
-   - Análise preditiva
+2. **Ecossistema Externo**
+   - Mais chamadas de startups
+   - Parcerias com Cesar Recife
+   - Hub GovTech em Brasília
 
-3. **Features Avançadas**
-   - Notificações push
-   - Chat colaborativo
-   - Sistema de aprovações
+3. **Mudança Cultural**
+   - Consolidação da cultura de intraempreendedorismo
+   - Eliminação do "cemitério de ideias"
+   - Inovação ágil em empresa centenária
 
 ## 🤝 Contribuição
 
-Este projeto foi desenvolvido como uma demonstração das capacidades de desenvolvimento moderno para a CAIXA. O código está estruturado para fácil manutenção e extensão.
+Este projeto foi desenvolvido para apresentar o Sandbox CAIXA, ambiente de experimentação interna da Caixa Econômica Federal. O código está estruturado para fácil manutenção e extensão.
 
 ## 📄 Licença
 
-Projeto desenvolvido para demonstração de capacidades técnicas.
+Projeto desenvolvido para apresentação do Sandbox CAIXA.
 
 ---
 
-**Desenvolvido com ❤️ para revolucionar a inovação na CAIXA**
+**Desenvolvido com ❤️ para apresentar a revolução da inovação na Caixa Econômica Federal**
 
