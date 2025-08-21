@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
@@ -11,24 +11,40 @@ import {
   ChevronRight,
   ChevronLeft,
   Check,
-  AlertCircle,
   Rocket,
   Sparkles,
-  Brain,
-  Users,
-  Zap,
   Send,
-  MessageCircle,
   Eye
 } from 'lucide-react';
 import ChatBot from '../components/ChatBot';
+import AISuggestionsPanel from '../components/AISuggestionsPanel';
+import MockupStatusPanel from '../components/MockupStatusPanel';
+import WatsonDebugPanel from '../components/WatsonDebugPanel';
+import { useAIFormIntegration } from '../hooks/useAIFormIntegration';
 
 const FormPage = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChatMinimized, setIsChatMinimized] = useState(false);
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm();
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const formMethods = useForm();
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = formMethods;
+
+  // AI Integration Hook
+  const {
+    mockup,
+    pendingSuggestions,
+    isProcessing,
+    aiMessages,
+    mockupStats,
+    processAICommand,
+    approveSuggestion,
+    rejectSuggestion,
+    sendMockupToAI,
+    executeQuickAction,
+    mockupData
+  } = useAIFormIntegration(formMethods);
 
   const steps = [
     {
@@ -74,16 +90,13 @@ const FormPage = () => {
 
   // Send form data to chatbot
   const sendToChatBot = async () => {
-    const currentFormData = watchedValues;
-    
-    // Simulate sending to IBM Watson
-    toast.loading('Enviando dados para o assistente IA...', { duration: 2000 });
-    
-    setTimeout(() => {
-      toast.success('Dados enviados com sucesso! O assistente analisará suas informações.', {
-        icon: '🚀'
-      });
-    }, 2000);
+    try {
+      toast.loading('Enviando mockup para análise da IA...', { duration: 1500 });
+      await sendMockupToAI();
+      setShowSuggestions(true);
+    } catch (error) {
+      console.error('Erro ao enviar para IA:', error);
+    }
   };
 
   // Calculate form completion percentage
@@ -151,17 +164,46 @@ const FormPage = () => {
       `}>
         <ChatBot
           onFormFieldUpdate={handleFormFieldUpdate}
-          formData={watchedValues}
+          formData={mockupData}
           isMinimized={isChatMinimized}
           onToggleMinimize={handleToggleChat}
+          onProcessCommand={processAICommand}
+          onExecuteQuickAction={executeQuickAction}
+          aiMessages={aiMessages}
+          isProcessing={isProcessing}
+          mockupStats={mockupStats}
         />
       </div>
+
+      {/* AI Suggestions Panel - Floating */}
+      {showSuggestions && pendingSuggestions.length > 0 && (
+        <div className="fixed top-24 right-4 z-30 w-80 max-h-[60vh] overflow-hidden">
+          <AISuggestionsPanel
+            suggestions={pendingSuggestions}
+            onApproveSuggestion={approveSuggestion}
+            onRejectSuggestion={rejectSuggestion}
+            mockupStats={mockupStats}
+          />
+        </div>
+      )}
+
+      {/* Mockup Status Panel - Floating */}
+      {mockup && !isChatMinimized && (
+        <div className="fixed top-24 right-4 z-20 w-64">
+          <MockupStatusPanel
+            mockupStats={mockupStats}
+            mockupData={mockupData}
+            isProcessing={isProcessing}
+            className="mb-4"
+          />
+        </div>
+      )}
 
       {/* Main Content - Adjusted margin for chat */}
       <div className={`transition-all duration-300 pt-20 ${
         isChatMinimized 
-          ? 'pb-4 md:ml-0' 
-          : 'pb-[45vh] md:pb-4 md:ml-80 lg:ml-96'
+          ? 'pb-4 md:ml-0 md:pr-0' 
+          : 'pb-[45vh] md:pb-4 md:ml-80 lg:ml-96 md:pr-80'
       }`}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             
@@ -285,7 +327,7 @@ const FormPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-              className="sticky bottom-4 bg-white rounded-xl shadow-lg p-4 flex items-center justify-between gap-4"
+              className="sticky bottom-4 bg-gradient-to-r from-caixa-blue to-caixa-blue-700 rounded-xl shadow-2xl border border-blue-500 p-4 flex items-center justify-between gap-4"
           >
               {/* Left side - Previous button */}
             <motion.button
@@ -296,8 +338,8 @@ const FormPage = () => {
               whileTap={{ scale: currentStep === 0 ? 1 : 0.98 }}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                 currentStep === 0 
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                  ? 'bg-blue-800 text-blue-400 cursor-not-allowed border border-blue-700' 
+                    : 'bg-white hover:bg-blue-50 text-caixa-blue border border-blue-200 hover:border-blue-300 shadow-lg hover:shadow-xl'
                 }`}
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -308,7 +350,7 @@ const FormPage = () => {
               <div className="flex items-center space-x-2">
                 <Link
                   to="/colaborador/minhas-ideias"
-                  className="flex items-center space-x-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium text-sm transition-all"
+                  className="flex items-center space-x-1 px-3 py-2 bg-white hover:bg-blue-50 text-caixa-blue rounded-lg font-medium text-sm transition-all border border-blue-200 hover:border-blue-300 shadow-lg hover:shadow-xl"
                 >
                   <Eye className="w-4 h-4" />
                   <span className="hidden sm:inline">Minhas Ideias</span>
@@ -319,12 +361,29 @@ const FormPage = () => {
                   onClick={sendToChatBot}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-caixa-blue to-caixa-blue-700 text-white rounded-lg font-medium text-sm hover:shadow-lg transition-all"
+                  className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-caixa-orange to-orange-500 text-white rounded-lg font-medium text-sm hover:shadow-lg transition-all border border-orange-400 hover:border-orange-300 shadow-lg hover:shadow-xl"
+                  disabled={isProcessing}
                 >
                   <Send className="w-4 h-4" />
-                  <span className="hidden sm:inline">Enviar para IA</span>
+                  <span className="hidden sm:inline">
+                    {isProcessing ? 'Processando...' : 'Enviar para IA'}
+                  </span>
                   <span className="sm:hidden">IA</span>
                 </motion.button>
+
+                {pendingSuggestions.length > 0 && (
+                  <motion.button
+                    type="button"
+                    onClick={() => setShowSuggestions(!showSuggestions)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex items-center space-x-1 px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium text-sm transition-all border border-purple-400 hover:border-purple-300 shadow-lg hover:shadow-xl"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span className="hidden sm:inline">Sugestões ({pendingSuggestions.length})</span>
+                    <span className="sm:hidden">{pendingSuggestions.length}</span>
+                  </motion.button>
+                )}
               </div>
 
               {/* Right side - Next/Submit button */}
@@ -334,7 +393,7 @@ const FormPage = () => {
                 disabled={isSubmitting}
                 whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
                 whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-medium text-sm hover:shadow-lg transition-all"
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-medium text-sm hover:shadow-lg transition-all border border-green-400 hover:border-green-300 shadow-lg hover:shadow-xl"
               >
                 {isSubmitting ? (
                   <>
@@ -356,7 +415,7 @@ const FormPage = () => {
                 onClick={nextStep}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-caixa-blue to-caixa-blue-700 text-white rounded-lg font-medium text-sm hover:shadow-lg transition-all"
+                  className="flex items-center space-x-2 px-4 py-2 bg-white hover:bg-blue-50 text-caixa-blue rounded-lg font-medium text-sm hover:shadow-lg transition-all border border-blue-200 hover:border-blue-300 shadow-lg hover:shadow-xl"
               >
                   <span className="hidden sm:inline">Próximo</span>
                   <span className="sm:hidden">→</span>
@@ -367,6 +426,9 @@ const FormPage = () => {
         </form>
         </div>
       </div>
+
+      {/* Watson Debug Panel (apenas em desenvolvimento) */}
+      <WatsonDebugPanel />
     </div>
   );
 };

@@ -13,6 +13,12 @@ import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import DashboardApp from './dashboard/DashboardApp';
 
+// Importa testes do Watson apenas em desenvolvimento
+if (process.env.NODE_ENV === 'development') {
+  import('./utils/testWatsonIntegration');
+  import('./utils/debugWatsonConnection');
+}
+
 function App() {
   return (
     <Router>

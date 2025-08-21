@@ -1,0 +1,1444 @@
+[
+  {
+    "id": "7b84b773-7fcc-4f41-b400-2564e45d0039",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "running",
+    "started_at": "2025-08-20T22:33:05.233858Z",
+    "completed_at": null,
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "role": "user",
+      "content": "INICIAR",
+      "additional_properties": {
+        "wxa_message": {
+          "context": {
+            "skills": {
+              "conversational_skills": {
+                "session_variables": {
+                  "chat": {
+                    "private": {
+                      "user_payload": null
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "chat": {
+                "private": {
+                  "user_payload": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "7b84b773-7fcc-4f41-b400-2564e45d0039",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "completed",
+    "started_at": "2025-08-20T22:33:05.233858Z",
+    "completed_at": "2025-08-20T22:33:08.335321Z",
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "data": {
+        "message": {
+          "id": "e8a77d7a-58a6-4d0f-9348-beb2134b1017",
+          "role": "assistant",
+          "content": [
+            {
+              "id": "1",
+              "text": "Olá! Vamos começar o questionário do formulário MO15185. Farei perguntas passo a passo. Por favor, responda claramente.\n\nInforme o NOME do experimento.",
+              "response_type": "text"
+            }
+          ],
+          "context": null,
+          "mentions": null,
+          "assistant": {
+            "is_default": true
+          },
+          "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+          "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+          "created_by": "IBMid-6970012G69",
+          "created_on": "2025-08-20T22:33:08.233304Z",
+          "updated_at": "2025-08-20T22:33:08.233304Z",
+          "document_ids": null,
+          "step_history": [],
+          "message_state": null,
+          "parent_message_id": "5ef0b249-6fce-4060-9a77-370bc104b036",
+          "created_by_username": "arthurbendini@gmail.com",
+          "additional_properties": {
+            "display_properties": {
+              "is_async": false,
+              "skip_render": false
+            }
+          }
+        },
+        "message_id": "e8a77d7a-58a6-4d0f-9348-beb2134b1017",
+        "target_run_id": null,
+        "correlation_id": null,
+        "flowinstance_id": null
+      },
+      "type": "message_created"
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "c7801720-7e30-4118-a66b-ba5273867a1f",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "running",
+    "started_at": "2025-08-20T22:33:11.451816Z",
+    "completed_at": null,
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "role": "user",
+      "content": "Experimento Tech Excellence",
+      "additional_properties": {
+        "wxa_message": {
+          "context": {
+            "skills": {
+              "conversational_skills": {
+                "session_variables": {
+                  "chat": {
+                    "private": {
+                      "user_payload": null
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "chat": {
+                "private": {
+                  "user_payload": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "c7801720-7e30-4118-a66b-ba5273867a1f",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "completed",
+    "started_at": "2025-08-20T22:33:11.451816Z",
+    "completed_at": "2025-08-20T22:33:13.381475Z",
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "data": {
+        "message": {
+          "id": "53c93581-1765-49c2-92d8-2198bbbe9001",
+          "role": "assistant",
+          "content": [
+            {
+              "id": "1",
+              "text": "Perfeito, anotado.\n\nQual é o SEU NOME completo (proponente)?",
+              "response_type": "text"
+            }
+          ],
+          "context": null,
+          "mentions": null,
+          "assistant": {
+            "is_default": true
+          },
+          "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+          "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+          "created_by": "IBMid-6970012G69",
+          "created_on": "2025-08-20T22:33:13.300151Z",
+          "updated_at": "2025-08-20T22:33:13.300151Z",
+          "document_ids": null,
+          "step_history": [],
+          "message_state": null,
+          "parent_message_id": "8f453792-cf1d-433b-b5ce-ed579dc2a24c",
+          "created_by_username": "arthurbendini@gmail.com",
+          "additional_properties": {
+            "display_properties": {
+              "is_async": false,
+              "skip_render": false
+            }
+          }
+        },
+        "message_id": "53c93581-1765-49c2-92d8-2198bbbe9001",
+        "target_run_id": null,
+        "correlation_id": null,
+        "flowinstance_id": null
+      },
+      "type": "message_created"
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "dcd26356-642d-49d0-8a20-9a617fda165a",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "running",
+    "started_at": "2025-08-20T22:33:17.307481Z",
+    "completed_at": null,
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "role": "user",
+      "content": "João Felipe de Almeida",
+      "additional_properties": {
+        "wxa_message": {
+          "context": {
+            "skills": {
+              "conversational_skills": {
+                "session_variables": {
+                  "chat": {
+                    "private": {
+                      "user_payload": null
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "chat": {
+                "private": {
+                  "user_payload": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "dcd26356-642d-49d0-8a20-9a617fda165a",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "completed",
+    "started_at": "2025-08-20T22:33:17.307481Z",
+    "completed_at": "2025-08-20T22:33:19.843648Z",
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "data": {
+        "message": {
+          "id": "16a4fa84-ff91-4771-bfbe-b66e1103a5aa",
+          "role": "assistant",
+          "content": [
+            {
+              "id": "1",
+              "text": "Perfeito, anotado.\n\nInforme sua MATRÍCULA (apenas dígitos, mínimo 6).",
+              "response_type": "text"
+            }
+          ],
+          "context": null,
+          "mentions": null,
+          "assistant": {
+            "is_default": true
+          },
+          "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+          "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+          "created_by": "IBMid-6970012G69",
+          "created_on": "2025-08-20T22:33:19.772019Z",
+          "updated_at": "2025-08-20T22:33:19.772019Z",
+          "document_ids": null,
+          "step_history": [],
+          "message_state": null,
+          "parent_message_id": "3d989b6a-b049-4c5c-acfb-34e359ee1587",
+          "created_by_username": "arthurbendini@gmail.com",
+          "additional_properties": {
+            "display_properties": {
+              "is_async": false,
+              "skip_render": false
+            }
+          }
+        },
+        "message_id": "16a4fa84-ff91-4771-bfbe-b66e1103a5aa",
+        "target_run_id": null,
+        "correlation_id": null,
+        "flowinstance_id": null
+      },
+      "type": "message_created"
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "7ebba726-88b8-4277-aaeb-80713080e7f9",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "pending",
+    "started_at": null,
+    "completed_at": null,
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "role": "user",
+      "content": "114567",
+      "additional_properties": {
+        "wxa_message": {
+          "context": {
+            "skills": {
+              "conversational_skills": {
+                "session_variables": {
+                  "chat": {
+                    "private": {
+                      "user_payload": null
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "chat": {
+                "private": {
+                  "user_payload": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "7ebba726-88b8-4277-aaeb-80713080e7f9",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "completed",
+    "started_at": "2025-08-20T22:33:22.361184Z",
+    "completed_at": "2025-08-20T22:33:25.293401Z",
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "data": {
+        "message": {
+          "id": "67a59633-932a-477b-b182-4694f9853523",
+          "role": "assistant",
+          "content": [
+            {
+              "id": "1",
+              "text": "Perfeito, anotado.\n\nInforme o CÓDIGO da UNIDADE (CGC) — apenas dígitos, mínimo 3.",
+              "response_type": "text"
+            }
+          ],
+          "context": null,
+          "mentions": null,
+          "assistant": {
+            "is_default": true
+          },
+          "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+          "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+          "created_by": "IBMid-6970012G69",
+          "created_on": "2025-08-20T22:33:25.062692Z",
+          "updated_at": "2025-08-20T22:33:25.062692Z",
+          "document_ids": null,
+          "step_history": [],
+          "message_state": null,
+          "parent_message_id": "69bb3287-4c79-4b92-aa06-b3badca7e86b",
+          "created_by_username": "arthurbendini@gmail.com",
+          "additional_properties": {
+            "display_properties": {
+              "is_async": false,
+              "skip_render": false
+            }
+          }
+        },
+        "message_id": "67a59633-932a-477b-b182-4694f9853523",
+        "target_run_id": null,
+        "correlation_id": null,
+        "flowinstance_id": null
+      },
+      "type": "message_created"
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "aa8776ae-46de-43b5-9d28-94c68a946f19",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "running",
+    "started_at": "2025-08-20T22:33:30.305404Z",
+    "completed_at": null,
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "role": "user",
+      "content": "4467",
+      "additional_properties": {
+        "wxa_message": {
+          "context": {
+            "skills": {
+              "conversational_skills": {
+                "session_variables": {
+                  "chat": {
+                    "private": {
+                      "user_payload": null
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "chat": {
+                "private": {
+                  "user_payload": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "aa8776ae-46de-43b5-9d28-94c68a946f19",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "completed",
+    "started_at": "2025-08-20T22:33:30.305404Z",
+    "completed_at": "2025-08-20T22:33:31.553881Z",
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "data": {
+        "message": {
+          "id": "92038259-6a83-4043-8be0-4530b76d5d1a",
+          "role": "assistant",
+          "content": [
+            {
+              "id": "1",
+              "text": "Perfeito, anotado.\n\nQual é a UNIDADE GESTORA do experimento?",
+              "response_type": "text"
+            }
+          ],
+          "context": null,
+          "mentions": null,
+          "assistant": {
+            "is_default": true
+          },
+          "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+          "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+          "created_by": "IBMid-6970012G69",
+          "created_on": "2025-08-20T22:33:31.476016Z",
+          "updated_at": "2025-08-20T22:33:31.476016Z",
+          "document_ids": null,
+          "step_history": [],
+          "message_state": null,
+          "parent_message_id": "d3f57c75-7c24-4b98-bb9d-38636c24f959",
+          "created_by_username": "arthurbendini@gmail.com",
+          "additional_properties": {
+            "display_properties": {
+              "is_async": false,
+              "skip_render": false
+            }
+          }
+        },
+        "message_id": "92038259-6a83-4043-8be0-4530b76d5d1a",
+        "target_run_id": null,
+        "correlation_id": null,
+        "flowinstance_id": null
+      },
+      "type": "message_created"
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "02febb23-4203-45cd-bf75-0bb18ede9cde",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "running",
+    "started_at": "2025-08-20T22:33:33.926499Z",
+    "completed_at": null,
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "role": "user",
+      "content": "UCB",
+      "additional_properties": {
+        "wxa_message": {
+          "context": {
+            "skills": {
+              "conversational_skills": {
+                "session_variables": {
+                  "chat": {
+                    "private": {
+                      "user_payload": null
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "chat": {
+                "private": {
+                  "user_payload": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "02febb23-4203-45cd-bf75-0bb18ede9cde",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "completed",
+    "started_at": "2025-08-20T22:33:33.926499Z",
+    "completed_at": "2025-08-20T22:33:37.321656Z",
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "data": {
+        "message": {
+          "id": "c486fe2d-e265-4117-96e1-ae109f8afaa0",
+          "role": "assistant",
+          "content": [
+            {
+              "id": "1",
+              "text": "Perfeito, anotado.\n\nDescreva o DESAFIO que a ideia resolve.",
+              "response_type": "text"
+            }
+          ],
+          "context": null,
+          "mentions": null,
+          "assistant": {
+            "is_default": true
+          },
+          "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+          "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+          "created_by": "IBMid-6970012G69",
+          "created_on": "2025-08-20T22:33:37.127150Z",
+          "updated_at": "2025-08-20T22:33:37.127150Z",
+          "document_ids": null,
+          "step_history": [],
+          "message_state": null,
+          "parent_message_id": "a600a032-a23b-4ce3-a42f-cb1b60a2c1ac",
+          "created_by_username": "arthurbendini@gmail.com",
+          "additional_properties": {
+            "display_properties": {
+              "is_async": false,
+              "skip_render": false
+            }
+          }
+        },
+        "message_id": "c486fe2d-e265-4117-96e1-ae109f8afaa0",
+        "target_run_id": null,
+        "correlation_id": null,
+        "flowinstance_id": null
+      },
+      "type": "message_created"
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "0897a136-1df3-4351-be14-3a834a861569",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "running",
+    "started_at": "2025-08-20T22:33:40.440363Z",
+    "completed_at": null,
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "role": "user",
+      "content": "Redução de desigualdade no acesso à tecnologia.",
+      "additional_properties": {
+        "wxa_message": {
+          "context": {
+            "skills": {
+              "conversational_skills": {
+                "session_variables": {
+                  "chat": {
+                    "private": {
+                      "user_payload": null
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "chat": {
+                "private": {
+                  "user_payload": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "0897a136-1df3-4351-be14-3a834a861569",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "completed",
+    "started_at": "2025-08-20T22:33:40.440363Z",
+    "completed_at": "2025-08-20T22:33:42.824640Z",
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "data": {
+        "message": {
+          "id": "aa459b3f-a541-45f7-8be7-0113e436540c",
+          "role": "assistant",
+          "content": [
+            {
+              "id": "1",
+              "text": "Perfeito, anotado.\n\nDescreva o EXPERIMENTO (objetivos, metodologia e etapas).",
+              "response_type": "text"
+            }
+          ],
+          "context": null,
+          "mentions": null,
+          "assistant": {
+            "is_default": true
+          },
+          "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+          "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+          "created_by": "IBMid-6970012G69",
+          "created_on": "2025-08-20T22:33:42.746464Z",
+          "updated_at": "2025-08-20T22:33:42.746464Z",
+          "document_ids": null,
+          "step_history": [],
+          "message_state": null,
+          "parent_message_id": "f47f2c12-fbe3-40e8-96f7-feb5ad64063a",
+          "created_by_username": "arthurbendini@gmail.com",
+          "additional_properties": {
+            "display_properties": {
+              "is_async": false,
+              "skip_render": false
+            }
+          }
+        },
+        "message_id": "aa459b3f-a541-45f7-8be7-0113e436540c",
+        "target_run_id": null,
+        "correlation_id": null,
+        "flowinstance_id": null
+      },
+      "type": "message_created"
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "6f122940-bdfe-4d35-a601-11fd8f201396",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "running",
+    "started_at": "2025-08-20T22:33:45.821628Z",
+    "completed_at": null,
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "role": "user",
+      "content": "Experimento com Scrum em 5 etapas.",
+      "additional_properties": {
+        "wxa_message": {
+          "context": {
+            "skills": {
+              "conversational_skills": {
+                "session_variables": {
+                  "chat": {
+                    "private": {
+                      "user_payload": null
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "chat": {
+                "private": {
+                  "user_payload": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "6f122940-bdfe-4d35-a601-11fd8f201396",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "completed",
+    "started_at": "2025-08-20T22:33:45.821628Z",
+    "completed_at": "2025-08-20T22:33:52.421862Z",
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "data": {
+        "message": {
+          "id": "fb91129d-b0f2-417a-9138-0d86b5f8a9bc",
+          "role": "assistant",
+          "content": [
+            {
+              "id": "1",
+              "text": "Desculpe, mas a resposta está muito curta. Por favor, descreva o EXPERIMENTO (objetivos, metodologia e etapas) de forma mais detalhada.",
+              "response_type": "text"
+            }
+          ],
+          "context": null,
+          "mentions": null,
+          "assistant": {
+            "is_default": true
+          },
+          "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+          "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+          "created_by": "IBMid-6970012G69",
+          "created_on": "2025-08-20T22:33:52.315562Z",
+          "updated_at": "2025-08-20T22:33:52.315562Z",
+          "document_ids": null,
+          "step_history": [],
+          "message_state": null,
+          "parent_message_id": "bed521c4-c578-4895-a2d0-533f2b00c204",
+          "created_by_username": "arthurbendini@gmail.com",
+          "additional_properties": {
+            "display_properties": {
+              "is_async": false,
+              "skip_render": false
+            }
+          }
+        },
+        "message_id": "fb91129d-b0f2-417a-9138-0d86b5f8a9bc",
+        "target_run_id": null,
+        "correlation_id": null,
+        "flowinstance_id": null
+      },
+      "type": "message_created"
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "055d93fc-0511-4459-ba7f-c01e5e26d1e9",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "running",
+    "started_at": "2025-08-20T22:33:56.421344Z",
+    "completed_at": null,
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "role": "user",
+      "content": "",
+      "additional_properties": {
+        "wxa_message": {
+          "context": {
+            "skills": {
+              "conversational_skills": {
+                "session_variables": {
+                  "chat": {
+                    "private": {
+                      "user_payload": null
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "chat": {
+                "private": {
+                  "user_payload": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "055d93fc-0511-4459-ba7f-c01e5e26d1e9",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "completed",
+    "started_at": "2025-08-20T22:33:56.421344Z",
+    "completed_at": "2025-08-20T22:33:58.705805Z",
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "data": {
+        "message": {
+          "id": "317375f5-b69f-4df8-aaf3-ff25333ac3a6",
+          "role": "assistant",
+          "content": [
+            {
+              "id": "1",
+              "text": "Desculpe, mas não recebi uma resposta. Por favor, descreva o EXPERIMENTO (objetivos, metodologia e etapas) de forma mais detalhada.",
+              "response_type": "text"
+            }
+          ],
+          "context": null,
+          "mentions": null,
+          "assistant": {
+            "is_default": true
+          },
+          "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+          "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+          "created_by": "IBMid-6970012G69",
+          "created_on": "2025-08-20T22:33:58.635164Z",
+          "updated_at": "2025-08-20T22:33:58.635164Z",
+          "document_ids": null,
+          "step_history": [],
+          "message_state": null,
+          "parent_message_id": "47073485-a006-467d-99a3-9484fc94e7ba",
+          "created_by_username": "arthurbendini@gmail.com",
+          "additional_properties": {
+            "display_properties": {
+              "is_async": false,
+              "skip_render": false
+            }
+          }
+        },
+        "message_id": "317375f5-b69f-4df8-aaf3-ff25333ac3a6",
+        "target_run_id": null,
+        "correlation_id": null,
+        "flowinstance_id": null
+      },
+      "type": "message_created"
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "909f1e5b-b0cd-46c0-8f2f-5898a4f38da7",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "running",
+    "started_at": "2025-08-20T22:34:02.897944Z",
+    "completed_at": null,
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "role": "user",
+      "content": "",
+      "additional_properties": {
+        "wxa_message": {
+          "context": {
+            "skills": {
+              "conversational_skills": {
+                "session_variables": {
+                  "chat": {
+                    "private": {
+                      "user_payload": null
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "chat": {
+                "private": {
+                  "user_payload": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "909f1e5b-b0cd-46c0-8f2f-5898a4f38da7",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "completed",
+    "started_at": "2025-08-20T22:34:02.897944Z",
+    "completed_at": "2025-08-20T22:34:07.994199Z",
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "data": {
+        "message": {
+          "id": "a6ce9ad9-da59-41bd-b1e5-aefc6682da27",
+          "role": "assistant",
+          "content": [
+            {
+              "id": "1",
+              "text": "Desculpe, mas parece que você não forneceu uma resposta. Por favor, descreva o EXPERIMENTO (objetivos, metodologia e etapas) de forma mais detalhada.",
+              "response_type": "text"
+            }
+          ],
+          "context": null,
+          "mentions": null,
+          "assistant": {
+            "is_default": true
+          },
+          "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+          "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+          "created_by": "IBMid-6970012G69",
+          "created_on": "2025-08-20T22:34:07.838531Z",
+          "updated_at": "2025-08-20T22:34:07.838531Z",
+          "document_ids": null,
+          "step_history": [],
+          "message_state": null,
+          "parent_message_id": "dc0a8d5e-e6ef-45ab-9b71-8f5e58ac7c72",
+          "created_by_username": "arthurbendini@gmail.com",
+          "additional_properties": {
+            "display_properties": {
+              "is_async": false,
+              "skip_render": false
+            }
+          }
+        },
+        "message_id": "a6ce9ad9-da59-41bd-b1e5-aefc6682da27",
+        "target_run_id": null,
+        "correlation_id": null,
+        "flowinstance_id": null
+      },
+      "type": "message_created"
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "e409df64-d28c-435c-b8c5-b5fe469cbefb",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "running",
+    "started_at": "2025-08-20T22:34:10.927019Z",
+    "completed_at": null,
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "role": "user",
+      "content": "",
+      "additional_properties": {
+        "wxa_message": {
+          "context": {
+            "skills": {
+              "conversational_skills": {
+                "session_variables": {
+                  "chat": {
+                    "private": {
+                      "user_payload": null
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "chat": {
+                "private": {
+                  "user_payload": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "e409df64-d28c-435c-b8c5-b5fe469cbefb",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "completed",
+    "started_at": "2025-08-20T22:34:10.927019Z",
+    "completed_at": "2025-08-20T22:34:14.221072Z",
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "data": {
+        "message": {
+          "id": "493335d5-8210-4d7a-9ea8-291030901ffe",
+          "role": "assistant",
+          "content": [
+            {
+              "id": "1",
+              "text": "Desculpe, mas não posso prosseguir sem uma resposta. Por favor, descreva o EXPERIMENTO (objetivos, metodologia e etapas) de forma mais detalhada.",
+              "response_type": "text"
+            }
+          ],
+          "context": null,
+          "mentions": null,
+          "assistant": {
+            "is_default": true
+          },
+          "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+          "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+          "created_by": "IBMid-6970012G69",
+          "created_on": "2025-08-20T22:34:14.137026Z",
+          "updated_at": "2025-08-20T22:34:14.137026Z",
+          "document_ids": null,
+          "step_history": [],
+          "message_state": null,
+          "parent_message_id": "66f0a10c-a29c-41c4-b65d-79ebe6c90508",
+          "created_by_username": "arthurbendini@gmail.com",
+          "additional_properties": {
+            "display_properties": {
+              "is_async": false,
+              "skip_render": false
+            }
+          }
+        },
+        "message_id": "493335d5-8210-4d7a-9ea8-291030901ffe",
+        "target_run_id": null,
+        "correlation_id": null,
+        "flowinstance_id": null
+      },
+      "type": "message_created"
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "6a90d1ab-cf9a-498a-9731-a16c32fea5b5",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "running",
+    "started_at": "2025-08-20T22:34:16.535481Z",
+    "completed_at": null,
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "role": "user",
+      "content": "",
+      "additional_properties": {
+        "wxa_message": {
+          "context": {
+            "skills": {
+              "conversational_skills": {
+                "session_variables": {
+                  "chat": {
+                    "private": {
+                      "user_payload": null
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "chat": {
+                "private": {
+                  "user_payload": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "6a90d1ab-cf9a-498a-9731-a16c32fea5b5",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "completed",
+    "started_at": "2025-08-20T22:34:16.535481Z",
+    "completed_at": "2025-08-20T22:34:20.014436Z",
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "data": {
+        "message": {
+          "id": "f460b3ed-54a8-461e-9fa6-5956e49005a2",
+          "role": "assistant",
+          "content": [
+            {
+              "id": "1",
+              "text": "Desculpe, mas parece que você não está fornecendo uma resposta. Por favor, descreva o EXPERIMENTO (objetivos, metodologia e etapas) de forma mais detalhada. Se precisar de ajuda, posso fornecer mais informações sobre o que estou procurando.",
+              "response_type": "text"
+            }
+          ],
+          "context": null,
+          "mentions": null,
+          "assistant": {
+            "is_default": true
+          },
+          "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+          "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+          "created_by": "IBMid-6970012G69",
+          "created_on": "2025-08-20T22:34:19.914529Z",
+          "updated_at": "2025-08-20T22:34:19.914529Z",
+          "document_ids": null,
+          "step_history": [],
+          "message_state": null,
+          "parent_message_id": "9bd3e70f-e55f-42e6-a98a-a0c0d1093c5e",
+          "created_by_username": "arthurbendini@gmail.com",
+          "additional_properties": {
+            "display_properties": {
+              "is_async": false,
+              "skip_render": false
+            }
+          }
+        },
+        "message_id": "f460b3ed-54a8-461e-9fa6-5956e49005a2",
+        "target_run_id": null,
+        "correlation_id": null,
+        "flowinstance_id": null
+      },
+      "type": "message_created"
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "b97c8944-452b-4ed7-b8d5-07b155d5887b",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "running",
+    "started_at": "2025-08-20T22:34:22.213913Z",
+    "completed_at": null,
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "role": "user",
+      "content": "",
+      "additional_properties": {
+        "wxa_message": {
+          "context": {
+            "skills": {
+              "conversational_skills": {
+                "session_variables": {
+                  "chat": {
+                    "private": {
+                      "user_payload": null
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "chat": {
+                "private": {
+                  "user_payload": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "b97c8944-452b-4ed7-b8d5-07b155d5887b",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "completed",
+    "started_at": "2025-08-20T22:34:22.213913Z",
+    "completed_at": "2025-08-20T22:34:27.107529Z",
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "data": {
+        "message": {
+          "id": "fc724da6-0bcd-4ff4-9e1d-c7b0995d0f35",
+          "role": "assistant",
+          "content": [
+            {
+              "id": "1",
+              "text": "Desculpe, mas não posso continuar sem uma resposta. Vou tentar novamente: Descreva o EXPERIMENTO (objetivos, metodologia e etapas) de forma mais detalhada. Por favor, forneça uma resposta para que possamos prosseguir.",
+              "response_type": "text"
+            }
+          ],
+          "context": null,
+          "mentions": null,
+          "assistant": {
+            "is_default": true
+          },
+          "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+          "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+          "created_by": "IBMid-6970012G69",
+          "created_on": "2025-08-20T22:34:26.958592Z",
+          "updated_at": "2025-08-20T22:34:26.958592Z",
+          "document_ids": null,
+          "step_history": [],
+          "message_state": null,
+          "parent_message_id": "edd2e3b3-f2e0-4e21-8b1c-e72328b1e7ac",
+          "created_by_username": "arthurbendini@gmail.com",
+          "additional_properties": {
+            "display_properties": {
+              "is_async": false,
+              "skip_render": false
+            }
+          }
+        },
+        "message_id": "fc724da6-0bcd-4ff4-9e1d-c7b0995d0f35",
+        "target_run_id": null,
+        "correlation_id": null,
+        "flowinstance_id": null
+      },
+      "type": "message_created"
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "5fe82f13-c8bf-4a37-8bbb-2ed6d0e0ccbb",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "running",
+    "started_at": "2025-08-20T22:34:30.880966Z",
+    "completed_at": null,
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "role": "user",
+      "content": "",
+      "additional_properties": {
+        "wxa_message": {
+          "context": {
+            "skills": {
+              "conversational_skills": {
+                "session_variables": {
+                  "chat": {
+                    "private": {
+                      "user_payload": null
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "chat": {
+                "private": {
+                  "user_payload": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  },
+  {
+    "id": "5fe82f13-c8bf-4a37-8bbb-2ed6d0e0ccbb",
+    "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+    "assistant_id": null,
+    "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+    "status": "completed",
+    "started_at": "2025-08-20T22:34:30.880966Z",
+    "completed_at": "2025-08-20T22:34:34.198586Z",
+    "failed_at": null,
+    "cancelled_at": null,
+    "llm_params": null,
+    "usage": null,
+    "last_error": null,
+    "result": {
+      "data": {
+        "message": {
+          "id": "10848a52-e6d3-457f-90fc-14d5577d3983",
+          "role": "assistant",
+          "content": [
+            {
+              "id": "1",
+              "text": "Parece que você não está fornecendo uma resposta. Vou tentar novamente de uma forma diferente: Qual é o objetivo principal do experimento e como você planeja alcançá-lo? Por favor, forneça uma resposta para que possamos prosseguir.",
+              "response_type": "text"
+            }
+          ],
+          "context": null,
+          "mentions": null,
+          "assistant": {
+            "is_default": true
+          },
+          "tenant_id": "c709b28cadb74850a789f021a7dc6a40_5f50e7cf-2f9e-4120-8894-36992549b6d8",
+          "thread_id": "8487e9d1-2aed-42b8-bf9d-6b9994b62b2a",
+          "created_by": "IBMid-6970012G69",
+          "created_on": "2025-08-20T22:34:34.082493Z",
+          "updated_at": "2025-08-20T22:34:34.082493Z",
+          "document_ids": null,
+          "step_history": [],
+          "message_state": null,
+          "parent_message_id": "5a1d9d1c-58cb-42af-b49d-72a44e5d819b",
+          "created_by_username": "arthurbendini@gmail.com",
+          "additional_properties": {
+            "display_properties": {
+              "is_async": false,
+              "skip_render": false
+            }
+          }
+        },
+        "message_id": "10848a52-e6d3-457f-90fc-14d5577d3983",
+        "target_run_id": null,
+        "correlation_id": null,
+        "flowinstance_id": null
+      },
+      "type": "message_created"
+    },
+    "guardrails": null,
+    "agent_id": null,
+    "additional_parameters": null
+  }
+]

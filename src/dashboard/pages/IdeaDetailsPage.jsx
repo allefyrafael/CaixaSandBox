@@ -384,25 +384,25 @@ const IdeaDetailsPage = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* Left Side - Form Data */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-4">
             
             {/* Author Info */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4"
             >
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-                  <User className="w-6 h-6 text-white" />
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                  <User className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Informações do Autor</h3>
-                  <p className="text-gray-600">Dados do empregado responsável pela ideia</p>
+                  <h3 className="text-base font-semibold text-gray-900">Informações do Autor</h3>
+                  <p className="text-sm text-gray-600">Dados do empregado responsável pela ideia</p>
                 </div>
               </div>
               
@@ -443,20 +443,20 @@ const IdeaDetailsPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4"
             >
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-white" />
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Informações de Ideação</h3>
-                  <p className="text-gray-600">Explore os detalhes da proposta</p>
+                  <h3 className="text-base font-semibold text-gray-900">Informações de Ideação</h3>
+                  <p className="text-sm text-gray-600">Explore os detalhes da proposta</p>
                 </div>
               </div>
               
               {/* Steps Navigation */}
-              <div className="flex space-x-2 mb-8">
+              <div className="flex space-x-2 mb-4">
                 {steps.map((step, index) => {
                   const Icon = step.icon;
                   const isActive = currentStep === index;
@@ -497,14 +497,14 @@ const IdeaDetailsPage = () => {
           </div>
 
           {/* Right Side - AI Analysis & Classification */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-span-5 space-y-4">
             
             {/* AI Analysis */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4"
             >
               <div className="flex items-center space-x-2 mb-4">
                 <Bot className="w-5 h-5 text-blue-600" />
@@ -512,8 +512,8 @@ const IdeaDetailsPage = () => {
               </div>
 
               {/* Sentiment Analysis */}
-              <div className="mb-6">
-                <h4 className="font-medium text-gray-900 mb-3">Análise de Sentimento</h4>
+              <div className="mb-4">
+                <h4 className="font-medium text-gray-900 mb-2">Análise de Sentimento</h4>
                 <div className={`p-4 rounded-lg border-l-4 ${
                   aiAnalysis.sentiment.score > 0.7 ? 'bg-green-50 border-green-500' :
                   aiAnalysis.sentiment.score > 0.4 ? 'bg-yellow-50 border-yellow-500' : 'bg-red-50 border-red-500'
@@ -535,8 +535,8 @@ const IdeaDetailsPage = () => {
               </div>
 
               {/* Feasibility Score */}
-              <div className="mb-6">
-                <h4 className="font-medium text-gray-900 mb-3">Viabilidade</h4>
+              <div className="mb-4">
+                <h4 className="font-medium text-gray-900 mb-2">Viabilidade</h4>
                 <div className="space-y-2">
                   {aiAnalysis.feasibility.factors.map((factor, index) => (
                     <div key={index}>
@@ -560,8 +560,8 @@ const IdeaDetailsPage = () => {
               </div>
 
               {/* Impact Estimation */}
-              <div className="mb-6">
-                <h4 className="font-medium text-gray-900 mb-3">Impacto Estimado</h4>
+              <div className="mb-4">
+                <h4 className="font-medium text-gray-900 mb-2">Impacto Estimado</h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="text-center p-3 bg-green-50 rounded-lg">
                     <div className="text-lg font-bold text-green-600">
@@ -591,8 +591,8 @@ const IdeaDetailsPage = () => {
               </div>
 
               {/* Keywords */}
-              <div className="mb-6">
-                <h4 className="font-medium text-gray-900 mb-3">Palavras-chave</h4>
+              <div className="mb-4">
+                <h4 className="font-medium text-gray-900 mb-2">Palavras-chave</h4>
                 <div className="flex flex-wrap gap-2">
                   {aiAnalysis.keywords.map((keyword, index) => (
                     <span 
@@ -607,7 +607,7 @@ const IdeaDetailsPage = () => {
 
               {/* Recommendations */}
               <div>
-                <h4 className="font-medium text-gray-900 mb-3">Recomendações</h4>
+                <h4 className="font-medium text-gray-900 mb-2">Recomendações</h4>
                 <ul className="space-y-2">
                   {aiAnalysis.recommendations.map((rec, index) => (
                     <li key={index} className="flex items-start space-x-2">
@@ -624,14 +624,14 @@ const IdeaDetailsPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-6 text-white"
+              className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-4 text-white"
             >
               <div className="text-center">
-                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Globe className="w-8 h-8 text-white" />
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Globe className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Pronto para Classificar?</h3>
-                <p className="text-emerald-100 mb-4">
+                <h3 className="text-lg font-bold mb-2">Pronto para Classificar?</h3>
+                <p className="text-emerald-100 mb-3 text-sm">
                   Analise os dados ao lado e classifique esta ideia na fase adequada do Sandbox
                 </p>
                 <motion.button
