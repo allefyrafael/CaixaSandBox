@@ -4,7 +4,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 export default function ThreeModelViewer({
-  modelUrl = "/sandBOX.glb",
+  modelUrl = `${process.env.PUBLIC_URL}/sandBOX.glb`,
   width = 800,
   height = 600,
   dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio, 2) : 1,

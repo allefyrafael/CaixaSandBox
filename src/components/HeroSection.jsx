@@ -218,7 +218,7 @@ const HeroSection = () => {
           >
             <div className="relative w-full max-w-2xl h-[300px] md:h-[450px] lg:h-[600px]">
               <ThreeModelViewer
-                modelUrl="/sandBOX.glb"
+                modelUrl={`${process.env.PUBLIC_URL}/sandBOX.glb`}
                 width={getModelSize().width}
                 height={getModelSize().height}
                 cameraPosition={{ x: 15, y: 5, z: 15 }}

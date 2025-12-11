@@ -142,7 +142,7 @@ const HomePage = () => {
                     </div>
                     <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg border border-gray-200">
                       <img 
-                        src="/imagens/02_8-bar-reverse.svg" 
+                        src={`${process.env.PUBLIC_URL}/imagens/02_8-bar-reverse.svg`}
                         alt="IBM Logo" 
                         className="w-10 h-10"
                       />
