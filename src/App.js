@@ -21,7 +21,7 @@ if (process.env.NODE_ENV === 'development') {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/CaixaSandBox">
       <div className="min-h-screen bg-gray-50">
         <ScrollToTop />
         <Routes>
