@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/CaixaSandBox/static/css/main.3caf3684.css",
-    "main.js": "/CaixaSandBox/static/js/main.07fba1f4.js",
+    "main.js": "/CaixaSandBox/static/js/main.2893cd64.js",
     "static/js/453.6d0f4902.chunk.js": "/CaixaSandBox/static/js/453.6d0f4902.chunk.js",
     "index.html": "/CaixaSandBox/index.html",
     "main.3caf3684.css.map": "/CaixaSandBox/static/css/main.3caf3684.css.map",
-    "main.07fba1f4.js.map": "/CaixaSandBox/static/js/main.07fba1f4.js.map",
+    "main.2893cd64.js.map": "/CaixaSandBox/static/js/main.2893cd64.js.map",
     "453.6d0f4902.chunk.js.map": "/CaixaSandBox/static/js/453.6d0f4902.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.3caf3684.css",
-    "static/js/main.07fba1f4.js"
+    "static/js/main.2893cd64.js"
   ]
 }
