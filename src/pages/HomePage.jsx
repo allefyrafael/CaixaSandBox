@@ -16,9 +16,6 @@ import {
 } from 'lucide-react';
 import HeroSection from '../components/HeroSection';
 import StatsSection from '../components/StatsSection';
-// import FeaturesSection from '../components/FeaturesSection';
-// import ProcessSection from '../components/ProcessSection';
-// import TestimonialsSection from '../components/TestimonialsSection';
 
 const HomePage = () => {
   const benefits = [
