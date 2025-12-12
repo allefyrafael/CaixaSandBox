@@ -1,0 +1,23 @@
+# FastAPI e servidor
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.10.0
+
+# Firebase
+firebase-admin>=6.6.0
+
+# Groq AI
+groq>=0.13.0
+
+# Utilidades
+python-dotenv>=1.0.0
+python-multipart>=0.0.20
+
+# CORS e segurança (opcional, se precisar de autenticação JWT)
+# python-jose[cryptography]>=3.3.0
+# passlib[bcrypt]>=1.7.4
+
+# Opcional: Para desenvolvimento
+# pytest>=8.0.0
+# httpx>=0.28.0
+

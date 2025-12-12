@@ -23,6 +23,7 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize })
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [bottomOffset, setBottomOffset] = useState(80); // bottom-20 = 80px
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -32,6 +33,86 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize })
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Detecção do footer para posicionar o botão minimizado
+  useEffect(() => {
+    if (!isMinimized) return;
+
+    const footer = document.querySelector('footer');
+    if (!footer) {
+      setBottomOffset(80);
+      return;
+    }
+
+    let rafId = null;
+    let lastBottom = 80;
+
+    const updateBottom = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+
+      rafId = requestAnimationFrame(() => {
+        const footerRect = footer.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        const footerTop = footerRect.top;
+        const buttonHeight = 48; // w-12 h-12
+        const padding = 16; // Espaçamento mínimo do footer
+        
+        // Posição padrão quando o footer não está visível
+        const defaultBottom = 80;
+        
+        // Se o footer está visível na viewport
+        if (footerTop < windowHeight) {
+          // O botão deve ficar acima do topo do footer com padding
+          // bottom = distância do fundo da viewport até o fundo do botão
+          // Se o topo do footer está em footerTop, queremos o botão em (footerTop - buttonHeight - padding)
+          // Convertendo para bottom: windowHeight - (footerTop - buttonHeight - padding)
+          const calculatedBottom = windowHeight - footerTop + buttonHeight + padding;
+          
+          // Garantir que nunca seja menor que a posição padrão
+          const finalBottom = Math.max(defaultBottom, calculatedBottom);
+          
+          // Só atualiza se a diferença for significativa (evita micro-updates)
+          if (Math.abs(finalBottom - lastBottom) > 1) {
+            setBottomOffset(finalBottom);
+            lastBottom = finalBottom;
+          }
+        } else {
+          // Footer não visível, usar posição padrão
+          if (lastBottom !== defaultBottom) {
+            setBottomOffset(defaultBottom);
+            lastBottom = defaultBottom;
+          }
+        }
+      });
+    };
+
+    // Throttle para scroll (máximo 60fps)
+    let scrollTimeout = null;
+    const handleScroll = () => {
+      if (scrollTimeout) return;
+      scrollTimeout = setTimeout(() => {
+        updateBottom();
+        scrollTimeout = null;
+      }, 16); // ~60fps
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', updateBottom);
+    updateBottom(); // Chamar inicialmente
+
+    return () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', updateBottom);
+    };
+  }, [isMinimized]);
 
   const simulateBotResponse = async (userMessage) => {
     setIsTyping(true);
@@ -115,76 +196,92 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize })
 
   if (isMinimized) {
     return (
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        className="p-4 relative"
+      <div 
+        className="fixed left-4 z-50 transition-all duration-300 ease-out" 
+        style={{ 
+          maxWidth: 'calc(100vw - 2rem)',
+          bottom: `${bottomOffset}px`
+        }}
       >
-        {/* Futuristic Gradient Arc */}
         <motion.div
-          animate={{ 
-            rotate: 360
-          }}
-          transition={{ 
-            duration: 5, 
-            repeat: Infinity, 
-            ease: "linear" 
-          }}
-          className="absolute inset-2 w-16 h-16 pointer-events-none"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="relative w-12 h-12 flex items-center justify-center"
         >
-          <svg 
-            width="64" 
-            height="64" 
-            viewBox="0 0 64 64" 
-            className="absolute inset-0"
+          {/* Futuristic Gradient Arc */}
+          <motion.div
+            animate={{ 
+              rotate: 360
+            }}
+            transition={{ 
+              duration: 5, 
+              repeat: Infinity, 
+              ease: "linear" 
+            }}
+            className="absolute pointer-events-none"
+            style={{ 
+              top: '50%',
+              left: '50%',
+              width: '64px',
+              height: '64px',
+              marginTop: '-32px',
+              marginLeft: '-32px',
+              transformOrigin: '32px 32px'
+            }}
           >
-            <defs>
-              <linearGradient id="futuristicGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#0B5CFF" stopOpacity="0" />
-                <stop offset="20%" stopColor="#0B5CFF" stopOpacity="0.8" />
-                <stop offset="50%" stopColor="#FF6B35" stopOpacity="1" />
-                <stop offset="80%" stopColor="#10B981" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0" />
-              </linearGradient>
-              <filter id="glow">
-                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                <feMerge> 
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <circle
-              cx="32"
-              cy="32"
-              r="28"
-              fill="none"
-              stroke="url(#futuristicGradient)"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeDasharray="64 159"
-              filter="url(#glow)"
+            <svg 
+              width="64" 
+              height="64" 
+              viewBox="0 0 64 64"
               style={{
-                transformOrigin: '32px 32px'
+                display: 'block'
               }}
-            />
-          </svg>
-        </motion.div>
+            >
+              <defs>
+                <linearGradient id="futuristicGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#0B5CFF" stopOpacity="0" />
+                  <stop offset="20%" stopColor="#0B5CFF" stopOpacity="0.8" />
+                  <stop offset="50%" stopColor="#FF6B35" stopOpacity="1" />
+                  <stop offset="80%" stopColor="#10B981" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0" />
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                  <feMerge> 
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              <circle
+                cx="32"
+                cy="32"
+                r="28"
+                fill="none"
+                stroke="url(#futuristicGradient)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeDasharray="64 159"
+                filter="url(#glow)"
+              />
+            </svg>
+          </motion.div>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onToggleMinimize}
-          className="relative z-10 w-12 h-12 bg-gradient-to-r from-caixa-blue to-caixa-blue-700 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
-        >
-          <MessageCircle className="w-6 h-6 text-white" />
-          {messages.length > 1 && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-caixa-orange to-caixa-orange-dark rounded-full flex items-center justify-center border-2 border-white">
-              <span className="text-white text-xs font-bold">{messages.length - 1}</span>
-            </div>
-          )}
-        </motion.button>
-      </motion.div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onToggleMinimize}
+            className="relative z-10 w-12 h-12 bg-gradient-to-r from-caixa-blue to-caixa-blue-700 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <MessageCircle className="w-6 h-6 text-white" />
+            {messages.length > 1 && (
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-caixa-orange to-caixa-orange-dark rounded-full flex items-center justify-center border-2 border-white">
+                <span className="text-white text-xs font-bold">{messages.length - 1}</span>
+              </div>
+            )}
+          </motion.button>
+        </motion.div>
+      </div>
     );
   }
 
@@ -193,7 +290,7 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize })
       initial={{ x: -300, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: -300, opacity: 0 }}
-      className="h-full bg-white border border-gray-200 flex flex-col overflow-hidden rounded-t-lg md:rounded-2xl shadow-xl md:shadow-2xl md:m-4"
+      className="h-full bg-white border border-gray-200 flex flex-col overflow-hidden rounded-xl shadow-xl"
     >
       {/* Chat Header */}
       <div className="bg-gradient-to-r from-caixa-blue to-caixa-blue-700 p-3 md:p-4 flex items-center justify-between shrink-0">
@@ -243,8 +340,8 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize })
                 </div>
                 <div className={`rounded-2xl p-2.5 md:p-3 ${
                   message.type === 'user'
-                    ? 'bg-caixa-blue text-white rounded-br-sm'
-                    : 'bg-white text-gray-800 rounded-bl-sm shadow-sm border'
+                    ? 'bg-blue-500 text-white rounded-br-sm'
+                    : 'bg-orange-100 text-gray-800 rounded-bl-sm shadow-sm border border-orange-200'
                 }`}>
                   <p className="text-xs md:text-sm leading-relaxed break-words">{message.content}</p>
                   {message.fieldUpdate && (

@@ -126,42 +126,38 @@ const FormPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Main Content - 2 Columns Layout */}
-      <div className="pt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - ChatBot */}
-            {!isChatMinimized && (
-              <motion.div 
-                className="lg:col-span-1"
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
-                <div className="sticky" style={{ top: '6rem', bottom: 0 }}>
-                  <div style={{ height: 'calc(100vh - 6rem)' }}>
-                    <ChatBot
-                      onFormFieldUpdate={handleFormFieldUpdate}
-                      formData={watchedValues}
-                      isMinimized={isChatMinimized}
-                      onToggleMinimize={handleToggleChat}
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            )}
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Main Content - Flexbox Layout */}
+      <div className="flex-1 pt-20 flex transition-all duration-300 ease-in-out">
+        {/* Left Column - ChatBot (Sempre renderizado) */}
+        <aside className={`hidden lg:block shrink-0 transition-all duration-300 ease-in-out ${
+          isChatMinimized ? 'w-0 overflow-hidden' : 'w-96'
+        }`}>
+          <div className={`sticky transition-all duration-300 ease-in-out ${
+            isChatMinimized ? 'px-0' : 'px-6'
+          }`} style={{ top: '6rem', bottom: 0 }}>
+            <div style={{ height: 'calc(100vh - 6rem)' }}>
+              <ChatBot
+                onFormFieldUpdate={handleFormFieldUpdate}
+                formData={watchedValues}
+                isMinimized={isChatMinimized}
+                onToggleMinimize={handleToggleChat}
+              />
+            </div>
+          </div>
+        </aside>
 
-            {/* Right Column - Form */}
-            <motion.div 
-              className={isChatMinimized ? "lg:col-span-3 lg:pl-20" : "lg:col-span-2"}
-              initial={false}
-              animate={{
-                paddingLeft: isChatMinimized ? '5rem' : '0'
-              }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
+        {/* Right Column - Form */}
+        <main 
+          className={`flex-1 flex transition-all duration-300 ease-in-out px-4 sm:px-6 lg:px-8 ${
+            isChatMinimized ? 'justify-center lg:pr-20' : 'justify-start lg:pl-4 lg:pr-8'
+          }`}
+        >
+          <div 
+            className={`w-full transition-all duration-300 ease-in-out ${
+              isChatMinimized ? 'max-w-5xl' : 'max-w-5xl'
+            }`}
+          >
               {/* Progress Bar - Above Form (Not Fixed) */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                 {/* Form Header */}
@@ -286,9 +282,8 @@ const FormPage = () => {
                   )}
                 </div>
               </form>
-            </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

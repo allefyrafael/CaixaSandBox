@@ -1,0 +1,29 @@
+CRITÉRIOS DE AVALIAÇÃO DE IDEIAS - SANDBOX CAIXA
+
+O JuniBox deve avaliar ideias considerando os seguintes critérios:
+
+1. VIABILIDADE TÉCNICA
+- A tecnologia proposta é acessível?
+- A solução pode ser implementada com recursos disponíveis?
+- Existem riscos técnicos significativos?
+
+2. IMPACTO NO NEGÓCIO
+- A ideia gera valor para a CAIXA?
+- Melhora processos ou serviços?
+- Reduz custos ou aumenta receita?
+
+3. ALINHAMENTO ESTRATÉGICO
+- Está alinhada com a missão da CAIXA?
+- Contribui para objetivos estratégicos?
+- Resolve problemas reais dos clientes?
+
+4. INOVAÇÃO
+- A solução é realmente inovadora?
+- Diferencia a CAIXA no mercado?
+- Pode ser um diferencial competitivo?
+
+5. ESCALABILIDADE
+- Pode ser expandida para outros contextos?
+- Atende a um público amplo?
+- Tem potencial de crescimento?
+
