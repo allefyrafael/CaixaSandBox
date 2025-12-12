@@ -74,8 +74,8 @@ O projeto foi desenvolvido com abordagem **mobile-first**, garantindo excelente 
 
 1. **Clone o repositório**
 ```bash
-git clone [url-do-repositorio]
-cd sandbox-caixa-react
+git clone https://github.com/allefyrafael/CaixaSandBox.git
+cd CaixaSandBox
 ```
 
 2. **Instale as dependências**
@@ -97,6 +97,16 @@ yarn start
 http://localhost:3000
 ```
 
+## 🌐 Deploy
+
+O projeto está configurado para deploy no GitHub Pages:
+
+```bash
+npm run deploy
+```
+
+O site estará disponível em: `https://allefyrafael.github.io/CaixaSandBox`
+
 ## 📂 Estrutura do Projeto
 
 ```
@@ -106,14 +116,29 @@ src/
 │   ├── Footer.jsx      # Rodapé
 │   ├── HeroSection.jsx # Seção hero
 │   ├── StatsSection.jsx # Estatísticas
-│   ├── FeaturesSection.jsx # Funcionalidades
-│   ├── ProcessSection.jsx  # Processo
-│   └── TestimonialsSection.jsx # Depoimentos
+│   ├── ThreeModelViewer.jsx # Visualizador 3D
+│   ├── ChatBot.jsx     # Chatbot com IA
+│   ├── AISuggestionsPanel.jsx # Painel de sugestões IA
+│   └── WatsonDebugPanel.jsx # Painel de debug Watson
 ├── pages/              # Páginas principais
 │   ├── HomePage.jsx    # Página inicial
 │   ├── FormPage.jsx    # Formulário multi-etapas
 │   ├── ClassificationPage.jsx # Classificação IA
-│   └── MetricsPage.jsx # Dashboard métricas
+│   ├── MetricsPage.jsx # Dashboard métricas
+│   ├── RoleSelectionPage.jsx # Seleção de papel
+│   └── MyIdeasPage.jsx # Minhas ideias
+├── dashboard/          # Dashboard administrativo
+│   ├── pages/          # Páginas do dashboard
+│   ├── components/     # Componentes do dashboard
+│   └── hooks/          # Hooks customizados
+├── services/           # Serviços de integração
+│   ├── ibmWatsonClient.js # Cliente IBM Watson
+│   ├── aiOrchestrator.js  # Orquestrador de IA
+│   └── formMockupService.js # Serviço de mockup
+├── config/             # Configurações
+│   └── ibmConfig.js    # Configuração IBM Watson
+├── hooks/              # Hooks customizados
+├── utils/              # Utilitários
 ├── index.css          # Estilos globais
 ├── index.js           # Ponto de entrada
 └── App.js             # Componente raiz
