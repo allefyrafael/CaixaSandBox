@@ -1,30 +1,14 @@
 # ============================================
-# Logs
+# Build outputs
 # ============================================
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-pnpm-debug.log*
-
-# Diagnostic reports (https://nodejs.org/api/report.html)
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-
-# ============================================
-# Runtime data
-# ============================================
-pids
-*.pid
-*.seed
-*.pid.lock
+build/
+dist/
+*.tsbuildinfo
 
 # ============================================
 # Node.js / npm
 # ============================================
 node_modules/
-jspm_packages/
 .npm
 .yarn-integrity
 .pnp.*
@@ -36,157 +20,17 @@ jspm_packages/
 !.yarn/versions
 
 # ============================================
-# Build outputs
+# Logs
 # ============================================
-# React build output
-build/
-dist/
-*.tsbuildinfo
-
-# Compiled binary addons
-build/Release
-
-# ============================================
-# Python
-# ============================================
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
+logs
 *.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-.pybuilder/
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# poetry
-poetry.lock
-
-# pdm
-.pdm.toml
-
-# PEP 582
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # ============================================
-# Environment variables and secrets
+# Environment variables
 # ============================================
 .env
 .env.local
@@ -195,230 +39,44 @@ cython_debug/
 .env.production.local
 .env.*
 !.env.example
-*.key
-*.pem
-*.p12
-*.jks
-apikey*.json
-**/apikey*.json
 
 # ============================================
-# IBM Watson / API Keys
+# IDE
 # ============================================
-# Arquivos de conversas (podem conter dados sensíveis)
-RequisicaoAgente/conversas/*.json
-# Mantém a pasta mas ignora os arquivos
-!RequisicaoAgente/conversas/.gitkeep
-
-# Configurações com credenciais
-**/config.local.js
-**/ibmConfig.local.js
-
-# ============================================
-# IDE and Editor files
-# ============================================
-# VSCode
 .vscode/
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-*.code-workspace
-
-# IntelliJ IDEA / WebStorm / PyCharm
 .idea/
-*.iml
-*.iws
-*.ipr
-out/
-
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
-
-# Vim
 *.swp
 *.swo
 *~
-.vim/
-
-# Emacs
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
-*.elc
-auto-save-list
-tramp
-.\#*
 
 # ============================================
-# OS files
+# OS
 # ============================================
-# macOS
 .DS_Store
-.AppleDouble
-.LSOverride
-Icon
-._*
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
-.com.apple.timemachine.donotpresent
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
-
-# Windows
 Thumbs.db
-Thumbs.db:encryptable
-ehthumbs.db
-ehthumbs_vista.db
-*.stackdump
-[Dd]esktop.ini
-$RECYCLE.BIN/
-*.cab
-*.msi
-*.msix
-*.msm
-*.msp
-*.lnk
-
-# Linux
-*~
-.fuse_hidden*
-.directory
-.Trash-*
-.nfs*
 
 # ============================================
-# Testing
+# Python (para back-end se houver)
 # ============================================
-coverage/
-*.lcov
-.nyc_output
-.coverage
-.pytest_cache/
-.tox/
-htmlcov/
-
-# ============================================
-# Temporary files
-# ============================================
-*.tmp
-*.temp
-*.bak
-*.swp
-*.swo
-*~
-.cache/
-.parcel-cache/
-.temp/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
 
 # ============================================
-# React / Create React App specific
+# Front-end específico
 # ============================================
-# See https://github.com/facebook/create-react-app/blob/main/packages/react-scripts/template/README.md#npm-run-build-fails-to-minify
-
-# Optional eslint cache
-.eslintcache
-
-# Optional stylelint cache
-.stylelintcache
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
+front-end/build/
+front-end/node_modules/
 
 # ============================================
-# Three.js / 3D Models (opcional - descomente se não quiser versionar)
+# Back-end específico
 # ============================================
-# *.glb
-# *.gltf
-# *.obj
-# *.fbx
+back-end/__pycache__/
+back-end/venv/
+back-end/.env
 
-# ============================================
-# Other
-# ============================================
-# Directory for instrumented libs generated by jscoverage/JSCover
-lib-cov
-
-# Grunt intermediate storage
-.grunt
-
-# Bower dependency directory
-bower_components
-
-# node-waf configuration
-.lock-wscript
-
-# Snowpack dependency directory
-web_modules
-
-# Serverless directories
-.serverless/
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
-
-# Firebase cache directory
-.firebase/
-
-# TernJS port file
-.tern-port
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-
-# Vite logs files
-vite.config.js.timestamp-*
-vite.config.ts.timestamp-*
-
-# Next.js
-.next/
-out/
-
-# Nuxt.js
-.nuxt/
-dist/
-
-# Gatsby
-.cache/
-# public (descomente se usar Gatsby)
-
-# Vuepress
-.vuepress/dist/
-.vuepress/.temp/
-.vuepress/.cache/
-
-# Sveltekit
-.svelte-kit/
-
-# VitePress
-**/.vitepress/dist/
-**/.vitepress/cache/
-
-# Docusaurus
-.docusaurus/
-
-# ============================================
-# Project specific
-# ============================================
-# Arquivos de debug
-*.debug
-debug.log
-
-# Arquivos de teste temporários
-test-results/
-playwright-report/
