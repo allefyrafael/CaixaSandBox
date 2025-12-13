@@ -116,17 +116,6 @@ const HeroSection = () => {
             transition={{ duration: 0.8 }}
             className="space-y-8"
           >
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center space-x-2 bg-caixa-blue/10 border border-caixa-blue/20 rounded-full px-4 py-2"
-            >
-              <Sparkles className="w-4 h-4 text-caixa-blue" />
-              <span className="text-caixa-blue font-medium">Revolucionando a Inovação</span>
-            </motion.div>
-
             {/* Main Heading */}
             <div>
               <motion.h1
@@ -218,13 +207,13 @@ const HeroSection = () => {
           >
             <div className="relative w-full max-w-2xl h-[300px] md:h-[450px] lg:h-[600px]">
               <ThreeModelViewer
-                modelUrl={`${process.env.PUBLIC_URL}/sandBOX.glb`}
+                modelUrl={`${process.env.PUBLIC_URL}/Robo_SandBox.glb`}
                 width={getModelSize().width}
                 height={getModelSize().height}
-                cameraPosition={{ x: 15, y: 5, z: 15 }}
-                modelPosition={{ x: 0, y: -1, z: 0 }}
-                modelRotation={{ x: 0, y: 0, z: 0 }}
-                modelScale={{ x: 1, y: 1, z: 1 }}
+                cameraPosition={{ x: 0, y: 2, z: 5 }}
+                modelPosition={{ x: 0, y: -0.5, z: 0 }}
+                modelRotation={{ x: 0, y: 4.3, z: 0 }}
+                modelScale={{ x: 2, y: 1.8, z: 1.5 }}
                 enableControls={true}
                 autoRotate={false}
                 style={{ 

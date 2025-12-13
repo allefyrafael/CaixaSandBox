@@ -120,13 +120,23 @@ class ChatMessage(BaseModel):
     user_id: str = Field(..., description="ID do usuário")
     idea_id: str = Field(..., description="ID da ideia sendo discutida")
     message: str = Field(..., min_length=1, description="Mensagem do usuário")
+    form_context: Optional[Dict[str, Any]] = Field(None, description="Contexto do formulário (seção atual, dados, etc)")
     
     class Config:
         json_schema_extra = {
             "example": {
                 "user_id": "user123",
                 "idea_id": "idea123",
-                "message": "Como posso melhorar minha ideia?"
+                "message": "Como posso melhorar minha ideia?",
+                "form_context": {
+                    "current_step": 0,
+                    "step_id": "idea",
+                    "step_name": "Sua Ideia",
+                    "form_data": {
+                        "ideaTitle": "App de Reciclagem",
+                        "ideaDescription": "..."
+                    }
+                }
             }
         }
 
@@ -188,4 +198,47 @@ class ErrorResponse(BaseModel):
     status: str = "error"
     message: str
     detail: Optional[str] = None
+
+# ============================================
+# SCHEMAS DE SUGESTÕES
+# ============================================
+
+class FieldSuggestionRequest(BaseModel):
+    """Schema para solicitar sugestão de campo"""
+    user_id: str = Field(..., description="ID do usuário")
+    idea_id: str = Field(..., description="ID da ideia")
+    field_name: str = Field(..., description="Nome do campo para sugerir")
+    form_data: Dict[str, Any] = Field(..., description="Dados atuais do formulário")
+    current_step: int = Field(..., description="Índice da seção atual")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "user123",
+                "idea_id": "idea123",
+                "field_name": "publicoAlvo",
+                "form_data": {
+                    "ideaTitle": "App de Reciclagem",
+                    "ideaDescription": "..."
+                },
+                "current_step": 0
+            }
+        }
+
+class FieldSuggestionResponse(BaseModel):
+    """Schema de resposta com sugestão de campo"""
+    field: str = Field(..., description="Nome do campo")
+    suggestion: str = Field(..., description="Sugestão de valor para o campo")
+    reasoning: Optional[str] = Field(None, description="Razão da sugestão")
+    confidence: Optional[float] = Field(None, ge=0, le=1, description="Confiança da sugestão (0-1)")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "field": "publicoAlvo",
+                "suggestion": "Clientes da CAIXA com conta corrente ativa, interessados em sustentabilidade",
+                "reasoning": "Baseado no título 'App de Reciclagem' e descrição fornecida",
+                "confidence": 0.85
+            }
+        }
 

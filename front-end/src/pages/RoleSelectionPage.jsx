@@ -13,8 +13,8 @@ const RoleSelectionPage = () => {
 
   const handleRoleSelection = (role) => {
     if (role === 'colaborador') {
-      // Redirecionar para formulário
-      navigate('/colaborador/formulario');
+      // Redirecionar para página de login
+      navigate('/colaborador/login');
     } else {
       // Redirecionar para dashboard
       navigate('/dashboard/login');

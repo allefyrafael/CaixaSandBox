@@ -1,37 +1,58 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
+import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
+import { sendChatMessage, getChatHistory } from '../services/api';
+import toast from 'react-hot-toast';
 import {
   MessageCircle,
   Send,
   Bot,
   User,
-  Lightbulb,
-  Sparkles,
   Brain,
-  Minimize2,
-  Maximize2
+  Minimize2
 } from 'lucide-react';
 
-const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize }) => {
+const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize, currentStep, stepId, stepName }) => {
+  const [searchParams] = useSearchParams();
+  const { user, isAuthenticated } = useFirebaseAuth();
+  const ideaId = searchParams.get('ideaId');
   const [messages, setMessages] = useState([
     {
       id: 1,
       type: 'bot',
-      content: 'Olá! Sou o assistente do Sandbox CAIXA. Estou aqui para ajudar você a estruturar sua ideia inovadora. Como posso te ajudar hoje?',
+      content: 'Olá! Sou o JuniBox, assistente do Sandbox CAIXA. Estou aqui para ajudar você a estruturar sua ideia inovadora. Como posso te ajudar hoje?',
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [bottomOffset, setBottomOffset] = useState(80); // bottom-20 = 80px
+  const [bottomOffset, setBottomOffset] = useState(80);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+
+  // Carregar histórico de chat ao montar
+  useEffect(() => {
+    if (ideaId && user?.uid && isAuthenticated) {
+      loadChatHistory();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ideaId, user?.uid, isAuthenticated]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Scroll apenas dentro do container de mensagens, não a página inteira
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Scroll suave apenas quando novas mensagens são adicionadas
+    // Usar setTimeout para garantir que o DOM foi atualizado
+    const timer = setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+    return () => clearTimeout(timer);
   }, [messages]);
 
   // Detecção do footer para posicionar o botão minimizado
@@ -114,70 +135,241 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize })
     };
   }, [isMinimized]);
 
-  const simulateBotResponse = async (userMessage) => {
-    setIsTyping(true);
-    
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-    
-    let botResponse = '';
-    let fieldUpdate = null;
-    
-    // Simple keyword-based responses with form field suggestions
-    const lowerMessage = userMessage.toLowerCase();
-    
-    if (lowerMessage.includes('ideia') || lowerMessage.includes('inovação') || lowerMessage.includes('solução')) {
-      botResponse = 'Ótimo! Me conte mais sobre sua ideia. Que problema específico ela resolve? Isso me ajudará a preencher automaticamente alguns campos do formulário para você.';
-    } else if (lowerMessage.includes('problema') || lowerMessage.includes('dor') || lowerMessage.includes('necessidade')) {
-      botResponse = 'Entendi o problema que você identificou. Vou sugerir uma descrição para o campo "Problema Identificado" no formulário. Você pode ajustar conforme necessário.';
-      fieldUpdate = { field: 'problema', value: userMessage };
-    } else if (lowerMessage.includes('cliente') || lowerMessage.includes('usuário') || lowerMessage.includes('beneficiado')) {
-      botResponse = 'Perfeito! Identificar o público-alvo é fundamental. Vou preencher as informações sobre os clientes beneficiados no formulário.';
-      fieldUpdate = { field: 'publicoAlvo', value: userMessage };
-    } else if (lowerMessage.includes('tempo') || lowerMessage.includes('prazo') || lowerMessage.includes('cronograma')) {
-      botResponse = 'Entendo sobre o cronograma. O Sandbox CAIXA tem fases bem definidas: Discovery (90 dias), Delivery (180 dias) e Aceleração (360 dias). Vou atualizar o cronograma no formulário.';
-      fieldUpdate = { field: 'cronograma', value: userMessage };
-    } else if (lowerMessage.includes('objetivo') || lowerMessage.includes('meta') || lowerMessage.includes('resultado')) {
-      botResponse = 'Excelente! Objetivos claros são essenciais para o sucesso no Sandbox. Vou registrar seus objetivos no formulário para você.';
-      fieldUpdate = { field: 'objetivos', value: userMessage };
-    } else if (lowerMessage.includes('ajuda') || lowerMessage.includes('como') || lowerMessage.includes('começar')) {
-      botResponse = 'Posso te ajudar de várias formas! Você pode me contar sobre sua ideia e eu preencherei automaticamente os campos do formulário, ou você pode preencher o formulário manualmente e eu darei sugestões em tempo real. Qual preferência?';
-    } else {
-      botResponse = 'Interessante! Baseado no que você disse, posso sugerir algumas melhorias para sua proposta no Sandbox CAIXA. Continue me contando mais detalhes e vou te ajudar a estruturar sua ideia nos campos corretos.';
-    }
+  // Carregar histórico de chat do banco de dados
+  const loadChatHistory = async () => {
+    if (!ideaId || !user?.uid) return;
 
-    const botMessage = {
-      id: Date.now(),
-      type: 'bot',
-      content: botResponse,
-      timestamp: new Date(),
-      fieldUpdate
-    };
-
-    setMessages(prev => [...prev, botMessage]);
-    setIsTyping(false);
-
-    // Update form field if suggested
-    if (fieldUpdate && onFormFieldUpdate) {
-      onFormFieldUpdate(fieldUpdate.field, fieldUpdate.value);
+    try {
+      console.log('[ChatBot] Carregando histórico de chat...', { userId: user.uid, ideaId });
+      const historyData = await getChatHistory(user.uid, ideaId);
+      
+      console.log('[ChatBot] Histórico recebido:', historyData);
+      
+      if (historyData?.messages && Array.isArray(historyData.messages) && historyData.messages.length > 0) {
+        // Converter histórico do backend para formato da UI
+        const historyMessages = historyData.messages.map((msg, index) => {
+          // Converter timestamp do Firestore (pode ser Timestamp object ou string ISO)
+          let timestamp;
+          if (msg.timestamp) {
+            if (msg.timestamp.seconds) {
+              // Firestore Timestamp object
+              timestamp = new Date(msg.timestamp.seconds * 1000);
+            } else if (msg.timestamp.toDate) {
+              // Firestore Timestamp com método toDate()
+              timestamp = msg.timestamp.toDate();
+            } else if (typeof msg.timestamp === 'string') {
+              // String ISO
+              timestamp = new Date(msg.timestamp);
+            } else {
+              timestamp = new Date(msg.timestamp);
+            }
+          } else {
+            timestamp = new Date();
+          }
+          
+          return {
+            id: msg.id || `history-${index}`,
+            type: msg.role === 'assistant' ? 'bot' : 'user',
+            content: msg.content || '',
+            timestamp: timestamp
+          };
+        });
+        
+        console.log('[ChatBot] Mensagens convertidas:', historyMessages);
+        
+        // Adicionar mensagem de boas-vindas apenas se não houver histórico
+        setMessages([
+          {
+            id: 'welcome',
+            type: 'bot',
+            content: 'Olá! Sou o JuniBox, assistente do Sandbox CAIXA. Estou aqui para ajudar você a estruturar sua ideia inovadora. Como posso te ajudar hoje?',
+            timestamp: new Date()
+          },
+          ...historyMessages
+        ]);
+      } else {
+        // Sem histórico, apenas mensagem de boas-vindas
+        console.log('[ChatBot] Nenhum histórico encontrado, usando mensagem inicial');
+        setMessages([
+          {
+            id: 'welcome',
+            type: 'bot',
+            content: 'Olá! Sou o JuniBox, assistente do Sandbox CAIXA. Estou aqui para ajudar você a estruturar sua ideia inovadora. Como posso te ajudar hoje?',
+            timestamp: new Date()
+          }
+        ]);
+      }
+    } catch (error) {
+      console.error('[ChatBot] Erro ao carregar histórico:', error);
+      // Manter mensagem inicial mesmo em caso de erro
+      setMessages([
+        {
+          id: 'welcome',
+          type: 'bot',
+          content: 'Olá! Sou o JuniBox, assistente do Sandbox CAIXA. Estou aqui para ajudar você a estruturar sua ideia inovadora. Como posso te ajudar hoje?',
+          timestamp: new Date()
+        }
+      ]);
+      // Não mostrar toast de erro para não incomodar o usuário
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+  // Enviar mensagem para o backend com contexto do formulário
+  const sendMessageToBackend = async (userMessage) => {
+    if (!ideaId || !user?.uid) {
+      console.warn('[ChatBot] ideaId ou user.uid não disponível, usando chat simplificado');
+      // Fallback para chat simplificado se não tiver ideaId
+      return await sendMessageSimple(userMessage);
+    }
 
+    try {
+      setIsTyping(true);
+      
+      // Preparar contexto do formulário completo
+      const formContext = {
+        step_id: currentStep || 0,
+        step_name: stepName || 'Sua Ideia',
+        form_data: formData || {},
+        required_fields_filled: {
+          ideaTitle: !!formData?.ideaTitle,
+          ideaDescription: !!formData?.ideaDescription,
+          objetivos: !!formData?.objetivos
+        },
+        optional_fields_available: {
+          problema: !formData?.problema,
+          publicoAlvo: !formData?.publicoAlvo,
+          metricas: !formData?.metricas,
+          resultadosEsperados: !formData?.resultadosEsperados,
+          cronograma: !formData?.cronograma,
+          recursos: !formData?.recursos,
+          desafios: !formData?.desafios
+        }
+      };
+      
+      console.log('[ChatBot] Enviando mensagem com contexto:', {
+        userId: user.uid,
+        ideaId,
+        message: userMessage.substring(0, 50) + '...',
+        formContext
+      });
+      
+      const response = await sendChatMessage(user.uid, ideaId, userMessage, formContext);
+      
+      console.log('[ChatBot] Resposta recebida:', response);
+      
+      return {
+        content: response.response || 'Desculpe, não consegui processar sua mensagem.',
+        fieldUpdate: response.fieldUpdate || null
+      };
+    } catch (error) {
+      console.error('[ChatBot] Erro ao enviar mensagem:', error);
+      throw error;
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  // Chat simplificado (fallback)
+  const sendMessageSimple = async (userMessage) => {
+    try {
+      setIsTyping(true);
+      
+      // Converter histórico atual para formato da API
+      const history = messages
+        .filter(msg => msg.id !== 0 && msg.id !== 1) // Excluir mensagem de boas-vindas
+        .map(msg => ({
+          role: msg.type === 'bot' ? 'assistant' : 'user',
+          content: msg.content
+        }));
+
+      const { chatSimple } = await import('../services/api');
+      const response = await chatSimple(userMessage, history);
+      
+      return {
+        content: response.response || 'Desculpe, não consegui processar sua mensagem.',
+        fieldUpdate: null
+      };
+    } catch (error) {
+      console.error('Erro no chat simplificado:', error);
+      throw error;
+    } finally {
+      setIsTyping(false);
+    }
+  };
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || isTyping) return;
+
+    const userMessageText = inputValue.trim();
     const userMessage = {
-      id: Date.now() - 1,
+      id: `user-${Date.now()}`,
       type: 'user',
-      content: inputValue,
+      content: userMessageText,
       timestamp: new Date()
     };
 
+    // Adicionar mensagem do usuário imediatamente (otimista)
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
 
-    // Simulate bot response
-    await simulateBotResponse(inputValue);
+    try {
+      console.log('[ChatBot] Enviando mensagem:', userMessageText);
+      
+      // Enviar para o backend
+      const response = await sendMessageToBackend(userMessageText);
+      
+      console.log('[ChatBot] Resposta processada:', response);
+      
+      // Adicionar resposta do bot
+      const botMessage = {
+        id: `bot-${Date.now()}`,
+        type: 'bot',
+        content: response.content,
+        timestamp: new Date(),
+        fieldUpdate: response.fieldUpdate
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+
+      // Atualizar campo do formulário se sugerido
+      if (response.fieldUpdate && onFormFieldUpdate) {
+        console.log('[ChatBot] Atualizando campo do formulário:', response.fieldUpdate);
+        onFormFieldUpdate(response.fieldUpdate.field, response.fieldUpdate.value);
+        toast.success(`Campo "${response.fieldUpdate.field}" atualizado pelo assistente!`, {
+          icon: '✨',
+          duration: 3000
+        });
+      }
+    } catch (error) {
+      console.error('[ChatBot] Erro ao enviar mensagem:', error);
+      
+      // Remover mensagem do usuário se houver erro (ou manter e adicionar erro)
+      // Vamos manter e adicionar mensagem de erro
+      
+      // Mensagem de erro amigável
+      const errorMessage = {
+        id: `error-${Date.now()}`,
+        type: 'bot',
+        content: error.message?.includes('Firestore') || error.message?.includes('banco de dados')
+          ? 'Desculpe, o serviço de chat está temporariamente indisponível. Verifique se o banco de dados Firestore foi criado.'
+          : 'Desculpe, tive um problema ao processar sua mensagem. Tente novamente em alguns instantes.',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+      
+      // Toast apenas para erros críticos
+      if (error.message?.includes('Firestore') || error.message?.includes('banco de dados')) {
+        toast.error('Serviço de chat indisponível. Verifique a configuração do banco de dados.', {
+          icon: '⚠️',
+          duration: 5000
+        });
+      } else {
+        toast.error('Erro ao enviar mensagem. Verifique sua conexão e tente novamente.', {
+          icon: '⚠️',
+          duration: 4000
+        });
+      }
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -186,13 +378,6 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize })
       handleSendMessage();
     }
   };
-
-  const quickSuggestions = [
-    'Como estruturar minha ideia?',
-    'Qual o processo do Sandbox?',
-    'Preciso de ajuda com objetivos',
-    'Como definir cronograma?'
-  ];
 
   if (isMinimized) {
     return (
@@ -314,7 +499,10 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize })
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-2 md:p-4 space-y-3 md:space-y-4 bg-gray-50">
+      <div 
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-2 md:p-4 space-y-3 md:space-y-4 bg-gray-50"
+      >
         <AnimatePresence>
           {messages.map((message) => (
             <motion.div
@@ -397,23 +585,6 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize })
           </motion.div>
         )}
         <div ref={messagesEndRef} />
-      </div>
-
-      {/* Quick Suggestions */}
-      <div className="p-2 md:p-4 bg-white border-t shrink-0">
-        <div className="flex flex-wrap gap-1.5 md:gap-2 mb-2 md:mb-3">
-          {quickSuggestions.map((suggestion, index) => (
-            <motion.button
-              key={index}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setInputValue(suggestion)}
-              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 md:px-3 py-1 rounded-full transition-colors whitespace-nowrap"
-            >
-              {suggestion}
-            </motion.button>
-          ))}
-        </div>
       </div>
 
       {/* Input Area */}

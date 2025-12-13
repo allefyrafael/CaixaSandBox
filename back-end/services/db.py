@@ -10,8 +10,44 @@ import uuid
 # Importa Query apenas se Firebase estiver disponível
 if db:
     from google.cloud.firestore import Query
+    try:
+        from google.api_core import exceptions as google_exceptions
+    except ImportError:
+        # google.api_core pode não estar disponível em todas as versões
+        google_exceptions = None
 else:
     Query = None
+    google_exceptions = None
+
+# ============================================
+# FUNÇÕES AUXILIARES
+# ============================================
+
+def _is_database_not_found_error(error: Exception) -> bool:
+    """
+    Verifica se o erro é relacionado ao banco de dados não ter sido criado
+    
+    Args:
+        error: Exceção capturada
+        
+    Returns:
+        True se for erro de banco não encontrado
+    """
+    error_str = str(error)
+    return (
+        "does not exist" in error_str or 
+        "404" in error_str or
+        (google_exceptions and isinstance(error, google_exceptions.NotFound))
+    )
+
+def _raise_database_not_found_error():
+    """
+    Levanta exceção com mensagem clara sobre banco não criado
+    """
+    raise Exception(
+        "Banco de dados Firestore não foi criado. "
+        "Acesse: https://console.cloud.google.com/firestore/databases?project=sandboxcaixa-84951"
+    )
 
 # ============================================
 # OPERAÇÕES COM IDEIAS
@@ -46,7 +82,12 @@ def create_new_idea(user_id: str, title: str = "Nova Ideia") -> Dict[str, Any]:
     doc_ref = db.collection('users').document(user_id)\
                 .collection('ideas').document(idea_id)
     
-    doc_ref.set(idea_data)
+    try:
+        doc_ref.set(idea_data)
+    except Exception as e:
+        if _is_database_not_found_error(e):
+            _raise_database_not_found_error()
+        raise
     
     return {**idea_data, "id": idea_id}
 
@@ -73,7 +114,12 @@ def autosave_idea(user_id: str, idea_id: str, data: dict) -> Dict[str, Any]:
     data['last_updated'] = datetime.now()
     
     # merge=True é crucial: só atualiza os campos enviados
-    doc_ref.set(data, merge=True)
+    try:
+        doc_ref.set(data, merge=True)
+    except Exception as e:
+        if _is_database_not_found_error(e):
+            _raise_database_not_found_error()
+        raise
     
     return data
 
@@ -91,14 +137,19 @@ def get_idea(user_id: str, idea_id: str) -> Optional[Dict[str, Any]]:
     if not db:
         raise Exception("Firebase não está configurado")
     
-    doc = db.collection('users').document(user_id)\
-            .collection('ideas').document(idea_id).get()
-    
-    if doc.exists:
-        data = doc.to_dict()
-        data['id'] = idea_id
-        return data
-    return None
+    try:
+        doc = db.collection('users').document(user_id)\
+                .collection('ideas').document(idea_id).get()
+        
+        if doc.exists:
+            data = doc.to_dict()
+            data['id'] = idea_id
+            return data
+        return None
+    except Exception as e:
+        if _is_database_not_found_error(e):
+            _raise_database_not_found_error()
+        raise
 
 def get_idea_context(user_id: str, idea_id: str) -> Dict[str, Any]:
     """
@@ -115,10 +166,16 @@ def get_idea_context(user_id: str, idea_id: str) -> Dict[str, Any]:
     if not db:
         return {}
     
-    doc = db.collection('users').document(user_id)\
-            .collection('ideas').document(idea_id).get()
-    
-    return doc.to_dict() if doc.exists else {}
+    try:
+        doc = db.collection('users').document(user_id)\
+                .collection('ideas').document(idea_id).get()
+        
+        return doc.to_dict() if doc.exists else {}
+    except Exception as e:
+        if _is_database_not_found_error(e):
+            # Para get_idea_context, retorna vazio ao invés de erro
+            return {}
+        raise
 
 def list_user_ideas(user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
     """
@@ -129,23 +186,35 @@ def list_user_ideas(user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
         limit: Número máximo de ideias a retornar
         
     Returns:
-        Lista de dicionários com as ideias
+        Lista de dicionários com as ideias (vazia se não houver ideias ou Firebase não configurado)
     """
     if not db:
-        raise Exception("Firebase não está configurado")
+        # Retorna lista vazia se Firebase não estiver configurado
+        # Isso permite que o frontend funcione mesmo sem Firebase
+        print("[AVISO] Firebase não configurado. Retornando lista vazia de ideias.")
+        return []
     
-    docs = db.collection('users').document(user_id)\
-             .collection('ideas')\
-             .order_by('last_updated', direction=Query.DESCENDING)\
-             .limit(limit).stream()
-    
-    ideas = []
-    for doc in docs:
-        idea_data = doc.to_dict()
-        idea_data['id'] = doc.id
-        ideas.append(idea_data)
-    
-    return ideas
+    try:
+        docs = db.collection('users').document(user_id)\
+                 .collection('ideas')\
+                 .order_by('last_updated', direction=Query.DESCENDING)\
+                 .limit(limit).stream()
+        
+        ideas = []
+        for doc in docs:
+            idea_data = doc.to_dict()
+            idea_data['id'] = doc.id
+            ideas.append(idea_data)
+        
+        return ideas
+    except Exception as e:
+        if _is_database_not_found_error(e):
+            # Para list_user_ideas, retorna lista vazia ao invés de erro
+            print(f"[AVISO] Banco de dados Firestore não foi criado. Retornando lista vazia.")
+            return []
+        # Se houver erro ao buscar (ex: coleção não existe), retorna lista vazia
+        print(f"[AVISO] Erro ao buscar ideias: {e}. Retornando lista vazia.")
+        return []
 
 def delete_idea(user_id: str, idea_id: str) -> bool:
     """
@@ -167,7 +236,13 @@ def delete_idea(user_id: str, idea_id: str) -> bool:
     doc_ref = db.collection('users').document(user_id)\
                 .collection('ideas').document(idea_id)
     
-    doc_ref.delete()
+    try:
+        doc_ref.delete()
+    except Exception as e:
+        if _is_database_not_found_error(e):
+            _raise_database_not_found_error()
+        raise
+    
     return True
 
 # ============================================
@@ -196,11 +271,16 @@ def save_chat_message(user_id: str, idea_id: str, role: str, content: str) -> st
         "timestamp": datetime.now()
     }
     
-    doc_ref = db.collection('users').document(user_id)\
-                .collection('ideas').document(idea_id)\
-                .collection('chat').add(message_data)
-    
-    return doc_ref[1].id
+    try:
+        doc_ref = db.collection('users').document(user_id)\
+                    .collection('ideas').document(idea_id)\
+                    .collection('chat').add(message_data)
+        
+        return doc_ref[1].id
+    except Exception as e:
+        if _is_database_not_found_error(e):
+            _raise_database_not_found_error()
+        raise
 
 def get_chat_history(user_id: str, idea_id: str, limit: int = 10) -> List[Dict[str, str]]:
     """
@@ -218,21 +298,32 @@ def get_chat_history(user_id: str, idea_id: str, limit: int = 10) -> List[Dict[s
     if not db:
         return []
     
-    docs = db.collection('users').document(user_id)\
-             .collection('ideas').document(idea_id)\
-             .collection('chat')\
-             .order_by('timestamp', direction=Query.ASCENDING)\
-             .limit_to_last(limit).stream()
-    
-    history = []
-    for doc in docs:
-        data = doc.to_dict()
-        history.append({
-            "role": data['role'],
-            "content": data['content']
-        })
-    
-    return history
+    try:
+        # Usar order_by DESC + limit + get() ao invés de limit_to_last().stream()
+        # Depois inverter a ordem para manter ordem cronológica
+        docs = db.collection('users').document(user_id)\
+                 .collection('ideas').document(idea_id)\
+                 .collection('chat')\
+                 .order_by('timestamp', direction=Query.DESCENDING)\
+                 .limit(limit).get()
+        
+        history = []
+        for doc in docs:
+            data = doc.to_dict()
+            history.append({
+                "role": data['role'],
+                "content": data['content']
+            })
+        
+        # Inverter para manter ordem cronológica (mais antiga primeiro)
+        history.reverse()
+        
+        return history
+    except Exception as e:
+        if _is_database_not_found_error(e):
+            # Para get_chat_history, retorna lista vazia ao invés de erro
+            return []
+        raise
 
 def get_full_chat_history(user_id: str, idea_id: str) -> List[Dict[str, Any]]:
     """
@@ -249,23 +340,53 @@ def get_full_chat_history(user_id: str, idea_id: str) -> List[Dict[str, Any]]:
     if not db:
         return []
     
-    docs = db.collection('users').document(user_id)\
-             .collection('ideas').document(idea_id)\
-             .collection('chat')\
-             .order_by('timestamp', direction=Query.ASCENDING)\
-             .stream()
-    
-    messages = []
-    for doc in docs:
-        data = doc.to_dict()
-        messages.append({
-            "id": doc.id,
-            "role": data['role'],
-            "content": data['content'],
-            "timestamp": data['timestamp']
-        })
-    
-    return messages
+    try:
+        docs = db.collection('users').document(user_id)\
+                 .collection('ideas').document(idea_id)\
+                 .collection('chat')\
+                 .order_by('timestamp', direction=Query.ASCENDING)\
+                 .stream()
+        
+        messages = []
+        for doc in docs:
+            data = doc.to_dict()
+            # Converter timestamp do Firestore para datetime ISO string
+            timestamp = data.get('timestamp')
+            if timestamp:
+                # Se for um objeto Timestamp do Firestore, converter para datetime
+                if hasattr(timestamp, 'to_datetime'):
+                    timestamp = timestamp.to_datetime()
+                elif hasattr(timestamp, 'timestamp'):
+                    # Se for um objeto com método timestamp(), converter
+                    timestamp = datetime.fromtimestamp(timestamp.timestamp())
+                elif isinstance(timestamp, datetime):
+                    # Já é datetime, usar diretamente
+                    pass
+                else:
+                    # Tentar converter string ou outro formato
+                    try:
+                        if isinstance(timestamp, str):
+                            timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                        else:
+                            timestamp = datetime.now()
+                    except:
+                        timestamp = datetime.now()
+            else:
+                timestamp = datetime.now()
+            
+            messages.append({
+                "id": doc.id,
+                "role": data['role'],
+                "content": data['content'],
+                "timestamp": timestamp
+            })
+        
+        return messages
+    except Exception as e:
+        if _is_database_not_found_error(e):
+            # Para get_full_chat_history, retorna lista vazia ao invés de erro
+            return []
+        raise
 
 def clear_chat_history(user_id: str, idea_id: str) -> bool:
     """
@@ -281,14 +402,19 @@ def clear_chat_history(user_id: str, idea_id: str) -> bool:
     if not db:
         raise Exception("Firebase não está configurado")
     
-    # Busca todas as mensagens
-    docs = db.collection('users').document(user_id)\
-             .collection('ideas').document(idea_id)\
-             .collection('chat').stream()
-    
-    # Deleta cada mensagem
-    for doc in docs:
-        doc.reference.delete()
-    
-    return True
+    try:
+        # Busca todas as mensagens
+        docs = db.collection('users').document(user_id)\
+                 .collection('ideas').document(idea_id)\
+                 .collection('chat').stream()
+        
+        # Deleta cada mensagem
+        for doc in docs:
+            doc.reference.delete()
+        
+        return True
+    except Exception as e:
+        if _is_database_not_found_error(e):
+            _raise_database_not_found_error()
+        raise
 

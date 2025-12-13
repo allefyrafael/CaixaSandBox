@@ -27,9 +27,19 @@ def create_idea(payload: IdeaCreate):
         idea_data = create_new_idea(payload.user_id, payload.title)
         return idea_data
     except Exception as e:
+        error_msg = str(e)
+        if "does not exist" in error_msg or "404" in error_msg or "Banco de dados Firestore não foi criado" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=(
+                    "Banco de dados Firestore não foi criado. "
+                    "Por favor, crie o banco em: "
+                    "https://console.cloud.google.com/firestore/databases?project=sandboxcaixa-84951"
+                )
+            )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao criar ideia: {str(e)}"
+            detail=f"Erro ao criar ideia: {error_msg}"
         )
 
 @router.patch("/{user_id}/{idea_id}", response_model=SuccessResponse)
@@ -74,9 +84,19 @@ def endpoint_autosave(user_id: str, idea_id: str, payload: IdeaUpdate):
             "data": saved_data
         }
     except Exception as e:
+        error_msg = str(e)
+        if "does not exist" in error_msg or "404" in error_msg or "Banco de dados Firestore não foi criado" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=(
+                    "Banco de dados Firestore não foi criado. "
+                    "Por favor, crie o banco em: "
+                    "https://console.cloud.google.com/firestore/databases?project=sandboxcaixa-84951"
+                )
+            )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao salvar ideia: {str(e)}"
+            detail=f"Erro ao salvar ideia: {error_msg}"
         )
 
 @router.get("/{user_id}/{idea_id}", response_model=IdeaResponse)
@@ -100,9 +120,19 @@ def get_idea_by_id(user_id: str, idea_id: str):
     except HTTPException:
         raise
     except Exception as e:
+        error_msg = str(e)
+        if "does not exist" in error_msg or "404" in error_msg or "Banco de dados Firestore não foi criado" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=(
+                    "Banco de dados Firestore não foi criado. "
+                    "Por favor, crie o banco em: "
+                    "https://console.cloud.google.com/firestore/databases?project=sandboxcaixa-84951"
+                )
+            )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao buscar ideia: {str(e)}"
+            detail=f"Erro ao buscar ideia: {error_msg}"
         )
 
 @router.get("/{user_id}", response_model=List[IdeaResponse])
@@ -112,15 +142,17 @@ def list_ideas(user_id: str, limit: int = 50):
     
     - **user_id**: ID do usuário
     - **limit**: Número máximo de ideias a retornar (padrão: 50)
+    
+    Retorna lista vazia se o usuário não tiver ideias ou se Firebase não estiver configurado.
     """
     try:
         ideas = list_user_ideas(user_id, limit)
-        return ideas
+        # Sempre retorna uma lista, mesmo que vazia
+        return ideas if ideas else []
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao listar ideias: {str(e)}"
-        )
+        # Em caso de erro inesperado, retorna lista vazia ao invés de erro 500
+        print(f"[ERRO] Erro ao listar ideias para usuário {user_id}: {e}")
+        return []
 
 @router.delete("/{user_id}/{idea_id}", response_model=SuccessResponse)
 def delete_idea_by_id(user_id: str, idea_id: str):
@@ -149,9 +181,19 @@ def delete_idea_by_id(user_id: str, idea_id: str):
     except HTTPException:
         raise
     except Exception as e:
+        error_msg = str(e)
+        if "does not exist" in error_msg or "404" in error_msg or "Banco de dados Firestore não foi criado" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=(
+                    "Banco de dados Firestore não foi criado. "
+                    "Por favor, crie o banco em: "
+                    "https://console.cloud.google.com/firestore/databases?project=sandboxcaixa-84951"
+                )
+            )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao deletar ideia: {str(e)}"
+            detail=f"Erro ao deletar ideia: {error_msg}"
         )
 
 @router.put("/{user_id}/{idea_id}/status")
@@ -180,8 +222,18 @@ def update_idea_status(user_id: str, idea_id: str, new_status: str):
             "data": saved_data
         }
     except Exception as e:
+        error_msg = str(e)
+        if "does not exist" in error_msg or "404" in error_msg or "Banco de dados Firestore não foi criado" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=(
+                    "Banco de dados Firestore não foi criado. "
+                    "Por favor, crie o banco em: "
+                    "https://console.cloud.google.com/firestore/databases?project=sandboxcaixa-84951"
+                )
+            )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao atualizar status: {str(e)}"
+            detail=f"Erro ao atualizar status: {error_msg}"
         )
 

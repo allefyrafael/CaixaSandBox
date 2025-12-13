@@ -4,7 +4,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 export default function ThreeModelViewer({
-  modelUrl = `${process.env.PUBLIC_URL}/sandBOX.glb`,
+  modelUrl = `${process.env.PUBLIC_URL}/Robo_SandBox.glb`,
   width = 800,
   height = 600,
   dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio, 2) : 1,
@@ -37,6 +37,7 @@ export default function ThreeModelViewer({
     // Scene transparente
     const scene = new THREE.Scene();
     scene.background = null; // fundo transparente SEMPRE
+    scene.fog = null; // Remover qualquer fog que possa causar manchas
     sceneRef.current = scene;
 
     // Camera
@@ -44,27 +45,56 @@ export default function ThreeModelViewer({
     camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
     cameraRef.current = camera;
 
-    // Renderer transparente
+    // Renderer transparente (sem sombras)
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(dpr);
     renderer.setClearAlpha(0); // importante para transparência real
+    renderer.setClearColor(0x000000, 0); // fundo completamente transparente
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    // Desabilitar completamente sistema de sombras
     renderer.shadowMap.enabled = false;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.shadowMap.type = THREE.BasicShadowMap; // Tipo mais simples (desabilitado)
+    renderer.toneMapping = THREE.NoToneMapping; // Remover tone mapping que pode causar manchas
     renderer.toneMappingExposure = 1.0;
     rendererRef.current = renderer;
     container.appendChild(renderer.domElement);
 
-    // Lights (mantendo o "look" do código definitivo)
+    // Lights (otimizada para cores vibrantes - sem sombras)
     if (lights) {
-      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
+      // 1. Luz ambiente forte - garante que todas as partes recebam luz
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+      ambientLight.castShadow = false;
+      scene.add(ambientLight);
+
+      // 2. Luz hemisférica - preenche com luz natural
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x888888, 0.8);
+      hemiLight.castShadow = false;
+      hemiLight.shadow = null;
       scene.add(hemiLight);
 
-      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      dirLight.position.set(5, 10, 7.5);
-      dirLight.castShadow = true;
-      scene.add(dirLight);
+      // 3. Luz direcional principal - ilumina de frente com intensidade alta
+      const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.0);
+      dirLight1.position.set(10, 10, 5);
+      dirLight1.castShadow = false;
+      // Desabilitar completamente sistema de sombras
+      if (dirLight1.shadow) {
+        dirLight1.shadow.enabled = false;
+        dirLight1.shadow.map = null;
+        dirLight1.shadow.camera = null;
+      }
+      scene.add(dirLight1);
+
+      // 4. Luz direcional secundária - preenche sombras laterais
+      const dirLight2 = new THREE.DirectionalLight(0xffffff, 1.5);
+      dirLight2.position.set(-10, 5, -10);
+      dirLight2.castShadow = false;
+      if (dirLight2.shadow) {
+        dirLight2.shadow.enabled = false;
+        dirLight2.shadow.map = null;
+        dirLight2.shadow.camera = null;
+      }
+      scene.add(dirLight2);
     }
 
     // Controls
@@ -93,20 +123,60 @@ export default function ThreeModelViewer({
 
         model.traverse((obj) => {
           if (obj.isMesh) {
-            obj.castShadow = true;
-            obj.receiveShadow = true;
-            // aparência suave + color management coerente
+            // Desabilitar completamente sombras
+            obj.castShadow = false;
+            obj.receiveShadow = false;
+            // Remover shadow do objeto se existir
+            if (obj.shadow) {
+              obj.shadow = null;
+            }
+            
+            // Tratamento de materiais (limpo, sem efeitos extras)
             if (obj.material) {
               const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
               mats.forEach((m) => {
-                if (m.map) m.map.colorSpace = THREE.SRGBColorSpace;
-                if (m.emissiveMap) m.emissiveMap.colorSpace = THREE.SRGBColorSpace;
+                // Configurar color space
+                if (m.map) {
+                  m.map.colorSpace = THREE.SRGBColorSpace;
+                }
+                if (m.emissiveMap) {
+                  m.emissiveMap.colorSpace = THREE.SRGBColorSpace;
+                }
+                
+                // Remover todos os efeitos que podem causar manchas ou sombras
+                if (m.isMeshStandardMaterial || m.isMeshPhysicalMaterial) {
+                  // Se o material não tem textura, garantir cor base
+                  if (!m.map && !m.color) {
+                    m.color = new THREE.Color(0xffffff);
+                  }
+                  // Remover completamente emissão
+                  m.emissive = new THREE.Color(0x000000);
+                  m.emissiveIntensity = 0;
+                  // Remover metalness e roughness excessivos
+                  if (m.metalness !== undefined) {
+                    m.metalness = 0;
+                  }
+                  if (m.roughness !== undefined) {
+                    m.roughness = 0.5;
+                  }
+                  // Desabilitar envMap que pode causar reflexos indesejados
+                  m.envMap = null;
+                  // Remover aoMap (ambient occlusion) que pode criar sombras
+                  m.aoMap = null;
+                  m.aoMapIntensity = 0;
+                }
+                
                 m.flatShading = false;
                 m.needsUpdate = true;
               });
             }
-            if (obj.geometry?.attributes?.normal) {
-              obj.geometry.computeVertexNormals();
+            // Garantir normais calculadas
+            if (obj.geometry) {
+              if (!obj.geometry.attributes.normal) {
+                obj.geometry.computeVertexNormals();
+              } else {
+                obj.geometry.computeVertexNormals();
+              }
             }
           }
         });

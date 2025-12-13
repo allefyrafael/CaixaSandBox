@@ -77,9 +77,31 @@ users (Coleção)
 - **Conta no [Groq Cloud](https://console.groq.com/)** (para IA)
 - **Projeto no [Firebase](https://console.firebase.google.com/)** (opcional, apenas para endpoints completos)
 
-### 2. Instalação Rápida
+### 2. Configuração do Firestore
+
+Antes de usar os endpoints que requerem Firebase, você precisa criar o banco de dados Firestore:
+
+1. **Acesse o Console do Firebase:**
+   - Link direto: https://console.cloud.google.com/firestore/databases?project=sandboxcaixa-84951
+   - Ou acesse: https://console.firebase.google.com/project/sandboxcaixa-84951/firestore
+
+2. **Crie o banco de dados:**
+   - Clique em "Criar banco de dados" ou "Create database"
+   - Escolha o modo **Native** (recomendado para novos projetos)
+   - Selecione a localização (ex: `us-central` ou `southamerica-east1` para Brasil)
+   - Aguarde a criação (pode levar alguns minutos)
+
+3. **Verifique a criação:**
+   - Após criar, você verá a interface do Firestore
+   - O banco estará pronto para uso
+
+**Importante:** Sem criar o banco de dados, os endpoints que requerem Firebase retornarão erro 503 com mensagem clara indicando que o banco precisa ser criado.
+
+### 3. Instalação Rápida
 
 #### Opção A: Script Automático (Windows)
+
+**Nota:** Certifique-se de ter criado o banco de dados Firestore antes de usar endpoints que requerem Firebase (veja seção anterior).
 
 ```powershell
 cd back-end
@@ -135,13 +157,24 @@ FIREBASE_CREDENTIALS_PATH=firebase_credentials.json
 
 #### c) Firebase (Opcional - apenas para endpoints completos)
 
-1. Acesse o [Console do Firebase](https://console.firebase.google.com/)
-2. Crie um novo projeto (ou use um existente)
-3. Vá em **Configurações do Projeto** > **Contas de Serviço**
-4. Clique em **Gerar nova chave privada**
-5. Salve o arquivo JSON como `firebase_credentials.json` na pasta `back-end/`
+1. **Credenciais do Firebase:**
+   - Acesse o [Console do Firebase](https://console.firebase.google.com/)
+   - Crie um novo projeto (ou use um existente)
+   - Vá em **Configurações do Projeto** > **Contas de Serviço**
+   - Clique em **Gerar nova chave privada**
+   - Salve o arquivo JSON como `sandboxcaixa-84951-firebase-adminsdk-fbsvc-b9035301e8.json` na pasta `back-end/`
 
-> **Nota**: O chat simplificado (`POST /api/chat/`) funciona **sem Firebase**!
+2. **Criar Banco de Dados Firestore:**
+   - **IMPORTANTE**: Após configurar as credenciais, você **deve criar o banco de dados Firestore**
+   - Acesse: https://console.cloud.google.com/firestore/databases?project=sandboxcaixa-84951
+   - Clique em **"Criar banco de dados"** ou **"Create database"**
+   - Escolha o modo **Native** (recomendado para novos projetos)
+   - Selecione a localização (ex: `us-central` ou `southamerica-east1` para Brasil)
+   - Aguarde a criação (pode levar alguns minutos)
+   - Após criar, o banco estará pronto para uso
+
+> **Nota**: O chat simplificado (`POST /api/chat/`) funciona **sem Firebase**!  
+> **Aviso**: Sem criar o banco de dados, endpoints que requerem Firebase retornarão erro 503 com mensagem clara.
 
 ### 4. Executar o Servidor
 

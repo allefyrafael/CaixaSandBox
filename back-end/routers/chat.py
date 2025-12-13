@@ -8,7 +8,9 @@ from schemas import (
     ChatRequestResponse, 
     ChatMessage, 
     ChatResponse, 
-    ChatHistoryResponse
+    ChatHistoryResponse,
+    FieldSuggestionRequest,
+    FieldSuggestionResponse
 )
 from services.db import (
     save_chat_message,
@@ -21,9 +23,11 @@ from services.ai import (
     get_junibox_response,  # Função simplificada
     generate_junibox_response,  # Função com Firebase
     generate_idea_suggestions, 
-    validate_idea_completeness
+    validate_idea_completeness,
+    generate_field_suggestion
 )
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor
 
 router = APIRouter()
 
@@ -77,7 +81,7 @@ def endpoint_chat(payload: ChatMessage):
     **Fluxo:**
     1. Salva a mensagem do usuário no Firestore
     2. Busca o contexto da ideia e histórico de chat
-    3. Gera resposta usando Groq AI (Llama 3)
+    3. Gera resposta usando Groq AI (Llama 3) com contexto do formulário
     4. Salva a resposta da IA no Firestore
     5. Retorna a resposta para o frontend
     
@@ -85,17 +89,26 @@ def endpoint_chat(payload: ChatMessage):
     - **user_id**: ID do usuário
     - **idea_id**: ID da ideia sendo discutida
     - **message**: Mensagem do usuário
+    - **form_context**: Contexto do formulário (seção atual, dados do formulário, etc)
     """
     try:
         # 1. Salva mensagem do usuário
         save_chat_message(payload.user_id, payload.idea_id, "user", payload.message)
         
-        # 2. Busca contexto
-        history = get_chat_history(payload.user_id, payload.idea_id)
-        idea_data = get_idea_context(payload.user_id, payload.idea_id)
+        # 2. Busca contexto em paralelo (otimização)
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            history_future = executor.submit(get_chat_history, payload.user_id, payload.idea_id)
+            idea_future = executor.submit(get_idea_context, payload.user_id, payload.idea_id)
+            history = history_future.result()
+            idea_data = idea_future.result()
         
-        # 3. Gera resposta da IA
-        response = generate_junibox_response(payload.message, history, idea_data)
+        # 3. Gera resposta da IA com contexto do formulário
+        response = generate_junibox_response(
+            payload.message, 
+            history, 
+            idea_data,
+            form_context=payload.form_context
+        )
         
         # 4. Salva resposta da IA
         save_chat_message(payload.user_id, payload.idea_id, "assistant", response)
@@ -185,6 +198,60 @@ def get_idea_suggestions_endpoint(user_id: str, idea_id: str):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao gerar sugestões: {str(e)}"
+        )
+
+@router.post("/suggest-field", response_model=FieldSuggestionResponse)
+def suggest_field_endpoint(payload: FieldSuggestionRequest):
+    """
+    Gera sugestão para um campo específico do formulário
+    
+    A IA analisa o contexto do formulário e gera uma sugestão apropriada
+    para campos opcionais (publicoAlvo, metricas, resultadosEsperados).
+    
+    **Parâmetros:**
+    - **user_id**: ID do usuário
+    - **idea_id**: ID da ideia
+    - **field_name**: Nome do campo (publicoAlvo, metricas, resultadosEsperados)
+    - **form_data**: Dados atuais do formulário
+    - **current_step**: Índice da seção atual
+    
+    **Nota:** Este endpoint só deve ser usado para campos opcionais.
+    Campos obrigatórios devem ser preenchidos pelo usuário.
+    """
+    try:
+        # Validar que o campo é opcional
+        optional_fields = ["publicoAlvo", "metricas", "resultadosEsperados"]
+        if payload.field_name not in optional_fields:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Campo '{payload.field_name}' não é opcional. Apenas campos opcionais podem receber sugestões da IA."
+            )
+        
+        # Preparar contexto do formulário
+        step_names = ["Sua Ideia", "Objetivos e Metas", "Cronograma"]
+        step_name = step_names[payload.current_step] if 0 <= payload.current_step < len(step_names) else "Desconhecida"
+        
+        form_context = {
+            "form_data": payload.form_data,
+            "current_step": payload.current_step,
+            "step_name": step_name
+        }
+        
+        # Gerar sugestão
+        suggestion = generate_field_suggestion(
+            payload.field_name,
+            form_context,
+            payload.current_step
+        )
+        
+        return suggestion
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao gerar sugestão: {str(e)}"
         )
 
 @router.get("/validate/{user_id}/{idea_id}")
