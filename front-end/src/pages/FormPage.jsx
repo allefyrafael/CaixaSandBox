@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import ChatBot from '../components/ChatBot';
 import FieldSuggestion from '../components/FieldSuggestion';
+import ModerationAlert from '../components/ModerationAlert';
 import { getFieldSuggestion } from '../services/api';
 
 const FormPage = () => {
@@ -52,6 +53,8 @@ const FormPage = () => {
   const [pendingSave, setPendingSave] = useState(false);
   const [fieldSuggestions, setFieldSuggestions] = useState({}); // { fieldName: { suggestion, reasoning, confidence } }
   const [loadingSuggestions, setLoadingSuggestions] = useState({}); // { fieldName: true/false }
+  const [moderationAlert, setModerationAlert] = useState({ isOpen: false, fieldName: null, offensiveText: null });
+  const blockedFieldsRef = useRef(new Set()); // Campos bloqueados para autosave
   
   // Usar contexto de autosave
   const { 
@@ -212,6 +215,16 @@ const FormPage = () => {
       clearTimeout(autosaveTimerRef.current);
     }
 
+    // Verificar se algum campo está bloqueado
+    const hasBlockedField = Object.keys(watchedValues).some(field => 
+      blockedFieldsRef.current.has(field) && watchedValues[field]?.trim()
+    );
+    
+    if (hasBlockedField) {
+      // Se houver campo bloqueado, não tentar autosave
+      return;
+    }
+
     // Comparação inteligente usando JSON.stringify para objetos aninhados
     const currentValuesStr = JSON.stringify(watchedValues);
     const previousValuesStr = JSON.stringify(previousValuesRef.current);
@@ -293,6 +306,130 @@ const FormPage = () => {
         // Requisição foi cancelada, ignorar
         return;
       }
+      
+      // Tratamento especial para erro de moderação
+      if (error.isModerationError || (error.status === 400 && error.message?.includes('inapropriado'))) {
+        // Detectar qual campo contém conteúdo ofensivo
+        let offensiveField = null;
+        let offensiveText = '';
+        
+        // Mapeamento de campos backend -> frontend
+        const fieldMapping = {
+          'title': 'ideaTitle',
+          'description': 'ideaDescription',
+          'target_audience': 'publicoAlvo',
+          'problema': 'problema',
+          'objetivos': 'objetivos',
+          'metricas': 'metricas',
+          'resultadosEsperados': 'resultadosEsperados',
+          'cronograma': 'cronograma',
+          'recursos': 'recursos',
+          'desafios': 'desafios'
+        };
+        
+        // Tentar identificar o campo pelo erro
+        const errorMsg = (error.message || '').toLowerCase();
+        
+        // Verificar mensagens específicas do backend
+        if (errorMsg.includes('título') || errorMsg.includes('title')) {
+          offensiveField = 'ideaTitle';
+          offensiveText = watchedValues.ideaTitle || '';
+        } else if (errorMsg.includes('descrição') || errorMsg.includes('description') || errorMsg.includes('descricao')) {
+          offensiveField = 'ideaDescription';
+          offensiveText = watchedValues.ideaDescription || '';
+        } else {
+          // Verificar todos os campos que foram enviados no updateData
+          // O último campo modificado provavelmente é o ofensivo
+          const updateData = {
+            title: watchedValues.ideaTitle || '',
+            description: watchedValues.ideaDescription || '',
+            target_audience: watchedValues.publicoAlvo || '',
+            dynamic_content: {
+              problema: watchedValues.problema || '',
+              objetivos: watchedValues.objetivos || '',
+              metricas: watchedValues.metricas || '',
+              resultadosEsperados: watchedValues.resultadosEsperados || '',
+              cronograma: watchedValues.cronograma || '',
+              recursos: watchedValues.recursos || '',
+              desafios: watchedValues.desafios || ''
+            }
+          };
+          
+          // Verificar campos principais primeiro
+          if (updateData.title && errorMsg.includes('título')) {
+            offensiveField = 'ideaTitle';
+            offensiveText = updateData.title;
+          } else if (updateData.description && errorMsg.includes('descrição')) {
+            offensiveField = 'ideaDescription';
+            offensiveText = updateData.description;
+          } else if (updateData.target_audience && errorMsg.includes('público')) {
+            offensiveField = 'publicoAlvo';
+            offensiveText = updateData.target_audience;
+          } else {
+            // Verificar campos dinâmicos
+            for (const [backendField, frontendField] of Object.entries(fieldMapping)) {
+              if (backendField === 'title' || backendField === 'description' || backendField === 'target_audience') {
+                continue; // Já verificados
+              }
+              
+              const fieldValue = watchedValues[frontendField] || '';
+              if (fieldValue && fieldValue.trim()) {
+                // Verificar se o erro menciona este campo
+                const fieldNameLower = backendField.toLowerCase();
+                if (errorMsg.includes(fieldNameLower) || errorMsg.includes(frontendField.toLowerCase())) {
+                  offensiveField = frontendField;
+                  offensiveText = fieldValue;
+                  break;
+                }
+              }
+            }
+            
+            // Se ainda não encontrou, verificar o último campo modificado comparando com previousValues
+            if (!offensiveField) {
+              const previous = previousValuesRef.current || {};
+              for (const [frontendField, currentValue] of Object.entries(watchedValues)) {
+                const previousValue = previous[frontendField] || '';
+                if (currentValue && currentValue.trim() && currentValue !== previousValue) {
+                  // Este campo foi modificado recentemente, pode ser o ofensivo
+                  offensiveField = frontendField;
+                  offensiveText = currentValue;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        
+        // Se encontrou campo ofensivo, limpar e bloquear
+        if (offensiveField) {
+          // Limpar o campo ofensivo
+          setValue(offensiveField, '');
+          
+          // Bloquear autosave para este campo temporariamente
+          blockedFieldsRef.current.add(offensiveField);
+          
+          // Atualizar previousValues para não tentar salvar novamente
+          const cleanedValues = { ...watchedValues };
+          cleanedValues[offensiveField] = '';
+          previousValuesRef.current = JSON.parse(JSON.stringify(cleanedValues));
+          
+          // Mostrar alerta
+          setModerationAlert({
+            isOpen: true,
+            fieldName: offensiveField,
+            offensiveText: offensiveText
+          });
+          
+          // Remover bloqueio após 5 segundos (tempo para usuário ver o alerta)
+          setTimeout(() => {
+            blockedFieldsRef.current.delete(offensiveField);
+          }, 5000);
+          
+          // Não mostrar toast adicional, o alerta já mostra
+          return;
+        }
+      }
+      
       console.error('Erro no autosave:', error);
       setSaveError(error.message || 'Erro ao salvar');
       toast.error('Erro ao salvar. Tente novamente.', {
@@ -303,7 +440,7 @@ const FormPage = () => {
       setSaving(false);
       saveAbortControllerRef.current = null;
     }
-  }, [ideaId, user?.uid, saving, watchedValues]);
+  }, [ideaId, user?.uid, saving, watchedValues, setValue]);
 
   // Handle form field updates from chatbot
   const handleFormFieldUpdate = (field, value) => {
@@ -498,9 +635,18 @@ const FormPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Main Content - Flexbox Layout */}
-      <div className="flex-1 pt-20 flex transition-all duration-300 ease-in-out">
+    <>
+      {/* Moderation Alert */}
+      <ModerationAlert
+        isOpen={moderationAlert.isOpen}
+        onClose={() => setModerationAlert({ isOpen: false, fieldName: null, offensiveText: null })}
+        fieldName={moderationAlert.fieldName}
+        offensiveText={moderationAlert.offensiveText}
+      />
+      
+      <div className="min-h-screen bg-gray-50 flex">
+        {/* Main Content - Flexbox Layout */}
+        <div className="flex-1 pt-20 flex transition-all duration-300 ease-in-out">
         {/* Left Column - ChatBot (Sempre renderizado) */}
         <aside className={`hidden lg:block shrink-0 transition-all duration-300 ease-in-out ${
           isChatMinimized ? 'w-0 overflow-hidden' : 'w-96'
@@ -661,6 +807,7 @@ const FormPage = () => {
         </main>
       </div>
     </div>
+    </>
   );
 };
 

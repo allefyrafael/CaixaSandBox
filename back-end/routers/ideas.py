@@ -11,6 +11,7 @@ from services.db import (
     list_user_ideas,
     delete_idea
 )
+from agents.filtrador.agent import analyze_content
 from typing import List
 
 router = APIRouter()
@@ -23,6 +24,15 @@ def create_idea(payload: IdeaCreate):
     - **user_id**: ID do usuário (obrigatório)
     - **title**: Título inicial da ideia (opcional, padrão: "Nova Ideia")
     """
+    # Validação de moderação no título usando Agente Filtrador
+    if payload.title:
+        filter_result = analyze_content(payload.title, field_name="title")
+        if filter_result["is_inappropriate"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Por favor, mantenha a linguagem profissional e respeitosa. O título da ideia contém conteúdo inapropriado. {filter_result.get('reason', '')}"
+            )
+    
     try:
         idea_data = create_new_idea(payload.user_id, payload.title)
         return idea_data
@@ -65,10 +75,39 @@ def endpoint_autosave(user_id: str, idea_id: str, payload: IdeaUpdate):
     }
     ```
     """
+    # Validação de moderação nos campos atualizados usando Agente Filtrador
+    update_data = payload.dict(exclude_unset=True)
+    
+    # Verifica título se estiver sendo atualizado
+    if "title" in update_data and update_data["title"]:
+        filter_result = analyze_content(update_data["title"], field_name="title")
+        if filter_result["is_inappropriate"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Por favor, mantenha a linguagem profissional e respeitosa. O título da ideia contém conteúdo inapropriado. {filter_result.get('reason', '')}"
+            )
+    
+    # Verifica descrição se estiver sendo atualizada
+    if "description" in update_data and update_data["description"]:
+        filter_result = analyze_content(update_data["description"], field_name="description")
+        if filter_result["is_inappropriate"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Por favor, mantenha a linguagem profissional e respeitosa. A descrição contém conteúdo inapropriado. {filter_result.get('reason', '')}"
+            )
+    
+    # Verifica campos dinâmicos se estiverem sendo atualizados
+    if "dynamic_content" in update_data and update_data["dynamic_content"]:
+        for field_name, field_value in update_data["dynamic_content"].items():
+            if field_value and isinstance(field_value, str) and field_value.strip():
+                filter_result = analyze_content(field_value, field_name=field_name)
+                if filter_result["is_inappropriate"]:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Por favor, mantenha a linguagem profissional e respeitosa. O campo '{field_name}' contém conteúdo inapropriado. {filter_result.get('reason', '')}"
+                    )
+    
     try:
-        # exclude_unset=True garante que só enviamos o que foi digitado
-        update_data = payload.dict(exclude_unset=True)
-        
         if not update_data:
             return {
                 "status": "success",

@@ -1,0 +1,50 @@
+DETECÇÃO DE CONTEÚDO SEM SENTIDO
+
+O Agente Filtrador deve detectar conteúdo que não tem relação com inovação, ideias ou projetos do Sandbox CAIXA.
+
+CRITÉRIOS PARA CONTEÚDO SEM SENTIDO:
+
+1. SEQUÊNCIAS ALEATÓRIAS DE PALAVRAS:
+   - Exemplo: "pão batata e frango"
+   - Características: Palavras sem relação lógica entre si
+   - Não menciona inovação, tecnologia, serviços, bancos, CAIXA, ou qualquer contexto relevante
+
+2. CONTEÚDO COMPLETAMENTE FORA DE CONTEXTO:
+   - Receitas de comida
+   - Listas de compras
+   - Conversas pessoais sem relação com ideias
+   - Piadas ou memes sem contexto de inovação
+   - Texto aleatório ou spam
+
+3. FALTA DE COERÊNCIA:
+   - Texto que não forma uma ideia ou proposta
+   - Palavras soltas sem estrutura
+   - Conteúdo que não pode ser entendido como uma ideia de inovação
+
+4. AUSÊNCIA DE CONTEXTO DE INOVAÇÃO:
+   - Não menciona problemas a resolver
+   - Não menciona soluções ou ideias
+   - Não tem relação com serviços bancários, financeiros ou da CAIXA
+   - Não menciona tecnologia, processos ou melhorias
+
+EXEMPLOS DE CONTEÚDO SEM SENTIDO:
+- "pão batata e frango"
+- "gato cachorro passarinho"
+- "123 456 789"
+- "teste teste teste"
+- Qualquer sequência de palavras sem sentido no contexto de inovação
+
+COMO DETECTAR:
+1. Verificar se o conteúdo menciona algo relacionado a:
+   - Inovação, ideias, projetos
+   - Tecnologia, soluções, problemas
+   - CAIXA, bancos, serviços financeiros
+   - Melhorias, processos, clientes
+
+2. Se NENHUM desses elementos estiver presente, considerar como "conteudo_sem_sentido"
+
+3. Se houver dúvida, considerar o contexto do campo:
+   - Título de ideia: deve ser relacionado a uma proposta
+   - Descrição: deve descrever uma ideia ou solução
+   - Outros campos: devem estar relacionados ao contexto da ideia
+

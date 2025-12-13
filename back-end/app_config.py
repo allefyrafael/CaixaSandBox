@@ -3,7 +3,6 @@ Configurações e Variáveis de Ambiente
 """
 import os
 from dotenv import load_dotenv
-from config.prompts import SYSTEM_PROMPT
 
 # ============================================
 # CREDENCIAIS
@@ -53,8 +52,7 @@ MODEL_NAME = "llama-3.3-70b-versatile"
 TEMPERATURE = 0.2  # Baixa criatividade para seguir regras
 MAX_HISTORY_MESSAGES = 10
 
-# Prompt do sistema importado de config/prompts.py
-# Para editar o prompt, modifique: config/prompts.py
+# NOTA: Prompts agora estão em agents/filtrador/prompts.py e agents/ideia/prompts.py
 
 # ============================================
 # CONFIGURAÇÕES DE AUTOSAVE

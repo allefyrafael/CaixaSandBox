@@ -5,6 +5,8 @@ Entrada principal da aplicação
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import ideas, chat
+from agents.filtrador import router as filtrador_router
+from agents.ideia import router as ideia_router
 
 # Configuração da Documentação do Swagger
 app = FastAPI(
@@ -23,8 +25,13 @@ app.add_middleware(
 )
 
 # Registra as rotas
-app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
+# Rotas legadas (mantidas para compatibilidade)
+app.include_router(chat.router, prefix="/api/chat", tags=["Chat (Legado)"])
 app.include_router(ideas.router, prefix="/api/ideas", tags=["Ideas"])
+
+# Rotas dos Agentes (nova arquitetura)
+app.include_router(filtrador_router.router, prefix="/api/agents", tags=["Agente Filtrador"])
+app.include_router(ideia_router.router, prefix="/api/agents", tags=["Agente de Ideia"])
 
 @app.get("/", summary="Status da API")
 def home():

@@ -19,13 +19,14 @@ from services.db import (
     get_idea_context,
     clear_chat_history
 )
-from services.ai import (
-    get_junibox_response,  # Função simplificada
-    generate_junibox_response,  # Função com Firebase
+from agents.ideia.agent import (
+    get_response as get_ideia_response,  # Função simplificada
+    generate_response as generate_ideia_response,  # Função com Firebase
     generate_idea_suggestions, 
     validate_idea_completeness,
     generate_field_suggestion
 )
+from agents.filtrador.agent import analyze_content
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 
@@ -65,7 +66,7 @@ def chat_simple(request: ChatRequest):
             detail="A mensagem não pode estar vazia."
         )
     
-    response_text = get_junibox_response(request.message, request.history)
+    response_text = get_ideia_response(request.message, request.history)
     
     return {"response": response_text}
 
@@ -79,11 +80,12 @@ def endpoint_chat(payload: ChatMessage):
     Envia uma mensagem para o JuniBox e recebe uma resposta
     
     **Fluxo:**
-    1. Salva a mensagem do usuário no Firestore
-    2. Busca o contexto da ideia e histórico de chat
-    3. Gera resposta usando Groq AI (Llama 3) com contexto do formulário
-    4. Salva a resposta da IA no Firestore
-    5. Retorna a resposta para o frontend
+    1. Valida mensagem do usuário com Agente Filtrador (ANTES de salvar)
+    2. Se aprovada, salva mensagem do usuário no Firestore
+    3. Busca o contexto da ideia e histórico de chat
+    4. Gera resposta usando Agente de Ideia (Groq AI) com contexto do formulário
+    5. Salva a resposta da IA no Firestore
+    6. Retorna a resposta para o frontend
     
     **Parâmetros:**
     - **user_id**: ID do usuário
@@ -92,28 +94,36 @@ def endpoint_chat(payload: ChatMessage):
     - **form_context**: Contexto do formulário (seção atual, dados do formulário, etc)
     """
     try:
-        # 1. Salva mensagem do usuário
+        # 1. VALIDAÇÃO DO AGENTE FILTRADOR ANTES DE SALVAR
+        filter_result = analyze_content(payload.message, field_name="chat_message")
+        if filter_result["is_inappropriate"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Por favor, mantenha a linguagem profissional e respeitosa. Sua mensagem contém conteúdo inapropriado. {filter_result.get('reason', '')}"
+            )
+        
+        # 2. Salva mensagem do usuário (após validação)
         save_chat_message(payload.user_id, payload.idea_id, "user", payload.message)
         
-        # 2. Busca contexto em paralelo (otimização)
+        # 3. Busca contexto em paralelo (otimização)
         with ThreadPoolExecutor(max_workers=2) as executor:
             history_future = executor.submit(get_chat_history, payload.user_id, payload.idea_id)
             idea_future = executor.submit(get_idea_context, payload.user_id, payload.idea_id)
             history = history_future.result()
             idea_data = idea_future.result()
         
-        # 3. Gera resposta da IA com contexto do formulário
-        response = generate_junibox_response(
+        # 4. Gera resposta da IA com contexto do formulário
+        response = generate_ideia_response(
             payload.message, 
             history, 
             idea_data,
             form_context=payload.form_context
         )
         
-        # 4. Salva resposta da IA
+        # 5. Salva resposta da IA
         save_chat_message(payload.user_id, payload.idea_id, "assistant", response)
         
-        # 5. Retorna resposta
+        # 6. Retorna resposta
         return {
             "response": response,
             "timestamp": datetime.now()
@@ -227,6 +237,9 @@ def suggest_field_endpoint(payload: FieldSuggestionRequest):
                 detail=f"Campo '{payload.field_name}' não é opcional. Apenas campos opcionais podem receber sugestões da IA."
             )
         
+        # Buscar contexto da ideia
+        idea_context = get_idea_context(payload.user_id, payload.idea_id)
+        
         # Preparar contexto do formulário
         step_names = ["Sua Ideia", "Objetivos e Metas", "Cronograma"]
         step_name = step_names[payload.current_step] if 0 <= payload.current_step < len(step_names) else "Desconhecida"
@@ -239,9 +252,9 @@ def suggest_field_endpoint(payload: FieldSuggestionRequest):
         
         # Gerar sugestão
         suggestion = generate_field_suggestion(
-            payload.field_name,
+            idea_context,
             form_context,
-            payload.current_step
+            payload.field_name
         )
         
         return suggestion

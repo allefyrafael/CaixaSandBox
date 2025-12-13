@@ -39,6 +39,15 @@ async function fetchAPI(endpoint, options = {}) {
         throw friendlyError;
       }
       
+      // Tratamento especial para erro 400 (Bad Request) - Moderação de conteúdo
+      if (response.status === 400 && errorMessage.includes('inapropriado')) {
+        const moderationError = new Error(errorMessage);
+        moderationError.status = 400;
+        moderationError.isModerationError = true;
+        moderationError.originalMessage = errorMessage;
+        throw moderationError;
+      }
+      
       throw new Error(errorMessage);
     }
 

@@ -1,21 +1,21 @@
 """
-Carregador de Base de Conhecimento
+Carregador de Base de Conhecimento do Agente Filtrador
 Lê arquivos de texto da pasta knowledge/ e os inclui no prompt
 """
 import os
 from pathlib import Path
 from typing import List
 
-# Caminho para a pasta de conhecimento
+# Caminho para a pasta de conhecimento do Filtrador
 KNOWLEDGE_DIR = Path(__file__).parent / "knowledge"
 
-def load_knowledge_base() -> str:
+def load_filtrador_knowledge() -> str:
     """
-    Carrega todos os arquivos de texto da pasta knowledge/
+    Carrega todos os arquivos de texto da pasta knowledge/ do Agente Filtrador
     e retorna como uma string formatada
     
     Returns:
-        String com todo o conteúdo dos arquivos de conhecimento
+        String com todo o conteúdo dos arquivos de conhecimento do Filtrador
     """
     if not KNOWLEDGE_DIR.exists():
         return ""
@@ -57,9 +57,9 @@ def load_knowledge_base() -> str:
     
     return ""
 
-def get_knowledge_base_summary() -> dict:
+def get_filtrador_knowledge_summary() -> dict:
     """
-    Retorna um resumo dos arquivos de conhecimento carregados
+    Retorna um resumo dos arquivos de conhecimento carregados do Filtrador
     
     Returns:
         Dicionário com informações sobre os arquivos

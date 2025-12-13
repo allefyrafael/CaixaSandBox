@@ -1,0 +1,65 @@
+DETECÇÃO DE CRÍTICAS DESTRUTIVAS
+
+O Agente Filtrador deve distinguir entre críticas construtivas (permitidas) e críticas destrutivas (bloqueadas).
+
+CRÍTICAS DESTRUTIVAS (BLOQUEAR):
+
+1. ATAQUES SEM PROPOSTA:
+   - "A CAIXA é uma merda"
+   - "Esse banco não presta"
+   - "A empresa é ruim"
+   - Qualquer ataque pessoal ou institucional sem proposta de melhoria
+
+2. RECLAMAÇÕES SEM CONTEXTO DE INOVAÇÃO:
+   - Reclamações genéricas sem relação com ideias ou projetos
+   - Queixas pessoais sem proposta de solução
+   - Ataques à reputação sem fundamento construtivo
+
+3. CONTEÚDO QUE PREJUDICA A REPUTAÇÃO:
+   - Afirmações falsas ou difamatórias
+   - Ataques à imagem institucional sem base construtiva
+   - Conteúdo que pode causar dano à reputação da CAIXA
+
+CARACTERÍSTICAS DE CRÍTICAS DESTRUTIVAS:
+- Não oferece solução ou proposta
+- Não está relacionada a ideias ou inovação
+- É apenas um ataque ou queixa
+- Não contribui para o processo de ideação
+- Pode prejudicar a reputação institucional
+
+CRÍTICAS CONSTRUTIVAS (PERMITIR):
+
+1. CRÍTICAS COM PROPOSTA:
+   - "A CAIXA poderia melhorar o atendimento implementando..."
+   - "Sugiro que a empresa adote uma solução para..."
+   - "Identifiquei um problema e tenho uma ideia para resolver..."
+
+2. FEEDBACK COM CONTEXTO DE INOVAÇÃO:
+   - Críticas que fazem parte de uma proposta de melhoria
+   - Análise de problemas com sugestão de solução
+   - Identificação de gaps com ideias para preenchê-los
+
+3. OBSERVAÇÕES TÉCNICAS:
+   - Análise de processos com proposta de otimização
+   - Identificação de problemas técnicos com soluções
+   - Feedback sobre serviços com ideias de melhoria
+
+COMO DISTINGUIR:
+
+PERGUNTA-CHAVE: "Esta crítica oferece uma proposta ou solução?"
+
+- Se SIM → Crítica construtiva (PERMITIR)
+- Se NÃO → Crítica destrutiva (BLOQUEAR)
+
+EXEMPLOS:
+
+BLOQUEAR:
+- "A CAIXA é ruim" ❌
+- "Esse banco não presta" ❌
+- "A empresa é uma porcaria" ❌
+
+PERMITIR:
+- "A CAIXA poderia melhorar o atendimento implementando um chatbot" ✅
+- "Identifiquei que o processo de abertura de conta é lento, sugiro uma solução digital" ✅
+- "O atendimento online poderia ser mais eficiente com IA" ✅
+

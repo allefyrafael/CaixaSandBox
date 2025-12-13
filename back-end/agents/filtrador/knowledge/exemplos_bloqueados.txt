@@ -1,0 +1,50 @@
+EXEMPLOS DE CONTEÚDO BLOQUEADO
+
+Este arquivo contém exemplos reais de conteúdo que deve ser bloqueado pelo Agente Filtrador.
+
+EXEMPLOS DE XINGAMENTOS E PALAVRÕES:
+- "Arrombada"
+- "Caralho"
+- "Puta"
+- "Foda"
+- "Porra"
+- "Merda"
+- "Bosta"
+- "Cu"
+- "Buceta"
+- "Pau"
+- "Pica"
+- "Piroca"
+- "Rola"
+- "Viado"
+- "Veado"
+- "Bicha"
+
+EXEMPLOS DE TROCADILHOS MALICIOSOS:
+- "Arthur Gay" (como título de ideia - trocadilho malicioso)
+- "João Gay" (como nome de ideia - trocadilho malicioso)
+- Qualquer nome próprio que contenha palavra ofensiva quando claramente é trocadilho
+
+EXEMPLOS DE TENTATIVAS DE EVAÇÃO:
+- "p0rr4" (substituição de letras por números)
+- "f0d4" (substituição de letras por números)
+- "c4r4lh0" (substituição de letras por números)
+- "pUtA" (alternância de maiúsculas/minúsculas)
+- "cArAlHo" (alternância de maiúsculas/minúsculas)
+- "p0rr@" (substituição de letras por números e símbolos)
+
+EXEMPLOS DE CONTEÚDO SEM SENTIDO:
+- "pão batata e frango" (conteúdo completamente fora de contexto)
+- Sequências aleatórias de palavras sem relação
+- Texto que não tem relação com inovação, ideias ou projetos
+
+EXEMPLOS DE CRÍTICAS DESTRUTIVAS:
+- "A CAIXA é uma merda" (crítica sem proposta construtiva)
+- "Esse banco não presta" (ataque sem contexto de inovação)
+- Qualquer crítica à empresa sem proposta de melhoria
+
+CONTEXTO LEGÍTIMO (NÃO BLOQUEAR):
+- "comunidade gay" (contexto legítimo sobre direitos)
+- "direitos da comunidade gay" (contexto legítimo)
+- "A CAIXA poderia melhorar o atendimento implementando..." (crítica construtiva com proposta)
+
