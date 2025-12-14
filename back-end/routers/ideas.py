@@ -96,6 +96,15 @@ def endpoint_autosave(user_id: str, idea_id: str, payload: IdeaUpdate):
                 detail=f"Por favor, mantenha a linguagem profissional e respeitosa. A descrição contém conteúdo inapropriado. {filter_result.get('reason', '')}"
             )
     
+    # Verifica público-alvo se estiver sendo atualizado
+    if "target_audience" in update_data and update_data["target_audience"]:
+        filter_result = analyze_content(update_data["target_audience"], field_name="target_audience")
+        if filter_result["is_inappropriate"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Por favor, mantenha a linguagem profissional e respeitosa. O campo 'Público-Alvo' contém conteúdo inapropriado. {filter_result.get('reason', '')}"
+            )
+    
     # Verifica campos dinâmicos se estiverem sendo atualizados
     if "dynamic_content" in update_data and update_data["dynamic_content"]:
         for field_name, field_value in update_data["dynamic_content"].items():
