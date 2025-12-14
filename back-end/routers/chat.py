@@ -1,6 +1,6 @@
 """
 Rotas de Chat
-Endpoints para conversação com o JuniBox
+Endpoints para conversação com o Sandbot
 """
 from fastapi import APIRouter, HTTPException, status
 from schemas import (
@@ -36,13 +36,13 @@ router = APIRouter()
 # ENDPOINT SIMPLIFICADO (SEM FIREBASE)
 # ============================================
 
-@router.post("/", response_model=ChatRequestResponse, summary="Chat simplificado com JuniBox")
+@router.post("/", response_model=ChatRequestResponse, summary="Chat simplificado com Sandbot")
 def chat_simple(request: ChatRequest):
     """
     **Endpoint Simplificado** - Chat básico sem necessidade de Firebase
     
     Recebe a mensagem do usuário e o histórico da conversa.
-    Retorna a resposta do agente JuniBox processada na Groq.
+    Retorna a resposta do agente Sandbot processada na Groq.
     
     **Ideal para:**
     - Testes rápidos
@@ -55,7 +55,7 @@ def chat_simple(request: ChatRequest):
         "message": "Tenho uma ideia de app para a Caixa",
         "history": [
             {"role": "user", "content": "Olá"},
-            {"role": "assistant", "content": "Olá! Sou o JuniBox."}
+            {"role": "assistant", "content": "Olá! Sou o Sandbot."}
         ]
     }
     ```
@@ -77,7 +77,7 @@ def chat_simple(request: ChatRequest):
 @router.post("/send", response_model=ChatResponse)
 def endpoint_chat(payload: ChatMessage):
     """
-    Envia uma mensagem para o JuniBox e recebe uma resposta
+    Envia uma mensagem para o Sandbot e recebe uma resposta
     
     **Fluxo:**
     1. Valida mensagem do usuário com Agente Filtrador (ANTES de salvar)

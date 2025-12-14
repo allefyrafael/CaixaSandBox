@@ -1,14 +1,14 @@
-# 📚 Base de Conhecimento - JuniBox
+# 📚 Base de Conhecimento - Sandbot
 
 ## 📋 Visão Geral
 
-A pasta `config/knowledge/` contém arquivos de texto que servem como base de conhecimento adicional para o agente JuniBox. Esses arquivos são automaticamente carregados e incluídos no prompt do sistema antes de cada conversa.
+A pasta `config/knowledge/` contém arquivos de texto que servem como base de conhecimento adicional para o agente Sandbot. Esses arquivos são automaticamente carregados e incluídos no prompt do sistema antes de cada conversa.
 
 ## 🎯 Como Funciona
 
 1. **Carregamento Automático**: Quando o servidor inicia, todos os arquivos `.txt` e `.md` da pasta `knowledge/` são lidos
 2. **Inclusão no Prompt**: O conteúdo é adicionado ao prompt do sistema como contexto adicional
-3. **Uso pela IA**: O JuniBox usa essas informações para avaliar ideias e responder perguntas
+3. **Uso pela IA**: O Sandbot usa essas informações para avaliar ideias e responder perguntas
 
 ## 📁 Estrutura
 
@@ -171,7 +171,7 @@ Retorna:
    ↓
 4. Incluído no prompt do sistema
    ↓
-5. JuniBox usa nas respostas
+5. Sandbot usa nas respostas
 ```
 
 ## 📌 Notas Importantes

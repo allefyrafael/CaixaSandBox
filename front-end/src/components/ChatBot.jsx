@@ -21,7 +21,7 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize, c
     {
       id: 1,
       type: 'bot',
-      content: 'Olá! Sou o JuniBox, assistente do Sandbox CAIXA. Estou aqui para ajudar você a estruturar sua ideia inovadora. Como posso te ajudar hoje?',
+      content: 'Olá! Sou o Sandbot, assistente do Sandbox CAIXA. Estou aqui para ajudar você a estruturar sua ideia inovadora. Como posso te ajudar hoje?',
       timestamp: new Date()
     }
   ]);
@@ -182,7 +182,7 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize, c
           {
             id: 'welcome',
             type: 'bot',
-            content: 'Olá! Sou o JuniBox, assistente do Sandbox CAIXA. Estou aqui para ajudar você a estruturar sua ideia inovadora. Como posso te ajudar hoje?',
+            content: 'Olá! Sou o Sandbot, assistente do Sandbox CAIXA. Estou aqui para ajudar você a estruturar sua ideia inovadora. Como posso te ajudar hoje?',
             timestamp: new Date()
           },
           ...historyMessages
@@ -194,7 +194,7 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize, c
           {
             id: 'welcome',
             type: 'bot',
-            content: 'Olá! Sou o JuniBox, assistente do Sandbox CAIXA. Estou aqui para ajudar você a estruturar sua ideia inovadora. Como posso te ajudar hoje?',
+            content: 'Olá! Sou o Sandbot, assistente do Sandbox CAIXA. Estou aqui para ajudar você a estruturar sua ideia inovadora. Como posso te ajudar hoje?',
             timestamp: new Date()
           }
         ]);
@@ -206,7 +206,7 @@ const ChatBot = ({ onFormFieldUpdate, formData, isMinimized, onToggleMinimize, c
         {
           id: 'welcome',
           type: 'bot',
-          content: 'Olá! Sou o JuniBox, assistente do Sandbox CAIXA. Estou aqui para ajudar você a estruturar sua ideia inovadora. Como posso te ajudar hoje?',
+          content: 'Olá! Sou o Sandbot, assistente do Sandbox CAIXA. Estou aqui para ajudar você a estruturar sua ideia inovadora. Como posso te ajudar hoje?',
           timestamp: new Date()
         }
       ]);

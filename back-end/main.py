@@ -1,5 +1,5 @@
 """
-JuniBox Backend - FastAPI + Firebase + Groq AI
+Sandbot Backend - FastAPI + Firebase + Groq AI
 Entrada principal da aplicação
 """
 from fastapi import FastAPI
@@ -10,7 +10,7 @@ from agents.ideia import router as ideia_router
 
 # Configuração da Documentação do Swagger
 app = FastAPI(
-    title="API JuniBox - CAIXA Sandbox",
+    title="API Sandbot - CAIXA Sandbox",
     description="Backend responsável por avaliar ideias usando Llama 3 via Groq.",
     version="1.0.0"
 )
@@ -38,7 +38,7 @@ def home():
     """Endpoint de status - verifica se a API está online"""
     return {
         "status": "online", 
-        "message": "JuniBox API is running",
+        "message": "Sandbot API is running",
         "docs": "/docs",
         "version": "1.0.0"
     }
@@ -46,7 +46,7 @@ def home():
 @app.get("/health", summary="Health Check")
 def health_check():
     """Endpoint de health check para monitoramento"""
-    return {"status": "healthy", "service": "JuniBox Backend"}
+    return {"status": "healthy", "service": "Sandbot Backend"}
 
 # Para rodar direto pelo arquivo (opcional)
 if __name__ == "__main__":

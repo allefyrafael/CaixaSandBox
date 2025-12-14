@@ -1,5 +1,5 @@
 """
-Agente de Ideia (JuniBox)
+Agente de Ideia (Sandbot)
 Sistema de assistência para ideação e estruturação de propostas
 """
 import json
@@ -39,7 +39,7 @@ def get_response(user_message: str, history: List[Message]) -> str:
     if not user_message or not user_message.strip():
         return "Por favor, envie uma mensagem válida."
     
-    # 1. Começa com o System Prompt (A personalidade do JuniBox)
+    # 1. Começa com o System Prompt (A personalidade do Sandbot)
     system_prompt = get_ideia_prompt()
     messages_payload = [{"role": "system", "content": system_prompt}]
     

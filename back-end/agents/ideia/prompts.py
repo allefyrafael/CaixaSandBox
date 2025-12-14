@@ -1,12 +1,12 @@
 """
-Prompts do Agente de Ideia (JuniBox)
+Prompts do Agente de Ideia (Sandbot)
 Sistema de assistência para ideação
 """
 from .knowledge_loader import load_ideia_knowledge
 
 def get_ideia_prompt() -> str:
     """
-    Retorna o prompt do Agente de Ideia (JuniBox) com conhecimento carregado
+    Retorna o prompt do Agente de Ideia (Sandbot) com conhecimento carregado
     """
     # Carrega conhecimento específico do Agente de Ideia
     knowledge = load_ideia_knowledge()
@@ -14,11 +14,11 @@ def get_ideia_prompt() -> str:
     # Prompt base do Agente de Ideia
     # NOTA: Moderação é responsabilidade do Agente Filtrador, não precisa aqui
     base_prompt = """Você é o avaliador oficial de ideias da CAIXA Econômica Federal no programa Sandbox.
-Seu nome é JuniBox.
+Seu nome é Sandbot.
 
 Sua função é:
 
-1. Se apresentar como JuniBox.
+1. Se apresentar como Sandbot.
 2. Estruturar a ideia enviada pelo usuário.
 3. Guiar o usuário a responder UMA pergunta por vez.
 4. Corrigir ambiguidade e avaliar se os campos fazem sentido.

@@ -1,11 +1,11 @@
-# 🏗️ JuniBox Backend - FastAPI + Firebase + Groq AI
+# 🏗️ Sandbot Backend - FastAPI + Firebase + Groq AI
 
-Backend do sistema JuniBox, focado em gestão de ideias com assistência de IA contextual.
+Backend do sistema Sandbot, focado em gestão de ideias com assistência de IA contextual.
 
 ## 📋 Características
 
 - **Autosave Inteligente**: Sistema de salvamento automático otimizado (Lazy Save)
-- **IA Contextual**: Assistente JuniBox powered by Groq (Llama 3.3)
+- **IA Contextual**: Assistente Sandbot powered by Groq (Llama 3.3)
 - **Firebase Firestore**: Banco de dados NoSQL escalável (opcional)
 - **API RESTful**: Endpoints bem documentados com FastAPI
 - **Validação de Dados**: Schemas Pydantic para segurança
@@ -208,7 +208,7 @@ Após iniciar o servidor, acesse:
 | Método | Endpoint | Descrição | Firebase |
 |--------|----------|-----------|----------|
 | POST | `/api/chat/` | **Chat simplificado** (sem Firebase) | ❌ Não |
-| POST | `/api/chat/send` | Enviar mensagem ao JuniBox | ✅ Sim |
+| POST | `/api/chat/send` | Enviar mensagem ao Sandbot | ✅ Sim |
 | GET | `/api/chat/history/{user_id}/{idea_id}` | Buscar histórico | ✅ Sim |
 | DELETE | `/api/chat/history/{user_id}/{idea_id}` | Limpar histórico | ✅ Sim |
 | GET | `/api/chat/suggestions/{user_id}/{idea_id}` | Gerar sugestões de IA | ✅ Sim |
@@ -241,7 +241,7 @@ curl -X POST "http://localhost:8000/api/chat/" \
 **Resposta:**
 ```json
 {
-  "response": "Olá! Sou o JuniBox, avaliador oficial de ideias da CAIXA. Como posso ajudar você a estruturar sua ideia?"
+  "response": "Olá! Sou o Sandbot, avaliador oficial de ideias da CAIXA. Como posso ajudar você a estruturar sua ideia?"
 }
 ```
 
@@ -259,15 +259,15 @@ curl -X POST "http://localhost:8000/api/chat/" \
       },
       {
         "role": "assistant",
-        "content": "Olá! Sou o JuniBox. Conte-me mais sobre sua ideia."
+        "content": "Olá! Sou o Sandbot. Conte-me mais sobre sua ideia."
       }
     ]
   }'
 ```
 
-## 🎨 Como Editar o Prompt do JuniBox
+## 🎨 Como Editar o Prompt do Sandbot
 
-O sistema de prompts do JuniBox funciona em duas camadas:
+O sistema de prompts do Sandbot funciona em duas camadas:
 
 ### 1. Prompt Base (`config/prompts.py`)
 
@@ -277,10 +277,10 @@ O sistema de prompts do JuniBox funciona em duas camadas:
 def get_system_prompt() -> str:
     base_prompt = """
 Você é o avaliador oficial de ideias da CAIXA Econômica Federal no programa Sandbox.
-Seu nome é JuniBox.
+Seu nome é Sandbot.
 
 Sua função é:
-1. Se apresentar como JuniBox.
+1. Se apresentar como Sandbot.
 2. Estruturar a ideia enviada pelo usuário.
 ...
 """
@@ -302,7 +302,7 @@ Arquivos `.txt` ou `.md` nesta pasta são carregados automaticamente e adicionad
 
 ### Como Funciona
 
-1. O `prompts.py` define o prompt base (personalidade e função do JuniBox)
+1. O `prompts.py` define o prompt base (personalidade e função do Sandbot)
 2. Os arquivos em `knowledge/` são carregados e adicionados como contexto adicional
 3. Ambos são combinados no `SYSTEM_PROMPT` final
 
@@ -357,12 +357,12 @@ O endpoint `PATCH /api/ideas/{user_id}/{idea_id}`:
 - Adiciona timestamp automático
 - Retorna confirmação de salvamento
 
-## 🧠 Como Funciona o JuniBox (IA)
+## 🧠 Como Funciona o Sandbot (IA)
 
 1. **Contexto da Ideia**: A IA recebe todos os dados atuais (título, descrição, público-alvo)
 2. **Histórico de Chat**: Mantém contexto das últimas 10 mensagens
 3. **Prompt Personalizado**: 
-   - **Prompt Base**: Definido em `config/prompts.py` (personalidade e função do JuniBox)
+   - **Prompt Base**: Definido em `config/prompts.py` (personalidade e função do Sandbot)
    - **Base de Conhecimento**: Arquivos `.txt`/`.md` em `config/knowledge/` (regras, critérios, diretrizes)
    - Ambos são combinados automaticamente no `SYSTEM_PROMPT` final
 4. **Modelo**: Llama 3.3 70B via Groq (rápido e eficiente)

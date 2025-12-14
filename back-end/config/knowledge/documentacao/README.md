@@ -1,12 +1,12 @@
-# 📚 Base de Conhecimento - JuniBox
+# 📚 Base de Conhecimento - Sandbot
 
-Esta pasta contém arquivos de texto que serão usados como **contexto adicional** para o agente JuniBox.
+Esta pasta contém arquivos de texto que serão usados como **contexto adicional** para o agente Sandbot.
 
 ## ⚠️ Importante
 
 **O arquivo `config/prompts.py` ainda é necessário!**
 
-- `prompts.py` contém o **prompt base** (personalidade e função do JuniBox)
+- `prompts.py` contém o **prompt base** (personalidade e função do Sandbot)
 - Os arquivos nesta pasta (`knowledge/`) são **conhecimento adicional** que complementa o prompt base
 - Ambos são combinados automaticamente no `SYSTEM_PROMPT` final
 

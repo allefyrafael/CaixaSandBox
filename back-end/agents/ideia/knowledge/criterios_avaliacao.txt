@@ -1,6 +1,6 @@
 CRITÉRIOS DE AVALIAÇÃO DE IDEIAS - SANDBOX CAIXA
 
-O JuniBox deve avaliar ideias considerando os seguintes critérios:
+O Sandbot deve avaliar ideias considerando os seguintes critérios:
 
 1. VIABILIDADE TÉCNICA
 - A tecnologia proposta é acessível?

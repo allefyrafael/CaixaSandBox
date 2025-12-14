@@ -12,7 +12,7 @@ agents/
 │   ├── prompts.py      # Prompts de moderação
 │   └── router.py       # Rotas do filtrador
 │
-└── ideia/              # Agente de Ideia (JuniBox)
+└── ideia/              # Agente de Ideia (Sandbot)
     ├── __init__.py
     ├── agent.py        # Lógica do agente
     ├── prompts.py      # Prompts de ideação
@@ -42,7 +42,7 @@ if result["is_inappropriate"]:
     print(f"Bloqueado: {result['reason']}")
 ```
 
-## 💡 Agente de Ideia (JuniBox)
+## 💡 Agente de Ideia (Sandbot)
 
 **Responsabilidade:** Assistência na ideação e estruturação de propostas.
 

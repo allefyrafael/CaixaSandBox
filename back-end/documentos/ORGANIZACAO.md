@@ -1,4 +1,4 @@
-# 📋 Guia de Organização - JuniBox Backend
+# 📋 Guia de Organização - Sandbot Backend
 
 ## ✅ Estrutura Organizada
 
@@ -55,7 +55,7 @@ back-end/
 ```python
 SYSTEM_PROMPT = """
 Você é o avaliador oficial de ideias da CAIXA Econômica Federal.
-Seu nome é JuniBox.
+Seu nome é Sandbot.
 
 [Edite aqui o prompt conforme necessário]
 """

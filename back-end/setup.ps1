@@ -1,7 +1,7 @@
-# Script de Setup do Backend JuniBox
+# Script de Setup do Backend Sandbot
 # Execute como: .\setup.ps1
 
-Write-Host "Junibox Backend - Setup Automatico" -ForegroundColor Cyan
+Write-Host "Sandbot Backend - Setup Automatico" -ForegroundColor Cyan
 Write-Host ""
 
 # Verifica se está na pasta correta

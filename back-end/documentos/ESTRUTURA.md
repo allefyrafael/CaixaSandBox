@@ -1,4 +1,4 @@
-# 📁 Estrutura do Projeto - JuniBox Backend
+# 📁 Estrutura do Projeto - Sandbot Backend
 
 ## 🗂️ Organização dos Arquivos
 
@@ -34,7 +34,7 @@ back-end/
 
 ## 🎯 Onde Editar o Prompt
 
-Para editar o prompt do JuniBox, abra:
+Para editar o prompt do Sandbot, abra:
 
 **`config/prompts.py`**
 

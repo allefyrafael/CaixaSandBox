@@ -154,7 +154,7 @@ def get_idea(user_id: str, idea_id: str) -> Optional[Dict[str, Any]]:
 def get_idea_context(user_id: str, idea_id: str) -> Dict[str, Any]:
     """
     Lê os dados da ideia para a IA entender o contexto
-    Usado antes de gerar respostas do JuniBox
+    Usado antes de gerar respostas do Sandbot
     
     Args:
         user_id: ID do usuário

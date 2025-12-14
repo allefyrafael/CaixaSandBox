@@ -5,7 +5,7 @@
 O sistema foi reestruturado para usar uma arquitetura modular com **dois agentes especializados**:
 
 1. **🛡️ Agente Filtrador** - Moderação antes de salvar
-2. **💡 Agente de Ideia (JuniBox)** - Assistência na ideação
+2. **💡 Agente de Ideia (Sandbot)** - Assistência na ideação
 
 ## 🏗️ Estrutura de Pastas
 
@@ -21,7 +21,7 @@ back-end/
 │   │   ├── prompts.py         # Prompts de moderação
 │   │   └── router.py          # Rotas: /api/agents/filtrador/*
 │   │
-│   └── ideia/                 # 💡 Agente de Ideia (JuniBox)
+│   └── ideia/                 # 💡 Agente de Ideia (Sandbot)
 │       ├── __init__.py
 │       ├── agent.py           # Lógica do agente
 │       ├── prompts.py         # Prompts de ideação
@@ -90,7 +90,7 @@ if result["is_inappropriate"]:
 }
 ```
 
-## 💡 Agente de Ideia (JuniBox)
+## 💡 Agente de Ideia (Sandbot)
 
 ### Responsabilidade
 Assistência na ideação e estruturação de propostas de inovação.
@@ -151,7 +151,7 @@ response = generate_response(
     │             ▼
     │    ┌──────────────────┐
     │    │ Agente de Ideia  │
-    │    │  (JuniBox)       │
+    │    │  (Sandbot)       │
     │    └──────────────────┘
     │
     └─── Retorna erro ao usuário

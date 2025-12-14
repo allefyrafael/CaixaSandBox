@@ -98,25 +98,25 @@ class ChatRequest(BaseModel):
                 "message": "Tenho uma ideia de app para a Caixa",
                 "history": [
                     {"role": "user", "content": "Olá"},
-                    {"role": "assistant", "content": "Olá! Sou o JuniBox, avaliador de ideias da CAIXA."}
+                    {"role": "assistant", "content": "Olá! Sou o Sandbot, avaliador de ideias da CAIXA."}
                 ]
             }
         }
 
 class ChatRequestResponse(BaseModel):
     """Resposta do chat simplificado"""
-    response: str = Field(..., description="A resposta gerada pelo JuniBox")
+    response: str = Field(..., description="A resposta gerada pelo Sandbot")
     
     class Config:
         json_schema_extra = {
             "example": {
-                "response": "Olá! Sou o JuniBox, avaliador oficial de ideias da CAIXA. Como posso ajudar você a estruturar sua ideia?"
+                "response": "Olá! Sou o Sandbot, avaliador oficial de ideias da CAIXA. Como posso ajudar você a estruturar sua ideia?"
             }
         }
 
 # Schema completo para chat com Firebase
 class ChatMessage(BaseModel):
-    """Schema para enviar mensagem ao JuniBox"""
+    """Schema para enviar mensagem ao Sandbot"""
     user_id: str = Field(..., description="ID do usuário")
     idea_id: str = Field(..., description="ID da ideia sendo discutida")
     message: str = Field(..., min_length=1, description="Mensagem do usuário")
@@ -142,7 +142,7 @@ class ChatMessage(BaseModel):
 
 class ChatResponse(BaseModel):
     """Schema de resposta do chat"""
-    response: str = Field(..., description="Resposta do JuniBox")
+    response: str = Field(..., description="Resposta do Sandbot")
     timestamp: Optional[datetime] = None
     
     class Config:

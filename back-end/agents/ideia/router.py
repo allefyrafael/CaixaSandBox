@@ -1,5 +1,5 @@
 """
-Rotas do Agente de Ideia (JuniBox)
+Rotas do Agente de Ideia (Sandbot)
 Endpoints para assistência na ideação
 """
 from fastapi import APIRouter, HTTPException, status
@@ -39,7 +39,7 @@ def chat_simple(request: ChatRequest):
     **Endpoint Simplificado** - Chat básico sem necessidade de Firebase
     
     Recebe a mensagem do usuário e o histórico da conversa.
-    Retorna a resposta do Agente de Ideia (JuniBox) processada na Groq.
+    Retorna a resposta do Agente de Ideia (Sandbot) processada na Groq.
     
     **Ideal para:**
     - Testes rápidos
