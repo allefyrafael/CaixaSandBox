@@ -427,6 +427,29 @@ const FormPage = () => {
           
           // Não mostrar toast adicional, o alerta já mostra
           return;
+        } else {
+          // Se não conseguiu identificar o campo, limpar todos os campos que foram modificados recentemente
+          // como medida de segurança
+          const previous = previousValuesRef.current || {};
+          for (const [fieldName, currentValue] of Object.entries(watchedValues)) {
+            const previousValue = previous[fieldName] || '';
+            if (currentValue && currentValue.trim() && currentValue !== previousValue) {
+              // Limpar este campo como medida de segurança
+              setValue(fieldName, '');
+              blockedFieldsRef.current.add(fieldName);
+              setTimeout(() => {
+                blockedFieldsRef.current.delete(fieldName);
+              }, 5000);
+            }
+          }
+          
+          // Mostrar alerta genérico
+          setModerationAlert({
+            isOpen: true,
+            fieldName: null,
+            offensiveText: error.message || 'Conteúdo inapropriado detectado'
+          });
+          return;
         }
       }
       
