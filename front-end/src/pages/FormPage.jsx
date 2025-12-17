@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import { useAutosave } from '../contexts/AutosaveContext';
-import { getIdea, autosaveIdea, createIdea } from '../services/api';
+import { getIdea, autosaveIdea, createIdea, submitIdea, validateFields } from '../services/api';
 import toast from 'react-hot-toast';
 import {
   FileText,
@@ -14,14 +14,117 @@ import {
   ChevronRight,
   ChevronLeft,
   Loader2,
-  Brain
+  Brain,
+  AlertTriangle,
+  HelpCircle,
+  CheckCircle,
+  Circle,
+  Ban
 } from 'lucide-react';
 import ChatBot from '../components/ChatBot';
 import FieldSuggestion from '../components/FieldSuggestion';
 import ModerationAlert from '../components/ModerationAlert';
 import { getFieldSuggestion } from '../services/api';
 
+// Componente helper para indicador de validação
+// IMPORTANTE: Definir ANTES de FormPage para evitar problemas de hoisting
+const ValidationIndicator = ({ fieldName, fieldValidationErrors, fieldValue, isValidated = false }) => {
+  if (!fieldName) {
+    return null;
+  }
+  
+  // Determinar estado do campo
+  let state = 'empty'; // empty, valid, offensive, outOfContext
+  let error = null;
+  
+  // PRIORIDADE 1: Se há erro de validação, sempre mostrar
+  if (fieldValidationErrors && fieldValidationErrors[fieldName]) {
+    error = fieldValidationErrors[fieldName];
+    state = error.tipo === 'ofensivo' ? 'offensive' : 'outOfContext';
+    console.log(`[ValidationIndicator] ${fieldName} tem erro:`, error);
+  } else if (fieldValue && fieldValue.trim() && isValidated) {
+    // Campo tem valor e foi validado sem erros
+    state = 'valid';
+  } else if (!fieldValue || !fieldValue.trim()) {
+    // Campo está vazio
+    state = 'empty';
+  }
+  
+  // SEMPRE mostrar se houver erro, mesmo se o campo estiver vazio
+  // Não mostrar apenas se estiver vazio E não validado E não houver erro
+  if (state === 'empty' && !isValidated && !error) {
+    return null;
+  }
+  
+  console.log(`[ValidationIndicator] Renderizando ${fieldName} com estado:`, state, { 
+    fieldValue, 
+    isValidated, 
+    hasError: !!error,
+    fieldValidationErrors: fieldValidationErrors?.[fieldName]
+  });
+  
+  // Configurar ícone e cores baseado no estado
+  let Icon, color, bgColor, borderColor, title;
+  
+  switch (state) {
+    case 'valid':
+      Icon = CheckCircle;
+      color = 'text-green-600';
+      bgColor = 'bg-green-100';
+      borderColor = 'border-green-400';
+      title = 'Campo válido';
+      break;
+    case 'offensive':
+      Icon = Ban;
+      color = 'text-red-600';
+      bgColor = 'bg-red-100';
+      borderColor = 'border-red-400';
+      title = error?.justificativa || 'Conteúdo ofensivo detectado';
+      break;
+    case 'outOfContext':
+      Icon = HelpCircle;
+      color = 'text-yellow-600';
+      bgColor = 'bg-yellow-100';
+      borderColor = 'border-yellow-400';
+      title = error?.justificativa || 'Conteúdo fora de contexto';
+      break;
+    case 'empty':
+    default:
+      Icon = Circle;
+      color = 'text-gray-400';
+      bgColor = 'bg-gray-100';
+      borderColor = 'border-gray-300';
+      title = 'Campo vazio';
+      break;
+  }
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.5 }}
+      transition={{ 
+        type: "spring", 
+        stiffness: 500, 
+        damping: 30,
+        duration: 0.3 
+      }}
+      className={`absolute top-0 right-0 mt-2 mr-2 ${bgColor} ${borderColor} border-2 rounded-full p-2 z-20 shadow-lg`}
+      title={title}
+      style={{ zIndex: 20 }}
+    >
+      <Icon className={`w-5 h-5 ${color}`} />
+    </motion.div>
+  );
+};
+
 const FormPage = () => {
+  // LOG CRÍTICO: Confirmar que este arquivo está sendo carregado
+  console.log('[FormPage] ========== ARQUIVO CORRETO CARREGADO ==========');
+  console.log('[FormPage] Timestamp:', new Date().toISOString());
+  console.log('[FormPage] ValidationIndicator definido:', typeof ValidationIndicator !== 'undefined');
+  console.log('[FormPage] ModerationAlert importado:', typeof ModerationAlert !== 'undefined');
+  
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, isAuthenticated, loading: authLoading } = useFirebaseAuth();
@@ -55,6 +158,79 @@ const FormPage = () => {
   const [loadingSuggestions, setLoadingSuggestions] = useState({}); // { fieldName: true/false }
   const [moderationAlert, setModerationAlert] = useState({ isOpen: false, fieldName: null, offensiveText: null });
   const blockedFieldsRef = useRef(new Set()); // Campos bloqueados para autosave
+  const [fieldValidationErrors, setFieldValidationErrors] = useState({}); // { fieldName: { tipo: 'ofensivo' | 'fora_contexto', justificativa: '...' } }
+  const [validatedFields, setValidatedFields] = useState({}); // { fieldName: true } - Campos que já foram validados
+  
+  // Debug: Log do estado de moderationAlert e fieldValidationErrors
+  useEffect(() => {
+    console.log('[FormPage] Estado atual de moderationAlert:', moderationAlert);
+    console.log('[FormPage] Estado atual de fieldValidationErrors:', fieldValidationErrors);
+  }, [moderationAlert, fieldValidationErrors]);
+  
+  // Disparar alerta automaticamente quando fieldValidationErrors mudar
+  useEffect(() => {
+    const errors = Object.keys(fieldValidationErrors);
+    
+    console.log('[FormPage] useEffect fieldValidationErrors executado:', {
+      errorsCount: errors.length,
+      errors,
+      fieldValidationErrors,
+      watchedValues
+    });
+    
+    if (errors.length > 0) {
+      console.log('[FormPage] Erros de validação detectados, disparando alerta:', fieldValidationErrors);
+      
+      // Pegar o primeiro campo com erro
+      const firstErrorField = errors[0];
+      const firstError = fieldValidationErrors[firstErrorField];
+      
+      // Capturar texto problemático - usar o texto do erro se disponível, senão usar watchedValues
+      const problematicText = firstError.texto || watchedValues[firstErrorField] || '';
+      
+      console.log('[FormPage] Texto problemático capturado:', {
+        field: firstErrorField,
+        textoDoErro: firstError.texto,
+        textoDoWatched: watchedValues[firstErrorField],
+        textoFinal: problematicText
+      });
+      
+      // Preparar lista de todos os campos com problema
+      const todosCampos = errors.map(field => {
+        const error = fieldValidationErrors[field];
+        return {
+          campo: field,
+          texto: error.texto || watchedValues[field] || '', // Usar texto do erro se disponível
+          tipo: error.tipo,
+          justificativa: error.justificativa
+        };
+      });
+      
+      // Criar dados do alerta
+      const alertData = {
+        isOpen: true,
+        fieldName: firstErrorField,
+        offensiveText: problematicText,
+        tipo: firstError.tipo,
+        justificativa: firstError.justificativa || (firstError.tipo === 'ofensivo' ? 'Linguagem ofensiva detectada' : 'Conteúdo fora de contexto'),
+        todosCampos: todosCampos
+      };
+      
+      console.log('[FormPage] Disparando alerta automaticamente com dados:', alertData);
+      
+      // Usar setTimeout para garantir que o estado seja atualizado
+      setTimeout(() => {
+        setModerationAlert(alertData);
+      }, 100);
+    } else {
+      // Se não há erros, fechar alerta se estiver aberto
+      if (moderationAlert.isOpen) {
+        console.log('[FormPage] Nenhum erro, fechando alerta');
+        setModerationAlert({ isOpen: false, fieldName: null, offensiveText: null, tipo: null, justificativa: null, todosCampos: null });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fieldValidationErrors]);
   
   // Usar contexto de autosave
   const { 
@@ -72,8 +248,13 @@ const FormPage = () => {
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = formMethods;
   const watchedValues = watch();
   const autosaveTimerRef = useRef(null);
+  const validationTimerRef = useRef(null);
   const previousValuesRef = useRef({});
+  const lastValidatedValuesRef = useRef({});
+  const lastValidatedDataStrRef = useRef('');
   const saveAbortControllerRef = useRef(null);
+  const isValidatingRef = useRef(false);
+  const validationPendingRef = useRef(false);
 
   const steps = [
     {
@@ -206,6 +387,251 @@ const FormPage = () => {
     }
   };
 
+  // Função de validação separada com debounce
+  const performValidation = useCallback(async (updateData) => {
+    if (!ideaId || !user?.uid || isValidatingRef.current) {
+      console.log('[Validation] Pulando - já validando ou sem dados necessários');
+      return;
+    }
+    
+    // Verificar se os dados mudaram desde a última validação
+    const currentDataStr = JSON.stringify(updateData);
+    
+    if (currentDataStr === lastValidatedDataStrRef.current) {
+      console.log('[Validation] Dados não mudaram desde última validação, pulando...');
+      return;
+    }
+    
+    // Verificar se já há uma validação pendente ou em andamento
+    if (validationPendingRef.current || isValidatingRef.current) {
+      console.log('[Validation] Validação já em andamento ou pendente, aguardando...');
+      return;
+    }
+    
+    validationPendingRef.current = true;
+    isValidatingRef.current = true;
+    
+    try {
+      console.log('[Validation] Validando dados:', updateData);
+      const validationResult = await validateFields(user.uid, updateData);
+      console.log('[Validation] Resultado:', validationResult);
+      
+      // Atualizar última validação
+      lastValidatedValuesRef.current = JSON.parse(JSON.stringify(updateData));
+      lastValidatedDataStrRef.current = currentDataStr;
+      
+      if (!validationResult.aprovado) {
+        // Campos com problema - atualizar estado de validação
+        const newValidationErrors = {};
+        const fieldMapping = {
+          'title': 'ideaTitle',
+          'description': 'ideaDescription',
+          'target_audience': 'publicoAlvo',
+          'problema': 'problema',
+          'objetivos': 'objetivos',
+          'metricas': 'metricas',
+          'resultadosEsperados': 'resultadosEsperados',
+          'cronograma': 'cronograma',
+          'recursos': 'recursos',
+          'desafios': 'desafios'
+        };
+        
+        console.log('[Validation] Campos com problema:', validationResult.campos_com_problema);
+        console.log('[Validation] Tipo de campos_com_problema:', typeof validationResult.campos_com_problema);
+        console.log('[Validation] É array?', Array.isArray(validationResult.campos_com_problema));
+        
+        if (validationResult.campos_com_problema) {
+          const camposArray = Array.isArray(validationResult.campos_com_problema) 
+            ? validationResult.campos_com_problema 
+            : [validationResult.campos_com_problema];
+          
+          camposArray.forEach((campoProblema, index) => {
+            console.log(`[Validation] Processando campo ${index}:`, campoProblema);
+            const backendField = campoProblema.campo || campoProblema.field || campoProblema.nome;
+            const frontendField = fieldMapping[backendField] || backendField;
+            console.log(`[Validation] Mapeando ${backendField} -> ${frontendField}`);
+            
+            if (frontendField) {
+              // Capturar o texto problemático - priorizar o texto do backend, senão usar watchedValues
+              const problematicText = campoProblema.texto || watchedValues[frontendField] || '';
+              
+              newValidationErrors[frontendField] = {
+                tipo: campoProblema.tipo || campoProblema.type || 'ofensivo',
+                justificativa: campoProblema.justificativa || campoProblema.message || 'Conteúdo precisa ser revisado',
+                texto: problematicText // Texto problemático do backend ou do campo atual
+              };
+            }
+          });
+        }
+        
+        console.log('[Validation] Erros mapeados:', newValidationErrors);
+        console.log('[Validation] Quantidade de erros:', Object.keys(newValidationErrors).length);
+        
+        // Atualizar estado de erros de validação
+        // O useEffect vai disparar o alerta automaticamente quando fieldValidationErrors mudar
+        setFieldValidationErrors(prev => {
+          console.log('[Validation] Estado anterior de fieldValidationErrors:', prev);
+          console.log('[Validation] Novo estado de fieldValidationErrors:', newValidationErrors);
+          return newValidationErrors;
+        });
+        
+        return false; // Validação falhou
+      } else {
+        // Validação passou - limpar erros e marcar campos como validados
+        console.log('[Validation] Validação aprovada, limpando erros');
+        
+        // Mapear campos do backend para frontend
+        const fieldMapping = {
+          'title': 'ideaTitle',
+          'description': 'ideaDescription',
+          'target_audience': 'publicoAlvo',
+          'problema': 'problema',
+          'objetivos': 'objetivos',
+          'metricas': 'metricas',
+          'resultadosEsperados': 'resultadosEsperados',
+          'cronograma': 'cronograma',
+          'recursos': 'recursos',
+          'desafios': 'desafios'
+        };
+        
+        // Mapear campos validados do backend para frontend
+        const newValidatedFields = { ...validatedFields };
+        Object.keys(updateData).forEach(backendField => {
+          const frontendField = fieldMapping[backendField] || backendField;
+          newValidatedFields[frontendField] = true;
+        });
+        
+        // Se houver dynamic_content, mapear também
+        if (updateData.dynamic_content) {
+          Object.keys(updateData.dynamic_content).forEach(dynamicField => {
+            const frontendField = fieldMapping[dynamicField] || dynamicField;
+            newValidatedFields[frontendField] = true;
+          });
+        }
+        
+        setValidatedFields(newValidatedFields);
+        setFieldValidationErrors({});
+        setModerationAlert({ isOpen: false, fieldName: null, offensiveText: null, tipo: null, justificativa: null, todosCampos: null });
+        return true; // Validação passou
+      }
+    } catch (validationError) {
+      console.error('[Validation] Erro na validação:', validationError);
+      return true; // Em caso de erro, permitir salvar (fallback)
+    } finally {
+      isValidatingRef.current = false;
+      validationPendingRef.current = false;
+    }
+  }, [ideaId, user?.uid, watchedValues]);
+
+  // Validação com debounce separado (mais rápido que autosave)
+  // Só validar quando campos relevantes mudarem
+  useEffect(() => {
+    if (!ideaId || !user?.uid || loadingIdea) return;
+
+    // Limpar timer anterior
+    if (validationTimerRef.current) {
+      clearTimeout(validationTimerRef.current);
+      validationTimerRef.current = null;
+    }
+
+    // Verificar se algum campo está bloqueado
+    const hasBlockedField = Object.keys(watchedValues).some(field => 
+      blockedFieldsRef.current.has(field) && watchedValues[field]?.trim()
+    );
+    
+    if (hasBlockedField) {
+      return;
+    }
+
+    // Preparar dados para validação (apenas campos preenchidos)
+    const updateData = {};
+    if (watchedValues.ideaTitle && watchedValues.ideaTitle.trim()) {
+      updateData.title = watchedValues.ideaTitle.trim();
+    }
+    if (watchedValues.ideaDescription && watchedValues.ideaDescription.trim()) {
+      updateData.description = watchedValues.ideaDescription.trim();
+    }
+    if (watchedValues.publicoAlvo && watchedValues.publicoAlvo.trim()) {
+      updateData.target_audience = watchedValues.publicoAlvo.trim();
+    }
+    
+    const dynamicContent = {};
+    if (watchedValues.problema && watchedValues.problema.trim()) {
+      dynamicContent.problema = watchedValues.problema.trim();
+    }
+    if (watchedValues.objetivos && watchedValues.objetivos.trim()) {
+      dynamicContent.objetivos = watchedValues.objetivos.trim();
+    }
+    if (watchedValues.metricas && watchedValues.metricas.trim()) {
+      dynamicContent.metricas = watchedValues.metricas.trim();
+    }
+    if (watchedValues.resultadosEsperados && watchedValues.resultadosEsperados.trim()) {
+      dynamicContent.resultadosEsperados = watchedValues.resultadosEsperados.trim();
+    }
+    if (watchedValues.cronograma && watchedValues.cronograma.trim()) {
+      dynamicContent.cronograma = watchedValues.cronograma.trim();
+    }
+    if (watchedValues.recursos && watchedValues.recursos.trim()) {
+      dynamicContent.recursos = watchedValues.recursos.trim();
+    }
+    if (watchedValues.desafios && watchedValues.desafios.trim()) {
+      dynamicContent.desafios = watchedValues.desafios.trim();
+    }
+    
+    if (Object.keys(dynamicContent).length > 0) {
+      updateData.dynamic_content = dynamicContent;
+    }
+
+    // Só validar se houver dados
+    if (Object.keys(updateData).length === 0) {
+      return;
+    }
+
+    // Verificar se os dados mudaram desde a última validação
+    const currentDataStr = JSON.stringify(updateData);
+    if (currentDataStr === lastValidatedDataStrRef.current) {
+      // Dados não mudaram, não validar
+      return;
+    }
+
+    // Verificar se já está validando ou se há validação pendente
+    if (isValidatingRef.current || validationPendingRef.current) {
+      return;
+    }
+
+    // Configurar timer de validação com debounce de 3 segundos (estilo Word/Google Docs)
+    validationTimerRef.current = setTimeout(async () => {
+      // Verificar novamente antes de validar (pode ter sido cancelado)
+      const finalDataStr = JSON.stringify(updateData);
+      if (finalDataStr !== lastValidatedDataStrRef.current && !isValidatingRef.current) {
+        await performValidation(updateData);
+      }
+      validationTimerRef.current = null;
+    }, 3000);
+
+    return () => {
+      if (validationTimerRef.current) {
+        clearTimeout(validationTimerRef.current);
+        validationTimerRef.current = null;
+      }
+    };
+  }, [ideaId, user?.uid, loadingIdea, watchedValues.ideaTitle, watchedValues.ideaDescription, watchedValues.publicoAlvo, watchedValues.problema, watchedValues.objetivos, watchedValues.metricas, watchedValues.resultadosEsperados, watchedValues.cronograma, watchedValues.recursos, watchedValues.desafios, performValidation]);
+
+  // Limpar erros de validação quando o campo é corrigido e validado novamente
+  useEffect(() => {
+    // Limpar erro de um campo específico se o valor mudou e não há mais erro na validação
+    Object.keys(fieldValidationErrors).forEach(fieldName => {
+      const currentValue = watchedValues[fieldName] || '';
+      const previousValue = previousValuesRef.current[fieldName] || '';
+      
+      // Se o valor mudou, pode ter sido corrigido
+      if (currentValue !== previousValue) {
+        // Não limpar imediatamente - aguardar próxima validação
+        // A validação vai limpar automaticamente se o campo estiver OK
+      }
+    });
+  }, [watchedValues, fieldValidationErrors]);
+
   // Autosave otimizado com debounce inteligente
   useEffect(() => {
     if (!ideaId || !user?.uid || loadingIdea) return;
@@ -222,6 +648,12 @@ const FormPage = () => {
     
     if (hasBlockedField) {
       // Se houver campo bloqueado, não tentar autosave
+      return;
+    }
+
+    // Verificar se há erros de validação - não salvar se houver
+    if (Object.keys(fieldValidationErrors).length > 0) {
+      console.log('[Autosave] Campos com erro de validação, não salvando');
       return;
     }
 
@@ -267,6 +699,13 @@ const FormPage = () => {
   const performAutosave = useCallback(async () => {
     if (!ideaId || !user?.uid || saving) return;
 
+    // Verificar se há erros de validação - NÃO SALVAR se houver
+    if (Object.keys(fieldValidationErrors).length > 0) {
+      console.log('[Autosave] Validação falhou, não salvando:', fieldValidationErrors);
+      setSaveError('Por favor, corrija os erros de validação antes de salvar.');
+      return;
+    }
+
     // Cancelar requisição anterior se existir
     if (saveAbortControllerRef.current) {
       saveAbortControllerRef.current.abort();
@@ -280,22 +719,71 @@ const FormPage = () => {
       setSaveError(null);
       
       // Mapear campos do formulário para o formato do backend
-      const updateData = {
-        title: watchedValues.ideaTitle || '',
-        description: watchedValues.ideaDescription || '',
-        target_audience: watchedValues.publicoAlvo || '',
-        dynamic_content: {
-          problema: watchedValues.problema || '',
-          objetivos: watchedValues.objetivos || '',
-          metricas: watchedValues.metricas || '',
-          resultadosEsperados: watchedValues.resultadosEsperados || '',
-          cronograma: watchedValues.cronograma || '',
-          recursos: watchedValues.recursos || '',
-          desafios: watchedValues.desafios || ''
+      // Apenas incluir campos que têm valor (não enviar strings vazias)
+      const updateData = {};
+      
+      // Campos principais - só incluir se tiverem valor
+      if (watchedValues.ideaTitle && watchedValues.ideaTitle.trim()) {
+        updateData.title = watchedValues.ideaTitle.trim();
+      }
+      if (watchedValues.ideaDescription && watchedValues.ideaDescription.trim()) {
+        updateData.description = watchedValues.ideaDescription.trim();
+      }
+      if (watchedValues.publicoAlvo && watchedValues.publicoAlvo.trim()) {
+        updateData.target_audience = watchedValues.publicoAlvo.trim();
+      }
+      
+      // Dynamic content - só incluir se houver pelo menos um campo preenchido
+      const dynamicContent = {};
+      if (watchedValues.problema && watchedValues.problema.trim()) {
+        dynamicContent.problema = watchedValues.problema.trim();
+      }
+      if (watchedValues.objetivos && watchedValues.objetivos.trim()) {
+        dynamicContent.objetivos = watchedValues.objetivos.trim();
+      }
+      if (watchedValues.metricas && watchedValues.metricas.trim()) {
+        dynamicContent.metricas = watchedValues.metricas.trim();
+      }
+      if (watchedValues.resultadosEsperados && watchedValues.resultadosEsperados.trim()) {
+        dynamicContent.resultadosEsperados = watchedValues.resultadosEsperados.trim();
+      }
+      if (watchedValues.cronograma && watchedValues.cronograma.trim()) {
+        dynamicContent.cronograma = watchedValues.cronograma.trim();
+      }
+      if (watchedValues.recursos && watchedValues.recursos.trim()) {
+        dynamicContent.recursos = watchedValues.recursos.trim();
+      }
+      if (watchedValues.desafios && watchedValues.desafios.trim()) {
+        dynamicContent.desafios = watchedValues.desafios.trim();
+      }
+      
+      // Só incluir dynamic_content se houver pelo menos um campo
+      if (Object.keys(dynamicContent).length > 0) {
+        updateData.dynamic_content = dynamicContent;
+      }
+      
+      // Só fazer autosave se houver algo para salvar
+      if (Object.keys(updateData).length > 0) {
+        // VALIDAÇÃO COM AGENTE GUARDIÃO ANTES DE SALVAR
+        const validationPassed = await performValidation(updateData);
+        
+        if (!validationPassed) {
+          // NÃO SALVAR - bloquear autosave
+          console.log('[Autosave] Validação falhou, não salvando');
+          setSaveError('Conteúdo precisa ser revisado antes de salvar');
+          return;
         }
-      };
-
-      await autosaveIdea(user.uid, ideaId, updateData);
+        
+        // Se passou na validação, salvar
+        console.log('[Autosave] Validação aprovada, salvando dados:', updateData);
+        await autosaveIdea(user.uid, ideaId, updateData);
+        console.log('[Autosave] Dados salvos com sucesso');
+        
+        // Limpar erros de validação após salvar com sucesso
+        setFieldValidationErrors({});
+      } else {
+        console.log('[Autosave] Nenhum dado para salvar');
+      }
       
       previousValuesRef.current = JSON.parse(JSON.stringify(watchedValues)); // Deep copy
       setLastSaved(new Date());
@@ -307,13 +795,9 @@ const FormPage = () => {
         return;
       }
       
-      // Tratamento especial para erro de moderação
-      if (error.isModerationError || (error.status === 400 && error.message?.includes('inapropriado'))) {
-        // Detectar qual campo contém conteúdo ofensivo
-        let offensiveField = null;
-        let offensiveText = '';
-        
-        // Mapeamento de campos backend -> frontend
+      // Tratamento especial para erro de moderação do backend
+      if (error.status === 400 && error.detail && typeof error.detail === 'object' && error.detail.error === 'moderation_failed') {
+        const camposProblema = error.detail.campos_com_problema || [];
         const fieldMapping = {
           'title': 'ideaTitle',
           'description': 'ideaDescription',
@@ -327,77 +811,67 @@ const FormPage = () => {
           'desafios': 'desafios'
         };
         
-        // Tentar identificar o campo pelo erro
+        // Atualizar estado de validação
+        const newValidationErrors = {};
+        camposProblema.forEach(campoProblema => {
+          const frontendField = fieldMapping[campoProblema.campo] || campoProblema.campo;
+          newValidationErrors[frontendField] = {
+            tipo: campoProblema.tipo,
+            justificativa: campoProblema.justificativa
+          };
+        });
+        
+        setFieldValidationErrors(newValidationErrors);
+        
+        // Mostrar alerta
+        if (camposProblema.length > 0) {
+          const primeiroCampo = camposProblema[0];
+          const frontendField = fieldMapping[primeiroCampo.campo] || primeiroCampo.campo;
+          setModerationAlert({
+            isOpen: true,
+            fieldName: frontendField,
+            offensiveText: watchedValues[frontendField] || '',
+            tipo: primeiroCampo.tipo,
+            justificativa: error.detail.justificativa_geral || '',
+            todosCampos: camposProblema.map(cp => ({
+              campo: fieldMapping[cp.campo] || cp.campo,
+              tipo: cp.tipo,
+              justificativa: cp.justificativa
+            }))
+          });
+        }
+        
+        setSaveError('Conteúdo precisa ser revisado antes de salvar');
+        return;
+      }
+      
+      // Tratamento de erro antigo (fallback)
+      if (error.isModerationError || (error.status === 400 && error.message?.includes('inapropriado'))) {
+        // Detectar qual campo contém conteúdo ofensivo
+        let offensiveField = null;
+        let offensiveText = '';
+        
+        const fieldMapping = {
+          'title': 'ideaTitle',
+          'description': 'ideaDescription',
+          'target_audience': 'publicoAlvo',
+          'problema': 'problema',
+          'objetivos': 'objetivos',
+          'metricas': 'metricas',
+          'resultadosEsperados': 'resultadosEsperados',
+          'cronograma': 'cronograma',
+          'recursos': 'recursos',
+          'desafios': 'desafios'
+        };
+        
         const errorMsg = (error.message || '').toLowerCase();
         
-        // Verificar mensagens específicas do backend
         if (errorMsg.includes('título') || errorMsg.includes('title')) {
           offensiveField = 'ideaTitle';
           offensiveText = watchedValues.ideaTitle || '';
         } else if (errorMsg.includes('descrição') || errorMsg.includes('description') || errorMsg.includes('descricao')) {
           offensiveField = 'ideaDescription';
           offensiveText = watchedValues.ideaDescription || '';
-        } else {
-          // Verificar todos os campos que foram enviados no updateData
-          // O último campo modificado provavelmente é o ofensivo
-          const updateData = {
-            title: watchedValues.ideaTitle || '',
-            description: watchedValues.ideaDescription || '',
-            target_audience: watchedValues.publicoAlvo || '',
-            dynamic_content: {
-              problema: watchedValues.problema || '',
-              objetivos: watchedValues.objetivos || '',
-              metricas: watchedValues.metricas || '',
-              resultadosEsperados: watchedValues.resultadosEsperados || '',
-              cronograma: watchedValues.cronograma || '',
-              recursos: watchedValues.recursos || '',
-              desafios: watchedValues.desafios || ''
-            }
-          };
-          
-          // Verificar campos principais primeiro
-          if (updateData.title && errorMsg.includes('título')) {
-            offensiveField = 'ideaTitle';
-            offensiveText = updateData.title;
-          } else if (updateData.description && errorMsg.includes('descrição')) {
-            offensiveField = 'ideaDescription';
-            offensiveText = updateData.description;
-          } else if (updateData.target_audience && errorMsg.includes('público')) {
-            offensiveField = 'publicoAlvo';
-            offensiveText = updateData.target_audience;
-          } else {
-            // Verificar campos dinâmicos
-            for (const [backendField, frontendField] of Object.entries(fieldMapping)) {
-              if (backendField === 'title' || backendField === 'description' || backendField === 'target_audience') {
-                continue; // Já verificados
-              }
-              
-              const fieldValue = watchedValues[frontendField] || '';
-              if (fieldValue && fieldValue.trim()) {
-                // Verificar se o erro menciona este campo
-                const fieldNameLower = backendField.toLowerCase();
-                if (errorMsg.includes(fieldNameLower) || errorMsg.includes(frontendField.toLowerCase())) {
-                  offensiveField = frontendField;
-                  offensiveText = fieldValue;
-                  break;
-                }
-              }
-            }
-            
-            // Se ainda não encontrou, verificar o último campo modificado comparando com previousValues
-            if (!offensiveField) {
-              const previous = previousValuesRef.current || {};
-              for (const [frontendField, currentValue] of Object.entries(watchedValues)) {
-                const previousValue = previous[frontendField] || '';
-                if (currentValue && currentValue.trim() && currentValue !== previousValue) {
-                  // Este campo foi modificado recentemente, pode ser o ofensivo
-                  offensiveField = frontendField;
-                  offensiveText = currentValue;
-                  break;
-                }
-              }
-            }
-          }
         }
         
         // Se encontrou campo ofensivo, limpar e bloquear
@@ -463,7 +937,7 @@ const FormPage = () => {
       setSaving(false);
       saveAbortControllerRef.current = null;
     }
-  }, [ideaId, user?.uid, saving, watchedValues, setValue]);
+  }, [ideaId, user?.uid, saving, watchedValues, setValue, fieldValidationErrors, performValidation]);
 
   // Handle form field updates from chatbot
   const handleFormFieldUpdate = (field, value) => {
@@ -565,15 +1039,35 @@ const FormPage = () => {
       return;
     }
 
+    // Validar campos obrigatórios antes de submeter
+    const camposObrigatorios = {
+      'Título': data.ideaTitle,
+      'Descrição': data.ideaDescription,
+      'Problema': data.problema,
+      'Objetivos': data.objetivos,
+      'Métricas': data.metricas
+    };
+
+    const camposFaltantes = Object.entries(camposObrigatorios)
+      .filter(([_, valor]) => !valor || valor.trim() === '')
+      .map(([campo, _]) => campo);
+
+    if (camposFaltantes.length > 0) {
+      toast.error(`Por favor, preencha os campos obrigatórios: ${camposFaltantes.join(', ')}`, {
+        icon: '⚠️',
+        duration: 5000
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
-      // Salvar dados finais
+      // Primeiro, salvar dados finais (autosave)
       const finalData = {
         title: data.ideaTitle || '',
         description: data.ideaDescription || '',
         target_audience: data.publicoAlvo || '',
-        status: 'submitted', // Marcar como enviado
         dynamic_content: {
           problema: data.problema || '',
           objetivos: data.objetivos || '',
@@ -587,13 +1081,48 @@ const FormPage = () => {
 
       await autosaveIdea(user.uid, ideaId, finalData);
       
-      toast.success('Formulário enviado com sucesso! Redirecionando...', {
-        icon: '✅',
-        duration: 3000
-      });
+      // Depois, submeter com validação do Agente Guardião e análise do Agente Analista
+      const submittedIdea = await submitIdea(user.uid, ideaId);
+      
+      // Mostrar metadados da IA se disponíveis
+      if (submittedIdea.classificacao_ia) {
+        const classificacao = submittedIdea.classificacao_ia;
+        toast.success(
+          `Ideia submetida com sucesso! Categoria: ${classificacao.categoria || 'Não definida'}`, 
+          {
+            icon: '✅',
+            duration: 5000
+          }
+        );
+      } else {
+        toast.success('Formulário enviado com sucesso! Redirecionando...', {
+          icon: '✅',
+          duration: 3000
+        });
+      }
+      
       navigate('/colaborador/minhas-ideias');
     } catch (error) {
       console.error('Erro ao enviar formulário:', error);
+      
+      // Tratar erro do Agente Guardião (conteúdo inapropriado)
+      if (error.isModerationError || (error.message && error.message.includes('inapropriado'))) {
+        toast.error(error.message || 'Conteúdo inapropriado detectado. Por favor, revise sua ideia.', {
+          icon: '🚫',
+          duration: 8000
+        });
+        return;
+      }
+      
+      // Tratar erro de autenticação
+      if (error.isAuthError || error.status === 401) {
+        toast.error('Sua sessão expirou. Por favor, faça login novamente.', {
+          icon: '🔒',
+          duration: 5000
+        });
+        return;
+      }
+      
       toast.error('Erro ao enviar formulário. Verifique sua conexão e tente novamente.', {
         icon: '❌',
         duration: 5000
@@ -633,11 +1162,11 @@ const FormPage = () => {
     
     switch (currentStep) {
       case 0:
-        return <IdeaStep {...stepProps} />;
+        return <IdeaStep {...stepProps} fieldValidationErrors={fieldValidationErrors} />;
       case 1:
-        return <ObjectivesStep {...stepProps} />;
+        return <ObjectivesStep {...stepProps} fieldValidationErrors={fieldValidationErrors} />;
       case 2:
-        return <TimelineStep register={register} errors={errors} />;
+        return <TimelineStep register={register} errors={errors} fieldValidationErrors={fieldValidationErrors} />;
       default:
         return null;
     }
@@ -660,12 +1189,20 @@ const FormPage = () => {
   return (
     <>
       {/* Moderation Alert */}
-      <ModerationAlert
-        isOpen={moderationAlert.isOpen}
-        onClose={() => setModerationAlert({ isOpen: false, fieldName: null, offensiveText: null })}
-        fieldName={moderationAlert.fieldName}
-        offensiveText={moderationAlert.offensiveText}
-      />
+      {moderationAlert.isOpen && (
+        <ModerationAlert
+          isOpen={moderationAlert.isOpen}
+          onClose={() => {
+            console.log('[ModerationAlert] Fechando alerta');
+            setModerationAlert({ isOpen: false, fieldName: null, offensiveText: null, tipo: null, justificativa: null, todosCampos: null });
+          }}
+          fieldName={moderationAlert.fieldName}
+          offensiveText={moderationAlert.offensiveText}
+          tipo={moderationAlert.tipo}
+          justificativa={moderationAlert.justificativa}
+          todosCampos={moderationAlert.todosCampos}
+        />
+      )}
       
       <div className="min-h-screen bg-gray-50 flex">
         {/* Main Content - Flexbox Layout */}
@@ -835,7 +1372,15 @@ const FormPage = () => {
 };
 
 // Step Components
-const IdeaStep = ({ register, errors, requestFieldSuggestion, loadingSuggestions, fieldSuggestions, handleAcceptSuggestion, handleRejectSuggestion }) => (
+const IdeaStep = ({ register, errors, requestFieldSuggestion, loadingSuggestions, fieldSuggestions, handleAcceptSuggestion, handleRejectSuggestion, fieldValidationErrors = {}, watchedValues = {}, validatedFields = {} }) => {
+  // Debug: verificar se fieldValidationErrors está sendo recebido
+  React.useEffect(() => {
+    if (Object.keys(fieldValidationErrors).length > 0) {
+      console.log('[IdeaStep] fieldValidationErrors recebido:', fieldValidationErrors);
+    }
+  }, [fieldValidationErrors]);
+  
+  return (
   <div className="space-y-6">
     <div className="flex items-center space-x-3 mb-6">
       <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
@@ -851,13 +1396,34 @@ const IdeaStep = ({ register, errors, requestFieldSuggestion, loadingSuggestions
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Título da Ideia *
       </label>
-      <input
-        {...register('ideaTitle', { required: 'Título é obrigatório' })}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        placeholder="Ex: Assistente Virtual para Atendimento ao Cliente"
-      />
+      <div className="relative">
+        <input
+          {...register('ideaTitle', { required: 'Título é obrigatório' })}
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            fieldValidationErrors.ideaTitle 
+              ? fieldValidationErrors.ideaTitle.tipo === 'ofensivo'
+                ? 'border-red-300 focus:ring-red-500'
+                : 'border-yellow-300 focus:ring-yellow-500'
+              : 'border-gray-300'
+          }`}
+          placeholder="Ex: Assistente Virtual para Atendimento ao Cliente"
+        />
+        <ValidationIndicator 
+          fieldName="ideaTitle" 
+          fieldValidationErrors={fieldValidationErrors} 
+          fieldValue={watchedValues.ideaTitle}
+          isValidated={!!validatedFields['ideaTitle']}
+        />
+      </div>
       {errors.ideaTitle && (
         <p className="mt-1 text-sm text-red-600">{errors.ideaTitle.message}</p>
+      )}
+      {fieldValidationErrors.ideaTitle && (
+        <p className={`mt-1 text-sm ${
+          fieldValidationErrors.ideaTitle.tipo === 'ofensivo' ? 'text-red-600' : 'text-yellow-600'
+        }`}>
+          {fieldValidationErrors.ideaTitle.justificativa}
+        </p>
       )}
     </div>
 
@@ -865,13 +1431,34 @@ const IdeaStep = ({ register, errors, requestFieldSuggestion, loadingSuggestions
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Descrição da Ideia *
       </label>
-      <textarea
-        {...register('ideaDescription', { required: 'Descrição é obrigatória' })}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[120px]"
-        placeholder="Descreva sua ideia de forma clara e objetiva..."
-      />
+      <div className="relative">
+        <textarea
+          {...register('ideaDescription', { required: 'Descrição é obrigatória' })}
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[120px] ${
+            fieldValidationErrors.ideaDescription 
+              ? fieldValidationErrors.ideaDescription.tipo === 'ofensivo'
+                ? 'border-red-300 focus:ring-red-500'
+                : 'border-yellow-300 focus:ring-yellow-500'
+              : 'border-gray-300'
+          }`}
+          placeholder="Descreva sua ideia de forma clara e objetiva..."
+        />
+        <ValidationIndicator 
+          fieldName="ideaDescription" 
+          fieldValidationErrors={fieldValidationErrors} 
+          fieldValue={watchedValues.ideaDescription}
+          isValidated={!!validatedFields['ideaDescription']}
+        />
+      </div>
       {errors.ideaDescription && (
         <p className="mt-1 text-sm text-red-600">{errors.ideaDescription.message}</p>
+      )}
+      {fieldValidationErrors.ideaDescription && (
+        <p className={`mt-1 text-sm ${
+          fieldValidationErrors.ideaDescription.tipo === 'ofensivo' ? 'text-red-600' : 'text-yellow-600'
+        }`}>
+          {fieldValidationErrors.ideaDescription.justificativa}
+        </p>
       )}
     </div>
 
@@ -879,11 +1466,32 @@ const IdeaStep = ({ register, errors, requestFieldSuggestion, loadingSuggestions
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Problema que Resolve
       </label>
-      <textarea
-        {...register('problema')}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[100px]"
-        placeholder="Que problema específico sua ideia resolve?"
-      />
+      <div className="relative">
+        <textarea
+          {...register('problema')}
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[100px] ${
+            fieldValidationErrors.problema 
+              ? fieldValidationErrors.problema.tipo === 'ofensivo'
+                ? 'border-red-300 focus:ring-red-500'
+                : 'border-yellow-300 focus:ring-yellow-500'
+              : 'border-gray-300'
+          }`}
+          placeholder="Que problema específico sua ideia resolve?"
+        />
+        <ValidationIndicator 
+          fieldName="problema" 
+          fieldValidationErrors={fieldValidationErrors} 
+          fieldValue={watchedValues.problema}
+          isValidated={!!validatedFields['problema']}
+        />
+      </div>
+      {fieldValidationErrors.problema && (
+        <p className={`mt-1 text-sm ${
+          fieldValidationErrors.problema.tipo === 'ofensivo' ? 'text-red-600' : 'text-yellow-600'
+        }`}>
+          {fieldValidationErrors.problema.justificativa}
+        </p>
+      )}
     </div>
 
     <div>
@@ -912,11 +1520,32 @@ const IdeaStep = ({ register, errors, requestFieldSuggestion, loadingSuggestions
           )}
         </motion.button>
       </div>
-      <input
-        {...register('publicoAlvo')}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        placeholder="Ex: Clientes da CAIXA, empregados internos, parceiros..."
-      />
+      <div className="relative">
+        <input
+          {...register('publicoAlvo')}
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            fieldValidationErrors.publicoAlvo 
+              ? fieldValidationErrors.publicoAlvo.tipo === 'ofensivo'
+                ? 'border-red-300 focus:ring-red-500'
+                : 'border-yellow-300 focus:ring-yellow-500'
+              : 'border-gray-300'
+          }`}
+          placeholder="Ex: Clientes da CAIXA, empregados internos, parceiros..."
+        />
+        <ValidationIndicator 
+          fieldName="publicoAlvo" 
+          fieldValidationErrors={fieldValidationErrors} 
+          fieldValue={watchedValues.publicoAlvo}
+          isValidated={!!validatedFields['publicoAlvo']}
+        />
+      </div>
+      {fieldValidationErrors.publicoAlvo && (
+        <p className={`mt-1 text-sm ${
+          fieldValidationErrors.publicoAlvo.tipo === 'ofensivo' ? 'text-red-600' : 'text-yellow-600'
+        }`}>
+          {fieldValidationErrors.publicoAlvo.justificativa}
+        </p>
+      )}
       <FieldSuggestion
         fieldName="publicoAlvo"
         suggestion={fieldSuggestions.publicoAlvo?.suggestion}
@@ -927,9 +1556,18 @@ const IdeaStep = ({ register, errors, requestFieldSuggestion, loadingSuggestions
       />
     </div>
   </div>
-);
+  );
+};
 
-const ObjectivesStep = ({ register, errors, requestFieldSuggestion, loadingSuggestions, fieldSuggestions, handleAcceptSuggestion, handleRejectSuggestion }) => (
+const ObjectivesStep = ({ register, errors, requestFieldSuggestion, loadingSuggestions, fieldSuggestions, handleAcceptSuggestion, handleRejectSuggestion, fieldValidationErrors = {}, watchedValues = {}, validatedFields = {} }) => {
+  // Debug: verificar se fieldValidationErrors está sendo recebido
+  React.useEffect(() => {
+    if (Object.keys(fieldValidationErrors).length > 0) {
+      console.log('[ObjectivesStep] fieldValidationErrors recebido:', fieldValidationErrors);
+    }
+  }, [fieldValidationErrors]);
+  
+  return (
   <div className="space-y-6">
     <div className="flex items-center space-x-3 mb-6">
       <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
@@ -945,13 +1583,34 @@ const ObjectivesStep = ({ register, errors, requestFieldSuggestion, loadingSugge
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Objetivos Principais *
       </label>
-      <textarea
-        {...register('objetivos', { required: 'Objetivos são obrigatórios' })}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[120px]"
-        placeholder="Descreva os principais objetivos do seu experimento..."
-      />
+      <div className="relative">
+        <textarea
+          {...register('objetivos', { required: 'Objetivos são obrigatórios' })}
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[120px] ${
+            fieldValidationErrors.objetivos 
+              ? fieldValidationErrors.objetivos.tipo === 'ofensivo'
+                ? 'border-red-300 focus:ring-red-500'
+                : 'border-yellow-300 focus:ring-yellow-500'
+              : 'border-gray-300'
+          }`}
+          placeholder="Descreva os principais objetivos do seu experimento..."
+        />
+        <ValidationIndicator 
+          fieldName="objetivos" 
+          fieldValidationErrors={fieldValidationErrors} 
+          fieldValue={watchedValues.objetivos}
+          isValidated={!!validatedFields['objetivos']}
+        />
+      </div>
       {errors.objetivos && (
         <p className="mt-1 text-sm text-red-600">{errors.objetivos.message}</p>
+      )}
+      {fieldValidationErrors.objetivos && (
+        <p className={`mt-1 text-sm ${
+          fieldValidationErrors.objetivos.tipo === 'ofensivo' ? 'text-red-600' : 'text-yellow-600'
+        }`}>
+          {fieldValidationErrors.objetivos.justificativa}
+        </p>
       )}
     </div>
 
@@ -981,11 +1640,32 @@ const ObjectivesStep = ({ register, errors, requestFieldSuggestion, loadingSugge
           )}
         </motion.button>
       </div>
-      <textarea
-        {...register('metricas')}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[100px]"
-        placeholder="Como você medirá o sucesso? Ex: redução de 30% no tempo de atendimento..."
-      />
+      <div className="relative">
+        <textarea
+          {...register('metricas')}
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[100px] ${
+            fieldValidationErrors.metricas 
+              ? fieldValidationErrors.metricas.tipo === 'ofensivo'
+                ? 'border-red-300 focus:ring-red-500'
+                : 'border-yellow-300 focus:ring-yellow-500'
+              : 'border-gray-300'
+          }`}
+          placeholder="Como você medirá o sucesso? Ex: redução de 30% no tempo de atendimento..."
+        />
+        <ValidationIndicator 
+          fieldName="metricas" 
+          fieldValidationErrors={fieldValidationErrors} 
+          fieldValue={watchedValues.metricas}
+          isValidated={!!validatedFields['metricas']}
+        />
+      </div>
+      {fieldValidationErrors.metricas && (
+        <p className={`mt-1 text-sm ${
+          fieldValidationErrors.metricas.tipo === 'ofensivo' ? 'text-red-600' : 'text-yellow-600'
+        }`}>
+          {fieldValidationErrors.metricas.justificativa}
+        </p>
+      )}
       <FieldSuggestion
         fieldName="metricas"
         suggestion={fieldSuggestions.metricas?.suggestion}
@@ -1022,11 +1702,32 @@ const ObjectivesStep = ({ register, errors, requestFieldSuggestion, loadingSugge
           )}
         </motion.button>
       </div>
-      <textarea
-        {...register('resultadosEsperados')}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[100px]"
-        placeholder="Que resultados você espera obter ao final do experimento?"
-      />
+      <div className="relative">
+        <textarea
+          {...register('resultadosEsperados')}
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[100px] ${
+            fieldValidationErrors.resultadosEsperados 
+              ? fieldValidationErrors.resultadosEsperados.tipo === 'ofensivo'
+                ? 'border-red-300 focus:ring-red-500'
+                : 'border-yellow-300 focus:ring-yellow-500'
+              : 'border-gray-300'
+          }`}
+          placeholder="Que resultados você espera obter ao final do experimento?"
+        />
+        <ValidationIndicator 
+          fieldName="resultadosEsperados" 
+          fieldValidationErrors={fieldValidationErrors} 
+          fieldValue={watchedValues.resultadosEsperados}
+          isValidated={!!validatedFields['resultadosEsperados']}
+        />
+      </div>
+      {fieldValidationErrors.resultadosEsperados && (
+        <p className={`mt-1 text-sm ${
+          fieldValidationErrors.resultadosEsperados.tipo === 'ofensivo' ? 'text-red-600' : 'text-yellow-600'
+        }`}>
+          {fieldValidationErrors.resultadosEsperados.justificativa}
+        </p>
+      )}
       <FieldSuggestion
         fieldName="resultadosEsperados"
         suggestion={fieldSuggestions.resultadosEsperados?.suggestion}
@@ -1037,9 +1738,18 @@ const ObjectivesStep = ({ register, errors, requestFieldSuggestion, loadingSugge
       />
     </div>
   </div>
-);
+  );
+};
 
-const TimelineStep = ({ register, errors }) => (
+const TimelineStep = ({ register, errors, fieldValidationErrors = {}, watchedValues = {}, validatedFields = {} }) => {
+  // Debug: verificar se fieldValidationErrors está sendo recebido
+  React.useEffect(() => {
+    if (Object.keys(fieldValidationErrors).length > 0) {
+      console.log('[TimelineStep] fieldValidationErrors recebido:', fieldValidationErrors);
+    }
+  }, [fieldValidationErrors]);
+  
+  return (
   <div className="space-y-6">
     <div className="flex items-center space-x-3 mb-6">
       <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center">
@@ -1055,35 +1765,99 @@ const TimelineStep = ({ register, errors }) => (
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Cronograma Detalhado
       </label>
-      <textarea
-        {...register('cronograma')}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[120px]"
-        placeholder="Descreva as principais etapas e prazos do seu experimento..."
-      />
+      <div className="relative">
+        <textarea
+          {...register('cronograma')}
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[120px] ${
+            fieldValidationErrors.cronograma 
+              ? fieldValidationErrors.cronograma.tipo === 'ofensivo'
+                ? 'border-red-300 focus:ring-red-500'
+                : 'border-yellow-300 focus:ring-yellow-500'
+              : 'border-gray-300'
+          }`}
+          placeholder="Descreva as principais etapas e prazos do seu experimento..."
+        />
+        <ValidationIndicator 
+          fieldName="cronograma" 
+          fieldValidationErrors={fieldValidationErrors} 
+          fieldValue={watchedValues.cronograma}
+          isValidated={!!validatedFields['cronograma']}
+        />
+      </div>
+      {fieldValidationErrors.cronograma && (
+        <p className={`mt-1 text-sm ${
+          fieldValidationErrors.cronograma.tipo === 'ofensivo' ? 'text-red-600' : 'text-yellow-600'
+        }`}>
+          {fieldValidationErrors.cronograma.justificativa}
+        </p>
+      )}
     </div>
 
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Recursos Necessários
       </label>
-      <textarea
-        {...register('recursos')}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[100px]"
-        placeholder="Que recursos você precisará? Ex: equipe, tecnologia, orçamento..."
-      />
+      <div className="relative">
+        <textarea
+          {...register('recursos')}
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[100px] ${
+            fieldValidationErrors.recursos 
+              ? fieldValidationErrors.recursos.tipo === 'ofensivo'
+                ? 'border-red-300 focus:ring-red-500'
+                : 'border-yellow-300 focus:ring-yellow-500'
+              : 'border-gray-300'
+          }`}
+          placeholder="Que recursos você precisará? Ex: equipe, tecnologia, orçamento..."
+        />
+        <ValidationIndicator 
+          fieldName="recursos" 
+          fieldValidationErrors={fieldValidationErrors} 
+          fieldValue={watchedValues.recursos}
+          isValidated={!!validatedFields['recursos']}
+        />
+      </div>
+      {fieldValidationErrors.recursos && (
+        <p className={`mt-1 text-sm ${
+          fieldValidationErrors.recursos.tipo === 'ofensivo' ? 'text-red-600' : 'text-yellow-600'
+        }`}>
+          {fieldValidationErrors.recursos.justificativa}
+        </p>
+      )}
     </div>
 
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Principais Desafios
       </label>
-      <textarea
-        {...register('desafios')}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[100px]"
-        placeholder="Quais desafios você antecipa? Como planeja superá-los?"
-      />
+      <div className="relative">
+        <textarea
+          {...register('desafios')}
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[100px] ${
+            fieldValidationErrors.desafios 
+              ? fieldValidationErrors.desafios.tipo === 'ofensivo'
+                ? 'border-red-300 focus:ring-red-500'
+                : 'border-yellow-300 focus:ring-yellow-500'
+              : 'border-gray-300'
+          }`}
+          placeholder="Quais desafios você antecipa? Como planeja superá-los?"
+        />
+        <ValidationIndicator 
+          fieldName="desafios" 
+          fieldValidationErrors={fieldValidationErrors} 
+          fieldValue={watchedValues.desafios}
+          isValidated={!!validatedFields['desafios']}
+        />
+      </div>
+      {fieldValidationErrors.desafios && (
+        <p className={`mt-1 text-sm ${
+          fieldValidationErrors.desafios.tipo === 'ofensivo' ? 'text-red-600' : 'text-yellow-600'
+        }`}>
+          {fieldValidationErrors.desafios.justificativa}
+        </p>
+      )}
     </div>
   </div>
-);
+  );
+};
 
 export default FormPage;

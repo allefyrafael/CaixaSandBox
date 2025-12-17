@@ -4,44 +4,26 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
 venv/
-ENV/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Ambiente virtual
-venv/
-ENV/
 env/
+ENV/
+.venv
 
-# Variáveis de ambiente
+# Environment
 .env
 .env.local
 
-# Credenciais Firebase
-firebase_credentials.json
-*-firebase-adminsdk-*.json
-
-# IDEs
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
+
+# Firebase
+firebase-credentials.json
+*-credentials.json
+*-firebase-adminsdk-*.json
+sandboxcaixa-*-firebase-adminsdk-*.json
 
 # Logs
 *.log
@@ -49,14 +31,4 @@ firebase_credentials.json
 # OS
 .DS_Store
 Thumbs.db
-
-# Pytest
-.pytest_cache/
-.coverage
-htmlcov/
-
-# MyPy
-.mypy_cache/
-.dmypy.json
-dmypy.json
 

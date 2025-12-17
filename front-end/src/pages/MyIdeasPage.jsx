@@ -54,30 +54,63 @@ const MyIdeasPage = () => {
       }
       
       // Transformar dados do backend para o formato esperado pela UI
-      const formattedIdeas = ideas.map(idea => ({
-        id: idea.id,
-        title: idea.title || 'Sem título',
-        description: idea.description || '',
-        submittedAt: idea.created_at 
-          ? (idea.created_at.seconds 
-              ? new Date(idea.created_at.seconds * 1000).toISOString().split('T')[0]
-              : new Date(idea.created_at).toISOString().split('T')[0])
-          : new Date().toISOString().split('T')[0],
-        status: idea.status || 'draft',
-        phase: idea.dynamic_content?.phase || null,
-        phaseDescription: idea.dynamic_content?.phaseDescription || null,
-        managerFeedback: idea.dynamic_content?.managerFeedback || null,
-        nextSteps: idea.dynamic_content?.nextSteps || null,
-        estimatedTime: idea.dynamic_content?.estimatedTime || null,
-        category: idea.dynamic_content?.category || 'Geral',
-        priority: idea.dynamic_content?.priority || 'Média'
-      }));
+      const formattedIdeas = ideas.map(idea => {
+        // Tratar formato de data do Firestore
+        let submittedAt = new Date().toISOString().split('T')[0];
+        if (idea.created_at) {
+          if (typeof idea.created_at === 'object' && idea.created_at.seconds) {
+            // Firestore Timestamp
+            submittedAt = new Date(idea.created_at.seconds * 1000).toISOString().split('T')[0];
+          } else if (typeof idea.created_at === 'string') {
+            // String ISO
+            submittedAt = new Date(idea.created_at).toISOString().split('T')[0];
+          } else if (idea.created_at instanceof Date) {
+            // Objeto Date
+            submittedAt = idea.created_at.toISOString().split('T')[0];
+          }
+        }
+        
+        // Extrair metadados da IA se existirem
+        const classificacaoIA = idea.classificacao_ia || {};
+        
+        return {
+          id: idea.id,
+          title: idea.title || 'Sem título',
+          description: idea.description || '',
+          submittedAt: submittedAt,
+          status: idea.status || 'draft',
+          // Metadados da IA
+          category: classificacaoIA.categoria || idea.dynamic_content?.category || 'Geral',
+          setorResponsavel: classificacaoIA.setor_responsavel || null,
+          nivelComplexidade: classificacaoIA.nivel_complexidade || null,
+          alinhamentoEstrategico: classificacaoIA.alinhamento_estrategico || null,
+          resumoExecutivo: classificacaoIA.resumo_executivo || null,
+          tags: classificacaoIA.tags || [],
+          // Campos antigos (mantidos para compatibilidade)
+          phase: idea.dynamic_content?.phase || null,
+          phaseDescription: idea.dynamic_content?.phaseDescription || null,
+          managerFeedback: idea.dynamic_content?.managerFeedback || null,
+          nextSteps: idea.dynamic_content?.nextSteps || null,
+          estimatedTime: idea.dynamic_content?.estimatedTime || null,
+          priority: idea.dynamic_content?.priority || 'Média'
+        };
+      });
       
       setMyIdeas(formattedIdeas);
     } catch (error) {
       console.error('Erro ao carregar ideias:', error);
+      
+      // Tratar erro 401 (não autenticado)
+      if (error.message && error.message.includes('401')) {
+        toast.error('Sua sessão expirou. Por favor, faça login novamente.', {
+          icon: '🔒',
+          duration: 5000
+        });
+        // Redirecionar para login será feito pelo componente de autenticação
+        return;
+      }
+      
       // Só mostra erro se realmente houver um problema de conexão
-      // Se for apenas "sem ideias", não mostra erro
       if (error.message && !error.message.includes('404') && !error.message.includes('não encontrada')) {
         toast.error('Erro ao carregar suas ideias. Verifique sua conexão e tente novamente.', {
           icon: '⚠️',

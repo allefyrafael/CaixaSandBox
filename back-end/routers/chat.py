@@ -1,302 +1,332 @@
 """
-Rotas de Chat
-Endpoints para conversação com o JuniBox
+Router de Chat
+Endpoints para interação com o Agente Mentor
 """
-from fastapi import APIRouter, HTTPException, status
-from schemas import (
-    ChatRequest, 
-    ChatRequestResponse, 
-    ChatMessage, 
-    ChatResponse, 
-    ChatHistoryResponse,
-    FieldSuggestionRequest,
-    FieldSuggestionResponse
+
+from fastapi import APIRouter, HTTPException, Depends
+from models.schemas import (
+    ChatSendRequest, ChatSendResponse, ChatHistoryResponse,
+    ChatMessage, FieldSuggestionRequest, FieldSuggestionResponse,
+    ValidationResponse
 )
-from services.db import (
-    save_chat_message,
-    get_chat_history,
-    get_full_chat_history,
-    get_idea_context,
-    clear_chat_history
-)
-from agents.ideia.agent import (
-    get_response as get_ideia_response,  # Função simplificada
-    generate_response as generate_ideia_response,  # Função com Firebase
-    generate_idea_suggestions, 
-    validate_idea_completeness,
-    generate_field_suggestion
-)
-from agents.filtrador.agent import analyze_content
-from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor
+from services.firebase_client import get_firebase_client
+from agents.mentor import AgenteMentor
+from middleware.auth import verify_user_id, get_current_user
 
 router = APIRouter()
 
 # ============================================
-# ENDPOINT SIMPLIFICADO (SEM FIREBASE)
+# DEPENDENCIES
 # ============================================
 
-@router.post("/", response_model=ChatRequestResponse, summary="Chat simplificado com JuniBox")
-def chat_simple(request: ChatRequest):
+def get_firebase():
+    """Dependency para Firebase"""
+    try:
+        return get_firebase_client()
+    except Exception as e:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Erro ao conectar com Firebase: {str(e)}"
+        )
+
+# ============================================
+# ENDPOINTS
+# ============================================
+
+@router.post("/chat/send", response_model=ChatSendResponse)
+async def send_chat_message(
+    request: ChatSendRequest,
+    current_user: dict = Depends(get_current_user),
+    firebase = Depends(get_firebase)
+):
     """
-    **Endpoint Simplificado** - Chat básico sem necessidade de Firebase
+    Envia mensagem para o chat com contexto do formulário
     
-    Recebe a mensagem do usuário e o histórico da conversa.
-    Retorna a resposta do agente JuniBox processada na Groq.
+    Fluxo:
+    1. Valida autenticação
+    2. Verifica se user_id corresponde ao usuário autenticado
+    3. Busca ideia e histórico de chat
+    4. Agente Mentor gera resposta
+    5. Salva ambas as mensagens no Firebase
+    6. Retorna resposta
+    """
+    # Validar user_id
+    if request.user_id != current_user["uid"]:
+        raise HTTPException(
+            status_code=403,
+            detail="user_id não corresponde ao usuário autenticado"
+        )
     
-    **Ideal para:**
-    - Testes rápidos
-    - Prototipagem
-    - Quando não precisa persistir no banco
+    # Verificar se ideia existe
+    idea = await firebase.get_idea(request.user_id, request.idea_id)
+    if not idea:
+        raise HTTPException(
+            status_code=404,
+            detail="Ideia não encontrada"
+        )
     
-    **Exemplo de uso:**
-    ```json
-    {
-        "message": "Tenho uma ideia de app para a Caixa",
-        "history": [
-            {"role": "user", "content": "Olá"},
-            {"role": "assistant", "content": "Olá! Sou o JuniBox."}
-        ]
+    # Buscar histórico
+    historico = await firebase.get_chat_history(
+        request.user_id,
+        request.idea_id,
+        limit=20
+    )
+    
+    # Preparar contexto do formulário
+    contexto_formulario = {
+        "title": idea.get("title"),
+        "description": idea.get("description"),
+        **idea.get("dynamic_content", {})
     }
-    ```
-    """
-    if not request.message or not request.message.strip():
+    
+    # Adicionar contexto adicional se fornecido
+    if request.form_context:
+        contexto_formulario.update(request.form_context)
+    
+    # Converter histórico para formato esperado
+    historico_formatado = [
+        {"role": msg.get("role"), "content": msg.get("content", "")}
+        for msg in historico
+    ]
+    
+    # Agente Mentor gera resposta
+    mentor = AgenteMentor()
+    resposta = await mentor.responder_chat(
+        mensagem_usuario=request.message,
+        contexto_formulario=contexto_formulario,
+        historico=historico_formatado
+    )
+    
+    # Salvar mensagens no Firebase
+    await firebase.add_chat_message(
+        request.user_id,
+        request.idea_id,
+        "user",
+        request.message
+    )
+    
+    await firebase.add_chat_message(
+        request.user_id,
+        request.idea_id,
+        "assistant",
+        resposta
+    )
+    
+    # Retornar resposta
+    return ChatSendResponse(
+        idea_id=request.idea_id,
+        message=ChatMessage(
+            role="assistant",
+            content=resposta
+        )
+    )
+
+@router.get("/chat/history/{user_id}/{idea_id}", response_model=ChatHistoryResponse)
+async def get_chat_history(
+    user_id: str,
+    idea_id: str,
+    _: str = Depends(verify_user_id),
+    firebase = Depends(get_firebase)
+):
+    """Busca histórico completo de chat"""
+    # Verificar se ideia existe
+    idea = await firebase.get_idea(user_id, idea_id)
+    if not idea:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="A mensagem não pode estar vazia."
+            status_code=404,
+            detail="Ideia não encontrada"
         )
     
-    response_text = get_ideia_response(request.message, request.history)
+    messages = await firebase.get_chat_history(user_id, idea_id, limit=100)
     
-    return {"response": response_text}
-
-# ============================================
-# ENDPOINTS AVANÇADOS (COM FIREBASE)
-# ============================================
-
-@router.post("/send", response_model=ChatResponse)
-def endpoint_chat(payload: ChatMessage):
-    """
-    Envia uma mensagem para o JuniBox e recebe uma resposta
-    
-    **Fluxo:**
-    1. Valida mensagem do usuário com Agente Filtrador (ANTES de salvar)
-    2. Se aprovada, salva mensagem do usuário no Firestore
-    3. Busca o contexto da ideia e histórico de chat
-    4. Gera resposta usando Agente de Ideia (Groq AI) com contexto do formulário
-    5. Salva a resposta da IA no Firestore
-    6. Retorna a resposta para o frontend
-    
-    **Parâmetros:**
-    - **user_id**: ID do usuário
-    - **idea_id**: ID da ideia sendo discutida
-    - **message**: Mensagem do usuário
-    - **form_context**: Contexto do formulário (seção atual, dados do formulário, etc)
-    """
-    try:
-        # 1. VALIDAÇÃO DO AGENTE FILTRADOR ANTES DE SALVAR
-        filter_result = analyze_content(payload.message, field_name="chat_message")
-        if filter_result["is_inappropriate"]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Por favor, mantenha a linguagem profissional e respeitosa. Sua mensagem contém conteúdo inapropriado. {filter_result.get('reason', '')}"
+    return ChatHistoryResponse(
+        idea_id=idea_id,
+        messages=[
+            ChatMessage(
+                id=msg.get("id"),
+                role=msg.get("role"),
+                content=msg.get("content", ""),
+                timestamp=msg.get("timestamp")
             )
-        
-        # 2. Salva mensagem do usuário (após validação)
-        save_chat_message(payload.user_id, payload.idea_id, "user", payload.message)
-        
-        # 3. Busca contexto em paralelo (otimização)
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            history_future = executor.submit(get_chat_history, payload.user_id, payload.idea_id)
-            idea_future = executor.submit(get_idea_context, payload.user_id, payload.idea_id)
-            history = history_future.result()
-            idea_data = idea_future.result()
-        
-        # 4. Gera resposta da IA com contexto do formulário
-        response = generate_ideia_response(
-            payload.message, 
-            history, 
-            idea_data,
-            form_context=payload.form_context
-        )
-        
-        # 5. Salva resposta da IA
-        save_chat_message(payload.user_id, payload.idea_id, "assistant", response)
-        
-        # 6. Retorna resposta
-        return {
-            "response": response,
-            "timestamp": datetime.now()
-        }
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao processar mensagem: {str(e)}"
-        )
+            for msg in messages
+        ]
+    )
 
-@router.get("/history/{user_id}/{idea_id}", response_model=ChatHistoryResponse)
-def get_chat_history_endpoint(user_id: str, idea_id: str):
-    """
-    Busca o histórico completo de chat de uma ideia
+@router.delete("/chat/history/{user_id}/{idea_id}")
+async def clear_chat_history(
+    user_id: str,
+    idea_id: str,
+    _: str = Depends(verify_user_id),
+    firebase = Depends(get_firebase)
+):
+    """Limpa histórico de chat"""
+    success = await firebase.clear_chat_history(user_id, idea_id)
     
-    - **user_id**: ID do usuário
-    - **idea_id**: ID da ideia
-    """
-    try:
-        messages = get_full_chat_history(user_id, idea_id)
-        
-        return {
-            "idea_id": idea_id,
-            "messages": messages
-        }
-    except Exception as e:
+    if not success:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao buscar histórico: {str(e)}"
+            status_code=404,
+            detail="Ideia não encontrada"
         )
-
-@router.delete("/history/{user_id}/{idea_id}")
-def clear_chat_history_endpoint(user_id: str, idea_id: str):
-    """
-    Limpa todo o histórico de chat de uma ideia
     
-    - **user_id**: ID do usuário
-    - **idea_id**: ID da ideia
-    """
-    try:
-        clear_chat_history(user_id, idea_id)
-        
-        return {
-            "status": "success",
-            "message": "Histórico de chat limpo com sucesso"
-        }
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao limpar histórico: {str(e)}"
-        )
+    return {"status": "cleared", "idea_id": idea_id}
 
-@router.get("/suggestions/{user_id}/{idea_id}")
-def get_idea_suggestions_endpoint(user_id: str, idea_id: str):
-    """
-    Gera sugestões automáticas para melhorar a ideia
-    
-    Usa IA para analisar a ideia atual e sugerir melhorias
-    
-    - **user_id**: ID do usuário
-    - **idea_id**: ID da ideia
-    """
-    try:
-        idea_data = get_idea_context(user_id, idea_id)
-        
-        if not idea_data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Ideia não encontrada"
-            )
-        
-        suggestions = generate_idea_suggestions(idea_data)
-        
-        return {
-            "idea_id": idea_id,
-            "suggestions": suggestions
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao gerar sugestões: {str(e)}"
-        )
-
-@router.post("/suggest-field", response_model=FieldSuggestionResponse)
-def suggest_field_endpoint(payload: FieldSuggestionRequest):
+@router.post("/chat/suggest-field", response_model=FieldSuggestionResponse)
+async def suggest_field(
+    request: FieldSuggestionRequest,
+    current_user: dict = Depends(get_current_user),
+    firebase = Depends(get_firebase)
+):
     """
     Gera sugestão para um campo específico do formulário
     
-    A IA analisa o contexto do formulário e gera uma sugestão apropriada
-    para campos opcionais (publicoAlvo, metricas, resultadosEsperados).
-    
-    **Parâmetros:**
-    - **user_id**: ID do usuário
-    - **idea_id**: ID da ideia
-    - **field_name**: Nome do campo (publicoAlvo, metricas, resultadosEsperados)
-    - **form_data**: Dados atuais do formulário
-    - **current_step**: Índice da seção atual
-    
-    **Nota:** Este endpoint só deve ser usado para campos opcionais.
-    Campos obrigatórios devem ser preenchidos pelo usuário.
+    Fluxo:
+    1. Valida autenticação
+    2. Verifica se user_id corresponde ao usuário autenticado
+    3. Busca ideia atual
+    4. Agente Mentor gera sugestão focada no campo
+    5. Retorna sugestão
     """
-    try:
-        # Validar que o campo é opcional
-        optional_fields = ["publicoAlvo", "metricas", "resultadosEsperados"]
-        if payload.field_name not in optional_fields:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Campo '{payload.field_name}' não é opcional. Apenas campos opcionais podem receber sugestões da IA."
-            )
-        
-        # Buscar contexto da ideia
-        idea_context = get_idea_context(payload.user_id, payload.idea_id)
-        
-        # Preparar contexto do formulário
-        step_names = ["Sua Ideia", "Objetivos e Metas", "Cronograma"]
-        step_name = step_names[payload.current_step] if 0 <= payload.current_step < len(step_names) else "Desconhecida"
-        
-        form_context = {
-            "form_data": payload.form_data,
-            "current_step": payload.current_step,
-            "step_name": step_name
-        }
-        
-        # Gerar sugestão
-        suggestion = generate_field_suggestion(
-            idea_context,
-            form_context,
-            payload.field_name
-        )
-        
-        return suggestion
-        
-    except HTTPException:
-        raise
-    except Exception as e:
+    # Validar user_id
+    if request.user_id != current_user["uid"]:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao gerar sugestão: {str(e)}"
+            status_code=403,
+            detail="user_id não corresponde ao usuário autenticado"
         )
+    
+    # Verificar se ideia existe
+    idea = await firebase.get_idea(request.user_id, request.idea_id)
+    if not idea:
+        raise HTTPException(
+            status_code=404,
+            detail="Ideia não encontrada"
+        )
+    
+    # Preparar contexto
+    contexto = {
+        "title": idea.get("title"),
+        "description": idea.get("description"),
+        **idea.get("dynamic_content", {}),
+        **request.form_data
+    }
+    
+    # Agente Mentor gera sugestão
+    mentor = AgenteMentor()
+    sugestao = await mentor.sugerir_melhoria(
+        contexto_atual=contexto,
+        campo_foco=request.field_name
+    )
+    
+    return FieldSuggestionResponse(
+        field_name=request.field_name,
+        suggestion=sugestao
+    )
 
-@router.get("/validate/{user_id}/{idea_id}")
-def validate_idea_endpoint(user_id: str, idea_id: str):
-    """
-    Valida se a ideia está completa e pronta para submissão
-    
-    Retorna um score de completude e lista de campos faltantes
-    
-    - **user_id**: ID do usuário
-    - **idea_id**: ID da ideia
-    """
-    try:
-        idea_data = get_idea_context(user_id, idea_id)
-        
-        if not idea_data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Ideia não encontrada"
-            )
-        
-        validation = validate_idea_completeness(idea_data)
-        
-        return {
-            "idea_id": idea_id,
-            "validation": validation
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
+@router.get("/chat/suggestions/{user_id}/{idea_id}")
+async def get_idea_suggestions(
+    user_id: str,
+    idea_id: str,
+    _: str = Depends(verify_user_id),
+    firebase = Depends(get_firebase)
+):
+    """Gera sugestões gerais para a ideia"""
+    idea = await firebase.get_idea(user_id, idea_id)
+    if not idea:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao validar ideia: {str(e)}"
+            status_code=404,
+            detail="Ideia não encontrada"
         )
+    
+    contexto = {
+        "title": idea.get("title"),
+        "description": idea.get("description"),
+        **idea.get("dynamic_content", {})
+    }
+    
+    mentor = AgenteMentor()
+    sugestao = await mentor.sugerir_melhoria(contexto_atual=contexto)
+    
+    return {
+        "idea_id": idea_id,
+        "suggestions": sugestao
+    }
+
+@router.get("/chat/validate/{user_id}/{idea_id}", response_model=ValidationResponse)
+async def validate_idea(
+    user_id: str,
+    idea_id: str,
+    _: str = Depends(verify_user_id),
+    firebase = Depends(get_firebase)
+):
+    """
+    Valida completude da ideia
+    
+    Retorna campos faltantes e sugestões
+    """
+    idea = await firebase.get_idea(user_id, idea_id)
+    if not idea:
+        raise HTTPException(
+            status_code=404,
+            detail="Ideia não encontrada"
+        )
+    
+    # Campos obrigatórios
+    campos_obrigatorios = {
+        "title": "Título",
+        "description": "Descrição",
+        "problema": "Problema",
+        "objetivos": "Objetivos",
+        "metricas": "Métricas"
+    }
+    
+    missing_fields = []
+    dynamic = idea.get("dynamic_content", {})
+    
+    if not idea.get("title"):
+        missing_fields.append("Título")
+    if not idea.get("description"):
+        missing_fields.append("Descrição")
+    if not dynamic.get("problema"):
+        missing_fields.append("Problema")
+    if not dynamic.get("objetivos"):
+        missing_fields.append("Objetivos")
+    if not dynamic.get("metricas"):
+        missing_fields.append("Métricas")
+    
+    # Gerar sugestões se houver campos faltantes
+    suggestions = []
+    if missing_fields:
+        mentor = AgenteMentor()
+        contexto = {
+            "title": idea.get("title"),
+            "description": idea.get("description"),
+            **dynamic
+        }
+        sugestao = await mentor.sugerir_melhoria(contexto_atual=contexto)
+        suggestions.append(sugestao)
+    
+    return ValidationResponse(
+        is_valid=len(missing_fields) == 0,
+        missing_fields=missing_fields,
+        suggestions=suggestions
+    )
+
+@router.post("/chat/")
+async def chat_simple(
+    message: str,
+    history: list = []
+):
+    """
+    Chat simplificado (sem Firebase)
+    Para testes ou uso geral
+    """
+    mentor = AgenteMentor()
+    resposta = await mentor.responder_chat(
+        mensagem_usuario=message,
+        contexto_formulario={},
+        historico=history
+    )
+    
+    return {
+        "response": resposta
+    }
 

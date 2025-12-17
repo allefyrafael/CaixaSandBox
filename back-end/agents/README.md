@@ -1,100 +1,120 @@
-# 🤖 Arquitetura de Agentes
+# Agentes Cognitivos
 
-Sistema modular com dois agentes especializados para diferentes funções.
+Estrutura modular de agentes, cada um com sua própria pasta, configuração e conhecimento.
 
 ## 📁 Estrutura
 
 ```
 agents/
-├── filtrador/          # Agente Filtrador (Moderação)
+├── guardiao/          # Agente Guardião - Filtro de Segurança
 │   ├── __init__.py
-│   ├── agent.py        # Lógica do agente
-│   ├── prompts.py      # Prompts de moderação
-│   └── router.py       # Rotas do filtrador
+│   ├── agent.py       # Lógica do agente
+│   ├── config.py      # Configurações específicas
+│   └── conhecimento.txt
 │
-└── ideia/              # Agente de Ideia (JuniBox)
+├── mentor/            # Agente Mentor - Ideação e Refinamento
+│   ├── __init__.py
+│   ├── agent.py
+│   ├── config.py
+│   └── conhecimento.txt
+│
+└── analista/          # Agente Analista - Classificação e Insights
     ├── __init__.py
-    ├── agent.py        # Lógica do agente
-    ├── prompts.py      # Prompts de ideação
-    └── router.py       # Rotas do agente de ideia
+    ├── agent.py
+    ├── config.py
+    └── conhecimento.txt
 ```
 
-## 🛡️ Agente Filtrador
+## 🎯 Agente Guardião
 
-**Responsabilidade:** Moderação de conteúdo ANTES de salvar no banco de dados.
+**Função**: Filtro de segurança e contexto  
+**Momento**: Antes de salvar no Firebase  
+**Decisão**: APROVADO ou REPROVADO
 
-**Detecta:**
-- ✅ Conteúdo inapropriado (xingamentos, palavrões, trocadilhos maliciosos)
-- ✅ Críticas destrutivas sem proposta construtiva
-- ✅ Conteúdo fora de contexto
-- ✅ Tentativas de evasão (p0rr4, f0d4, etc.)
+### Configurações (`config.py`)
+- `TEMPERATURE`: 0.2 (decisões determinísticas)
+- `MAX_TOKENS`: 500
+- `CONSERVATIVE_ON_ERROR`: True (bloquear em caso de erro)
 
-**Endpoints:**
-- `POST /api/agents/filtrador/analyze` - Análise completa de conteúdo
-- `POST /api/agents/filtrador/check` - Verificação simplificada
+### Conhecimento (`conhecimento.txt`)
+- Código de conduta
+- Regras de moderação
+- Diferença entre crítica construtiva e ataque pessoal
 
-**Uso:**
+## 🧠 Agente Mentor
+
+**Função**: Ideação e refinamento  
+**Gatilho**: Botão "Ajude-me a melhorar" ou Chat  
+**Abordagem**: Perguntas socráticas
+
+### Configurações (`config.py`)
+- `TEMPERATURE_SUGESTAO`: 0.7
+- `TEMPERATURE_CHAT`: 0.7
+- `MAX_HISTORICO_MENSAGENS`: 5
+
+### Conhecimento (`conhecimento.txt`)
+- Objetivos estratégicos 2025
+- Princípios do mentor
+- Campos obrigatórios
+
+## 📊 Agente Analista
+
+**Função**: Classificação e insights  
+**Momento**: Pós-aprovação do Guardião  
+**Saída**: Metadados estruturados
+
+### Configurações (`config.py`)
+- `TEMPERATURE`: 0.3 (análises consistentes)
+- `MAX_RESUMO_CARACTERES`: 140
+- `MAX_TAGS`: 5
+
+### Conhecimento (`conhecimento.txt`)
+- Objetivos estratégicos 2025
+- Taxonomia interna (departamentos, categorias)
+- Níveis de complexidade
+
+## 🔧 Como Usar
+
+### Importar um agente
+
 ```python
-from agents.filtrador.agent import analyze_content
-
-result = analyze_content("Arrombada", field_name="title")
-if result["is_inappropriate"]:
-    print(f"Bloqueado: {result['reason']}")
+from agents.guardiao import AgenteGuardiao
+from agents.mentor import AgenteMentor
+from agents.analista import AgenteAnalista
 ```
 
-## 💡 Agente de Ideia (JuniBox)
+### Instanciar e usar
 
-**Responsabilidade:** Assistência na ideação e estruturação de propostas.
-
-**Funções:**
-- ✅ Guiar usuário no preenchimento do formulário
-- ✅ Gerar sugestões para campos opcionais
-- ✅ Validar completude da ideia
-- ✅ Fornecer feedback e melhorias
-
-**Endpoints:**
-- `POST /api/agents/ideia/chat` - Chat simplificado (sem Firebase)
-- `POST /api/agents/ideia/send` - Chat completo (com Firebase)
-- `POST /api/agents/ideia/suggest-field` - Sugestão para campo específico
-- `GET /api/agents/ideia/suggestions/{user_id}/{idea_id}` - Sugestões gerais
-- `GET /api/agents/ideia/validate/{user_id}/{idea_id}` - Validação de completude
-
-**Uso:**
 ```python
-from agents.ideia.agent import generate_response
+# Agente Guardião
+guardiao = AgenteGuardiao()
+aprovado, justificativa = await guardiao.validar(titulo, descricao, problema)
 
-response = generate_response(
-    message="Minha ideia é...",
-    history=[],
-    idea_context={},
-    form_context={}
-)
+# Agente Mentor
+mentor = AgenteMentor()
+sugestao = await mentor.sugerir_melhoria(contexto_atual, campo_foco="metricas")
+
+# Agente Analista
+analista = AgenteAnalista()
+metadados = await analista.analisar(ideia_completa)
 ```
 
-## 🔄 Fluxo de Trabalho
+## 📝 Personalização
 
-```
-Usuário digita conteúdo
-    ↓
-Agente Filtrador analisa
-    ↓
-Se apropriado → Salva no banco
-    ↓
-Agente de Ideia ajuda na estruturação
-    ↓
-Usuário completa formulário
-```
+Para personalizar um agente:
 
-## 🚀 Vantagens da Arquitetura
+1. **Configurações**: Edite `config.py` do agente
+2. **Conhecimento**: Edite `conhecimento.txt` do agente
+3. **Lógica**: Edite `agent.py` do agente
 
-1. **Separação de Responsabilidades:** Cada agente tem uma função específica
-2. **Performance:** Filtrador bloqueia antes de salvar, economizando recursos
-3. **Manutenibilidade:** Código organizado e fácil de entender
-4. **Escalabilidade:** Fácil adicionar novos agentes
-5. **Testabilidade:** Cada agente pode ser testado independentemente
+Cada agente carrega seu próprio conhecimento automaticamente na primeira execução (cache).
 
-## 📝 Migração
+## 🚀 Vantagens da Estrutura Modular
 
-O código antigo em `services/ai.py` foi mantido como wrapper de compatibilidade.
-Novos desenvolvimentos devem usar diretamente os agentes.
+- ✅ Isolamento: Cada agente é independente
+- ✅ Manutenção: Fácil localizar e editar código
+- ✅ Escalabilidade: Adicionar novos agentes é simples
+- ✅ Testabilidade: Testar cada agente isoladamente
+- ✅ Configuração: Ajustes específicos por agente
+- ✅ Conhecimento: Base de conhecimento dedicada
 

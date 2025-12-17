@@ -2,16 +2,40 @@
  * Cliente HTTP para API do Backend
  * Centraliza todas as chamadas de API
  */
+import { auth } from '../config/firebase';
+
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
+/**
+ * Obtém token de autenticação do Firebase
+ */
+async function getAuthToken() {
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      const token = await user.getIdToken();
+      return token;
+    }
+    return null;
+  } catch (error) {
+    console.error('Erro ao obter token de autenticação:', error);
+    return null;
+  }
+}
 
 /**
  * Função auxiliar para fazer requisições
  */
 async function fetchAPI(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
+  
+  // Obter token de autenticação
+  const token = await getAuthToken();
+  
   const config = {
     headers: {
       'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
       ...options.headers,
     },
     ...options,
@@ -28,6 +52,33 @@ async function fetchAPI(endpoint, options = {}) {
       const errorData = await response.json().catch(() => ({ detail: 'Erro desconhecido' }));
       const errorMessage = errorData.detail || `Erro ${response.status}: ${response.statusText}`;
       
+      // Tratamento especial para erro 401 (Unauthorized) - Token expirado ou inválido
+      if (response.status === 401) {
+        const authError = new Error('Sua sessão expirou. Por favor, faça login novamente.');
+        authError.status = 401;
+        authError.isAuthError = true;
+        authError.originalMessage = errorMessage;
+        // Tentar renovar token se possível
+        try {
+          const user = auth.currentUser;
+          if (user) {
+            await user.getIdToken(true); // Força renovação do token
+          }
+        } catch (refreshError) {
+          console.error('Erro ao renovar token:', refreshError);
+        }
+        throw authError;
+      }
+      
+      // Tratamento especial para erro 403 (Forbidden) - Sem permissão
+      if (response.status === 403) {
+        const forbiddenError = new Error('Você não tem permissão para acessar este recurso.');
+        forbiddenError.status = 403;
+        forbiddenError.isForbiddenError = true;
+        forbiddenError.originalMessage = errorMessage;
+        throw forbiddenError;
+      }
+      
       // Tratamento especial para erro 503 (Service Unavailable) - Banco não criado
       if (response.status === 503 && errorMessage.includes('Firestore')) {
         const friendlyError = new Error(
@@ -39,13 +90,87 @@ async function fetchAPI(endpoint, options = {}) {
         throw friendlyError;
       }
       
+      // Tratamento especial para erro 500 com índice faltante do Firestore
+      if (response.status === 500 && (errorMessage.includes('index') || errorMessage.includes('índice') || errorMessage.includes('requires an index'))) {
+        // Extrair link do índice se presente
+        let indexLink = null;
+        
+        // Tentar diferentes padrões de extração
+        const linkPatterns = [
+          'Link:',
+          'link:',
+          'Acesse:',
+          'acesse:',
+          'https://console.firebase.google.com',
+          'https://console.cloud.google.com'
+        ];
+        
+        for (const pattern of linkPatterns) {
+          if (errorMessage.includes(pattern)) {
+            const parts = errorMessage.split(pattern);
+            if (parts.length > 1) {
+              // Pegar a parte após o padrão e extrair a URL
+              const remaining = parts[1].trim();
+              // Procurar por URL completa
+              const urlMatch = remaining.match(/https?:\/\/[^\s\)]+/);
+              if (urlMatch) {
+                indexLink = urlMatch[0];
+                break;
+              }
+              // Se não encontrar URL completa, pegar até o próximo espaço
+              const firstPart = remaining.split(/\s/)[0];
+              if (firstPart.startsWith('http')) {
+                indexLink = firstPart;
+                break;
+              }
+            }
+          }
+        }
+        
+        // Se ainda não encontrou, procurar diretamente por URLs no erro
+        if (!indexLink) {
+          const urlMatch = errorMessage.match(/https?:\/\/[^\s\)]+/);
+          if (urlMatch) {
+            indexLink = urlMatch[0];
+          }
+        }
+        
+        // Mensagem de erro amigável
+        let errorText = 'O banco de dados precisa de um índice composto no Firestore.';
+        if (indexLink) {
+          errorText += ` Clique aqui para criar o índice: ${indexLink}`;
+        } else {
+          errorText += ' Por favor, acesse o console do Firebase para criar o índice necessário.';
+        }
+        
+        const indexError = new Error(errorText);
+        indexError.status = 500;
+        indexError.isIndexError = true;
+        indexError.originalMessage = errorMessage;
+        indexError.indexLink = indexLink || `https://console.firebase.google.com/project/sandboxcaixa-84951/firestore/indexes`;
+        throw indexError;
+      }
+      
       // Tratamento especial para erro 400 (Bad Request) - Moderação de conteúdo
-      if (response.status === 400 && errorMessage.includes('inapropriado')) {
-        const moderationError = new Error(errorMessage);
-        moderationError.status = 400;
-        moderationError.isModerationError = true;
-        moderationError.originalMessage = errorMessage;
-        throw moderationError;
+      if (response.status === 400) {
+        try {
+          const errorData = await response.json();
+          if (errorData.detail && typeof errorData.detail === 'object' && errorData.detail.error === 'moderation_failed') {
+            const moderationError = new Error(errorData.detail.justificativa_geral || 'Conteúdo precisa ser revisado');
+            moderationError.status = 400;
+            moderationError.isModerationError = true;
+            moderationError.detail = errorData.detail;
+            throw moderationError;
+          }
+        } catch (e) {
+          // Se não conseguir parsear JSON, usar mensagem original
+          if (errorMessage.includes('inapropriado') || errorMessage.includes('moderation')) {
+            const moderationError = new Error(errorMessage);
+            moderationError.status = 400;
+            moderationError.isModerationError = true;
+            throw moderationError;
+          }
+        }
       }
       
       throw new Error(errorMessage);
@@ -87,6 +212,16 @@ export const listIdeas = async (userId, limit = 50) => {
 };
 
 /**
+ * Valida campos antes de salvar (moderação)
+ */
+export const validateFields = async (userId, data) => {
+  return fetchAPI(`/api/ideas/${userId}/validate`, {
+    method: 'POST',
+    body: data,
+  });
+};
+
+/**
  * Autosave - Atualiza campos da ideia
  */
 export const autosaveIdea = async (userId, ideaId, data) => {
@@ -111,6 +246,15 @@ export const deleteIdea = async (userId, ideaId) => {
 export const updateIdeaStatus = async (userId, ideaId, newStatus) => {
   return fetchAPI(`/api/ideas/${userId}/${ideaId}/status?new_status=${newStatus}`, {
     method: 'PUT',
+  });
+};
+
+/**
+ * Submete uma ideia (com validação do Agente Guardião e análise do Agente Analista)
+ */
+export const submitIdea = async (userId, ideaId) => {
+  return fetchAPI(`/api/ideas/${userId}/${ideaId}/submit`, {
+    method: 'POST',
   });
 };
 
