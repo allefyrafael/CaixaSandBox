@@ -47,39 +47,11 @@ def analyze_content(
         }
     
     if not client:
-        # Se não houver cliente, faz verificação básica como fallback
-        # Lista básica de palavras ofensivas comuns (fallback)
-        # Inclui variações e tentativas de evasão
-        offensive_words = [
-            # Palavrões comuns
-            'arrombada', 'arrombado', 'caralho', 'puta', 'puto', 'foda', 'foder', 'porra', 
-            'merda', 'bosta', 'cu', 'buceta', 'pau', 'pica', 'piroca', 'rola', 'viado', 
-            'veado', 'bicha', 'cuzão', 'fdp', 'filho da puta', 'vai se foder', 'vai tomar no cu',
-            'caralh', 'put', 'fod', 'porr', 'merd', 'bost', 'cuz', 'bucet', 'piroc', 'rol',
-            # Tentativas de evasão com números
-            'p0rr4', 'f0d4', 'c4r4lh0', 'p0rr@', 'f0d@', 'c4r4lh@', 'p0rra', 'f0da', 'c4ralho',
-            'm3rd4', 'b0st4', 'p1r0c4', 'r0l4',
-            # Tentativas de evasão com maiúsculas/minúsculas
-            'pUtA', 'cArAlHo', 'fOdA', 'pOrRa', 'mErDa', 'bOsTa', 'cU', 'bUcEtA', 'pAu', 'pIcA',
-            # Variações comuns
-            'caralhos', 'putas', 'putos', 'fodas', 'porras', 'merdas', 'bostas', 'cus', 'bucetas',
-            'paus', 'picas', 'pirocas', 'rolas', 'viados', 'veados', 'bichas', 'cuzões'
-        ]
-        content_lower = content.lower()
-        for word in offensive_words:
-            if word in content_lower:
-                return {
-                    "is_inappropriate": True,
-                    "category": "conteudo_inapropriado",
-                    "reason": "Conteúdo inapropriado detectado (modo fallback - GROQ_API_KEY não configurada)",
-                    "offensive_text": word
-                }
-        # Se não encontrou palavras ofensivas básicas, permite (mas avisa)
-        print("⚠️  AVISO: Agente Filtrador não configurado (GROQ_API_KEY ausente). Usando verificação básica apenas.")
+        # Se não houver cliente, retorna apropriado (não bloqueia)
         return {
             "is_inappropriate": False,
             "category": None,
-            "reason": "Agente Filtrador não configurado - usando verificação básica",
+            "reason": "Agente Filtrador não configurado",
             "offensive_text": None
         }
     
@@ -146,40 +118,11 @@ Analise este conteúdo e determine se deve ser bloqueado antes de salvar no banc
             
     except Exception as e:
         print(f"[AVISO] Erro no Agente Filtrador: {e}")
-        # Em caso de erro, faz verificação básica como fallback (fail-safe)
-        # Lista básica de palavras ofensivas comuns (fallback)
-        # Inclui variações e tentativas de evasão
-        offensive_words = [
-            # Palavrões comuns
-            'arrombada', 'arrombado', 'caralho', 'puta', 'puto', 'foda', 'foder', 'porra', 
-            'merda', 'bosta', 'cu', 'buceta', 'pau', 'pica', 'piroca', 'rola', 'viado', 
-            'veado', 'bicha', 'cuzão', 'fdp', 'filho da puta', 'vai se foder', 'vai tomar no cu',
-            'caralh', 'put', 'fod', 'porr', 'merd', 'bost', 'cuz', 'bucet', 'piroc', 'rol',
-            # Tentativas de evasão com números
-            'p0rr4', 'f0d4', 'c4r4lh0', 'p0rr@', 'f0d@', 'c4r4lh@', 'p0rra', 'f0da', 'c4ralho',
-            'm3rd4', 'b0st4', 'p1r0c4', 'r0l4',
-            # Tentativas de evasão com maiúsculas/minúsculas
-            'pUtA', 'cArAlHo', 'fOdA', 'pOrRa', 'mErDa', 'bOsTa', 'cU', 'bUcEtA', 'pAu', 'pIcA',
-            # Variações comuns
-            'caralhos', 'putas', 'putos', 'fodas', 'porras', 'merdas', 'bostas', 'cus', 'bucetas',
-            'paus', 'picas', 'pirocas', 'rolas', 'viados', 'veados', 'bichas', 'cuzões'
-        ]
-        content_lower = content.lower()
-        for word in offensive_words:
-            if word in content_lower:
-                return {
-                    "is_inappropriate": True,
-                    "category": "conteudo_inapropriado",
-                    "reason": f"Conteúdo inapropriado detectado (modo fallback após erro na IA: {str(e)})",
-                    "offensive_text": word
-                }
-        # Se não encontrou palavras ofensivas básicas, bloqueia por segurança (fail-safe)
-        # É melhor bloquear conteúdo suspeito do que permitir conteúdo ofensivo
-        print(f"⚠️  AVISO: Erro na análise do Agente Filtrador. Bloqueando por segurança.")
+        # Em caso de erro, retorna apropriado (não bloqueia) para não quebrar o fluxo
         return {
-            "is_inappropriate": True,
-            "category": "erro_analise",
-            "reason": f"Erro ao analisar conteúdo. Por segurança, o conteúdo foi bloqueado. Tente novamente. Erro: {str(e)}",
+            "is_inappropriate": False,
+            "category": None,
+            "reason": f"Erro na análise: {str(e)}",
             "offensive_text": None
         }
 

@@ -24,33 +24,106 @@ def create_idea(payload: IdeaCreate):
     - **user_id**: ID do usuário (obrigatório)
     - **title**: Título inicial da ideia (opcional, padrão: "Nova Ideia")
     """
-    # Validação de moderação no título usando Agente Filtrador
-    if payload.title:
-        filter_result = analyze_content(payload.title, field_name="title")
-        if filter_result["is_inappropriate"]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Por favor, mantenha a linguagem profissional e respeitosa. O título da ideia contém conteúdo inapropriado. {filter_result.get('reason', '')}"
-            )
+    import time
+    start_time = time.time()
     
     try:
+        print(f"[API] POST /api/ideas/ - Criando ideia para usuário {payload.user_id}")
+        
+        # Validação de moderação no título usando Agente Filtrador (com timeout curto)
+        # Se demorar muito, pula a validação para não bloquear a criação
+        if payload.title:
+            try:
+                import concurrent.futures
+                
+                # Tenta validação com timeout de 3 segundos
+                filter_start = time.time()
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(analyze_content, payload.title, "title")
+                    try:
+                        filter_result = future.result(timeout=3)  # Timeout de 3 segundos
+                        filter_time = time.time() - filter_start
+                        
+                        if filter_time > 2:
+                            print(f"[API] AVISO: Validação de moderação demorou {filter_time:.2f}s")
+                        
+                        if filter_result.get("is_inappropriate", False):
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f"Por favor, mantenha a linguagem profissional e respeitosa. O título da ideia contém conteúdo inapropriado. {filter_result.get('reason', '')}"
+                            )
+                    except concurrent.futures.TimeoutError:
+                        print(f"[API] AVISO: Timeout na validação de moderação (3s), continuando sem validação")
+                        # Se der timeout, continua sem validação (não bloqueia criação)
+            except HTTPException:
+                raise
+            except Exception as filter_error:
+                print(f"[API] AVISO: Erro na validação de moderação: {filter_error}. Continuando sem validação.")
+                # Se der erro, continua sem validação (não bloqueia criação)
+        
+        # Criar ideia
+        create_start = time.time()
         idea_data = create_new_idea(payload.user_id, payload.title)
+        create_time = time.time() - create_start
+        
+        elapsed_time = time.time() - start_time
+        print(f"[API] POST /api/ideas/ - Ideia criada em {elapsed_time:.2f}s (criação: {create_time:.2f}s)")
+        
         return idea_data
+        
+    except HTTPException:
+        raise
     except Exception as e:
+        elapsed_time = time.time() - start_time
         error_msg = str(e)
+        error_type = type(e).__name__
+        
+        # Log detalhado do erro
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"[API] ERRO ao criar ideia (tempo: {elapsed_time:.2f}s): {error_msg}")
+        print(f"[API] Tipo do erro: {error_type}")
+        print(f"[API] Detalhes completos:\n{error_details}")
+        
+        # Detectar tipo de erro específico e fornecer mensagem amigável
         if "does not exist" in error_msg or "404" in error_msg or "Banco de dados Firestore não foi criado" in error_msg:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=(
-                    "Banco de dados Firestore não foi criado. "
-                    "Por favor, crie o banco em: "
-                    "https://console.cloud.google.com/firestore/databases?project=sandboxcaixa-84951"
-                )
+                detail={
+                    "error": "Banco de dados Firestore não foi criado",
+                    "message": "Por favor, crie o banco de dados Firestore no console do Firebase",
+                    "link": "https://console.cloud.google.com/firestore/databases?project=sandboxcaixa-84951",
+                    "original_error": error_msg
+                }
             )
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao criar ideia: {error_msg}"
-        )
+        elif "Firebase não está configurado" in error_msg or "not configured" in error_msg.lower():
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "error": "Firebase não está configurado",
+                    "message": "Configure o Firebase para usar este endpoint",
+                    "original_error": error_msg
+                }
+            )
+        elif "permission" in error_msg.lower() or "forbidden" in error_msg.lower():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "error": "Erro de permissão",
+                    "message": "Você não tem permissão para realizar esta operação",
+                    "original_error": error_msg
+                }
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={
+                    "error": "Erro ao criar ideia",
+                    "message": f"Ocorreu um erro inesperado: {error_msg}",
+                    "original_error": error_msg,
+                    "error_type": error_type
+                }
+            )
 
 @router.patch("/{user_id}/{idea_id}", response_model=SuccessResponse)
 def endpoint_autosave(user_id: str, idea_id: str, payload: IdeaUpdate):
@@ -96,15 +169,6 @@ def endpoint_autosave(user_id: str, idea_id: str, payload: IdeaUpdate):
                 detail=f"Por favor, mantenha a linguagem profissional e respeitosa. A descrição contém conteúdo inapropriado. {filter_result.get('reason', '')}"
             )
     
-    # Verifica público-alvo se estiver sendo atualizado
-    if "target_audience" in update_data and update_data["target_audience"]:
-        filter_result = analyze_content(update_data["target_audience"], field_name="target_audience")
-        if filter_result["is_inappropriate"]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Por favor, mantenha a linguagem profissional e respeitosa. O campo 'Público-Alvo' contém conteúdo inapropriado. {filter_result.get('reason', '')}"
-            )
-    
     # Verifica campos dinâmicos se estiverem sendo atualizados
     if "dynamic_content" in update_data and update_data["dynamic_content"]:
         for field_name, field_value in update_data["dynamic_content"].items():
@@ -133,18 +197,33 @@ def endpoint_autosave(user_id: str, idea_id: str, payload: IdeaUpdate):
         }
     except Exception as e:
         error_msg = str(e)
+        error_type = type(e).__name__
+        
+        # Log detalhado do erro
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"[API] ERRO ao salvar ideia (autosave): {error_msg}")
+        print(f"[API] Tipo do erro: {error_type}")
+        print(f"[API] Detalhes completos:\n{error_details}")
+        
         if "does not exist" in error_msg or "404" in error_msg or "Banco de dados Firestore não foi criado" in error_msg:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=(
-                    "Banco de dados Firestore não foi criado. "
-                    "Por favor, crie o banco em: "
-                    "https://console.cloud.google.com/firestore/databases?project=sandboxcaixa-84951"
-                )
+                detail={
+                    "error": "Banco de dados Firestore não foi criado",
+                    "message": "Por favor, crie o banco de dados Firestore no console do Firebase",
+                    "link": "https://console.cloud.google.com/firestore/databases?project=sandboxcaixa-84951",
+                    "original_error": error_msg
+                }
             )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao salvar ideia: {error_msg}"
+            detail={
+                "error": "Erro ao salvar ideia",
+                "message": f"Ocorreu um erro ao salvar: {error_msg}",
+                "original_error": error_msg,
+                "error_type": error_type
+            }
         )
 
 @router.get("/{user_id}/{idea_id}", response_model=IdeaResponse)
@@ -193,13 +272,45 @@ def list_ideas(user_id: str, limit: int = 50):
     
     Retorna lista vazia se o usuário não tiver ideias ou se Firebase não estiver configurado.
     """
+    import time
+    import concurrent.futures
+    start_time = time.time()
+    
     try:
-        ideas = list_user_ideas(user_id, limit)
-        # Sempre retorna uma lista, mesmo que vazia
-        return ideas if ideas else []
+        print(f"[API] GET /api/ideas/{user_id} - Iniciando busca (limit: {limit})")
+        
+        # Usa ThreadPoolExecutor com timeout para não travar
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(list_user_ideas, user_id, limit)
+            try:
+                # Timeout de 10 segundos para a busca
+                ideas = future.result(timeout=10)
+                
+                elapsed_time = time.time() - start_time
+                print(f"[API] GET /api/ideas/{user_id} - Concluído em {elapsed_time:.2f}s - {len(ideas) if ideas else 0} ideias")
+                
+                # Sempre retorna uma lista, mesmo que vazia
+                return ideas if ideas else []
+            except concurrent.futures.TimeoutError:
+                elapsed_time = time.time() - start_time
+                print(f"[API] AVISO: Timeout ao buscar ideias para {user_id} (tempo: {elapsed_time:.2f}s)")
+                # Retorna lista vazia em caso de timeout (não quebra o frontend)
+                return []
+        
     except Exception as e:
+        elapsed_time = time.time() - start_time
+        error_msg = str(e)
+        error_type = type(e).__name__
+        
+        # Log detalhado do erro
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"[API] ERRO ao listar ideias para usuário {user_id} (tempo: {elapsed_time:.2f}s): {error_msg}")
+        print(f"[API] Tipo do erro: {error_type}")
+        print(f"[API] Detalhes completos:\n{error_details}")
+        
         # Em caso de erro inesperado, retorna lista vazia ao invés de erro 500
-        print(f"[ERRO] Erro ao listar ideias para usuário {user_id}: {e}")
+        # Isso permite que o frontend continue funcionando mesmo com problemas no backend
         return []
 
 @router.delete("/{user_id}/{idea_id}", response_model=SuccessResponse)

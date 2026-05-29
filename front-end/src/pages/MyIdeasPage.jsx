@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
@@ -34,22 +34,27 @@ const MyIdeasPage = () => {
   const [deletingIdeaId, setDeletingIdeaId] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null); // { ideaId, ideaTitle }
 
-  // Carregar ideias do backend
-  useEffect(() => {
-    if (isAuthenticated && user?.uid) {
-      loadIdeas();
+  const loadIdeas = useCallback(async () => {
+    // Verificar se user está disponível antes de fazer a chamada
+    if (!user?.uid) {
+      console.warn('[MyIdeasPage] User não disponível, cancelando carregamento');
+      setLoading(false);
+      setMyIdeas([]);
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, user?.uid]);
 
-  const loadIdeas = async () => {
     try {
       setLoading(true);
+      console.log('[MyIdeasPage] Carregando ideias para usuário:', user.uid);
+      
       const ideas = await listIdeas(user.uid);
+      console.log('[MyIdeasPage] Ideias recebidas:', ideas);
       
       // Se não houver ideias, apenas define array vazio (não é erro)
       if (!ideas || ideas.length === 0) {
+        console.log('[MyIdeasPage] Nenhuma ideia encontrada');
         setMyIdeas([]);
+        setLoading(false);
         return;
       }
       
@@ -73,9 +78,16 @@ const MyIdeasPage = () => {
         priority: idea.dynamic_content?.priority || 'Média'
       }));
       
+      console.log('[MyIdeasPage] Ideias formatadas:', formattedIdeas);
       setMyIdeas(formattedIdeas);
     } catch (error) {
-      console.error('Erro ao carregar ideias:', error);
+      console.error('[MyIdeasPage] Erro ao carregar ideias:', error);
+      console.error('[MyIdeasPage] Detalhes do erro:', {
+        message: error.message,
+        status: error.status,
+        stack: error.stack
+      });
+      
       // Só mostra erro se realmente houver um problema de conexão
       // Se for apenas "sem ideias", não mostra erro
       if (error.message && !error.message.includes('404') && !error.message.includes('não encontrada')) {
@@ -86,9 +98,21 @@ const MyIdeasPage = () => {
       }
       setMyIdeas([]);
     } finally {
+      // Garantir que o loading sempre é desligado
+      console.log('[MyIdeasPage] Finalizando carregamento');
       setLoading(false);
     }
-  };
+  }, [user?.uid]);
+
+  // Carregar ideias do backend
+  useEffect(() => {
+    if (isAuthenticated && user?.uid) {
+      loadIdeas();
+    } else if (!isAuthenticated && !user) {
+      // Se não estiver autenticado, para o loading
+      setLoading(false);
+    }
+  }, [isAuthenticated, user?.uid, loadIdeas]);
 
   const handleCreateNewIdea = async () => {
     if (!user?.uid) {

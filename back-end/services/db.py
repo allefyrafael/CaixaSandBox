@@ -64,8 +64,13 @@ def create_new_idea(user_id: str, title: str = "Nova Ideia") -> Dict[str, Any]:
     Returns:
         Dicionário com os dados da ideia criada
     """
+    import time
+    start_time = time.time()
+    
     if not db:
         raise Exception("Firebase não está configurado")
+    
+    print(f"[DB] Criando nova ideia para usuário {user_id}")
     
     idea_id = str(uuid.uuid4())
     idea_data = {
@@ -83,8 +88,17 @@ def create_new_idea(user_id: str, title: str = "Nova Ideia") -> Dict[str, Any]:
                 .collection('ideas').document(idea_id)
     
     try:
+        print(f"[DB] Salvando ideia {idea_id} no Firestore...")
+        save_start = time.time()
         doc_ref.set(idea_data)
+        save_time = time.time() - save_start
+        elapsed_time = time.time() - start_time
+        
+        print(f"[DB] Ideia {idea_id} criada com sucesso em {elapsed_time:.2f}s (salvamento: {save_time:.2f}s)")
+        
     except Exception as e:
+        elapsed_time = time.time() - start_time
+        print(f"[DB] Erro ao criar ideia (tempo: {elapsed_time:.2f}s): {e}")
         if _is_database_not_found_error(e):
             _raise_database_not_found_error()
         raise
@@ -194,11 +208,26 @@ def list_user_ideas(user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
         print("[AVISO] Firebase não configurado. Retornando lista vazia de ideias.")
         return []
     
+    import time
+    start_time = time.time()
+    
     try:
-        docs = db.collection('users').document(user_id)\
-                 .collection('ideas')\
-                 .order_by('last_updated', direction=Query.DESCENDING)\
-                 .limit(limit).stream()
+        print(f"[DB] Buscando ideias para usuário {user_id} (limit: {limit})")
+        
+        # Verifica se a coleção existe primeiro (mais rápido)
+        user_ref = db.collection('users').document(user_id)
+        user_doc = user_ref.get()
+        
+        if not user_doc.exists:
+            print(f"[DB] Usuário {user_id} não existe no Firestore")
+            return []
+        
+        # Busca direta sem order_by (mais rápido)
+        # Se não houver índice, order_by pode demorar muito ou falhar
+        ideas_ref = user_ref.collection('ideas').limit(limit)
+        
+        # Tenta buscar com timeout implícito (get() já tem timeout do Firestore)
+        docs = ideas_ref.get()
         
         ideas = []
         for doc in docs:
@@ -206,13 +235,52 @@ def list_user_ideas(user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
             idea_data['id'] = doc.id
             ideas.append(idea_data)
         
+        # Ordenar em memória (muito mais rápido que order_by no Firestore)
+        # Isso evita problemas com índices faltantes
+        try:
+            def get_sort_key(idea):
+                last_updated = idea.get('last_updated')
+                if not last_updated:
+                    return datetime.min
+                # Se for um timestamp do Firestore, converter
+                if hasattr(last_updated, 'timestamp'):
+                    return datetime.fromtimestamp(last_updated.timestamp())
+                # Se já for datetime, usar diretamente
+                if isinstance(last_updated, datetime):
+                    return last_updated
+                # Tentar converter string ou outros formatos
+                try:
+                    if isinstance(last_updated, str):
+                        return datetime.fromisoformat(last_updated.replace('Z', '+00:00'))
+                    return datetime.min
+                except:
+                    return datetime.min
+            
+            ideas.sort(key=get_sort_key, reverse=True)
+        except Exception as sort_error:
+            print(f"[DB] Aviso: Erro ao ordenar em memória: {sort_error}")
+            # Se não conseguir ordenar, retorna como está (não é crítico)
+        
+        elapsed_time = time.time() - start_time
+        print(f"[DB] {len(ideas)} ideias encontradas para usuário {user_id} em {elapsed_time:.2f}s")
         return ideas
+        
     except Exception as e:
+        elapsed_time = time.time() - start_time
+        error_str = str(e)
+        print(f"[DB] Erro ao buscar ideias para {user_id} (tempo: {elapsed_time:.2f}s): {error_str}")
+        
         if _is_database_not_found_error(e):
             # Para list_user_ideas, retorna lista vazia ao invés de erro
             print(f"[AVISO] Banco de dados Firestore não foi criado. Retornando lista vazia.")
             return []
-        # Se houver erro ao buscar (ex: coleção não existe), retorna lista vazia
+        
+        # Se for erro de permissão ou coleção não existe, retorna lista vazia
+        if "permission" in error_str.lower() or "not found" in error_str.lower() or "does not exist" in error_str.lower():
+            print(f"[AVISO] Coleção não existe ou sem permissão. Retornando lista vazia.")
+            return []
+        
+        # Para outros erros, também retorna lista vazia (não quebra o frontend)
         print(f"[AVISO] Erro ao buscar ideias: {e}. Retornando lista vazia.")
         return []
 
