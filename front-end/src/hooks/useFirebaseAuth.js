@@ -18,21 +18,59 @@ export const useFirebaseAuth = () => {
 
   // Observa mudanças no estado de autenticação
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      (currentUser) => {
-        setUser(currentUser);
+    let timeoutId;
+    let isMounted = true;
+    let authInitialized = false;
+
+    // Timeout de segurança: se o Firebase não responder em 5 segundos, parar o loading
+    timeoutId = setTimeout(() => {
+      if (isMounted && !authInitialized) {
+        console.warn('[useFirebaseAuth] Timeout: Firebase não respondeu em 5 segundos. Parando loading.');
         setLoading(false);
-        setError(null);
-      },
-      (err) => {
+        setError(new Error('Timeout ao inicializar autenticação. Verifique sua conexão.'));
+      }
+    }, 5000);
+
+    try {
+      const unsubscribe = onAuthStateChanged(
+        auth,
+        (currentUser) => {
+          if (isMounted) {
+            authInitialized = true;
+            clearTimeout(timeoutId);
+            setUser(currentUser);
+            setLoading(false);
+            setError(null);
+            console.log('[useFirebaseAuth] Estado de autenticação atualizado:', currentUser ? 'Autenticado' : 'Não autenticado');
+          }
+        },
+        (err) => {
+          if (isMounted) {
+            authInitialized = true;
+            clearTimeout(timeoutId);
+            console.error('[useFirebaseAuth] Erro no estado de autenticação:', err);
+            setError(err);
+            setLoading(false);
+            setUser(null);
+          }
+        }
+      );
+
+      return () => {
+        isMounted = false;
+        clearTimeout(timeoutId);
+        unsubscribe();
+      };
+    } catch (err) {
+      if (isMounted) {
+        authInitialized = true;
+        clearTimeout(timeoutId);
+        console.error('[useFirebaseAuth] Erro ao configurar listener de autenticação:', err);
         setError(err);
         setLoading(false);
         setUser(null);
       }
-    );
-
-    return () => unsubscribe();
+    }
   }, []);
 
   // Login com email e senha

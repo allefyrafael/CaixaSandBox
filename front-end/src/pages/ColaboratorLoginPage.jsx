@@ -15,7 +15,7 @@ import {
 
 const ColaboratorLoginPage = () => {
   const navigate = useNavigate();
-  const { login, signUp, isAuthenticated } = useFirebaseAuth();
+  const { login, signUp, isAuthenticated, loading: authLoading, error: authError } = useFirebaseAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [formData, setFormData] = useState({
@@ -24,12 +24,21 @@ const ColaboratorLoginPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  // Redireciona se já estiver autenticado
+  // Redireciona se já estiver autenticado (apenas quando não estiver carregando)
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/colaborador/minhas-ideias');
+    if (!authLoading && isAuthenticated) {
+      console.log('[ColaboratorLoginPage] Usuário já autenticado, redirecionando...');
+      navigate('/colaborador/minhas-ideias', { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, authLoading, navigate]);
+
+  // Mostrar erro de autenticação se houver
+  useEffect(() => {
+    if (authError && !authLoading) {
+      console.error('[ColaboratorLoginPage] Erro de autenticação:', authError);
+      // Não mostrar toast aqui para evitar spam, apenas logar
+    }
+  }, [authError, authLoading]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -72,6 +81,25 @@ const ColaboratorLoginPage = () => {
       setIsLoading(false);
     }
   };
+
+  // Mostrar loading apenas enquanto o Firebase está inicializando
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center space-y-4"
+        >
+          <div className="w-12 h-12 bg-gradient-to-r from-caixa-blue to-indigo-600 rounded-full flex items-center justify-center">
+            <Lightbulb className="w-6 h-6 text-white" />
+          </div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-caixa-blue"></div>
+          <p className="text-gray-600">Inicializando autenticação...</p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">

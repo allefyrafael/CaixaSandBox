@@ -100,10 +100,14 @@ const IdeaDetailsPage = () => {
     },
     keywords: ['IA', 'Chatbot', 'Atendimento', 'Automatização', 'Experiência do Cliente'],
     estimatedImpact: {
-      customerSatisfaction: '+40%',
+      potential: '+40%',
+      potentialReason: 'Baseado na capacidade de resolver 80% das consultas automaticamente e melhorar significativamente a experiência do usuário',
       costReduction: '25%',
+      costReductionReason: 'Redução de custos operacionais através da automatização de atendimentos repetitivos',
       efficiencyGain: '60%',
-      implementationTime: '4-6 meses'
+      efficiencyReason: 'Aumento na produtividade pela diminuição de sobrecarga nos atendentes humanos',
+      feasibility: '78%',
+      feasibilityReason: 'Alta viabilidade técnica considerando recursos disponíveis, tecnologia acessível e alinhamento estratégico'
     },
     riskFactors: [
       { risk: 'Integração com sistemas legados', level: 'Médio' },
@@ -358,25 +362,25 @@ const IdeaDetailsPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
-            <div className="flex items-center space-x-4">
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-3 md:py-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/dashboard')}
-                className="p-2 text-gray-600 hover:text-caixa-blue hover:bg-blue-50 rounded-lg transition-all"
+                className="p-2 text-gray-600 hover:text-caixa-blue hover:bg-blue-50 rounded-lg transition-all flex-shrink-0"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </motion.button>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">{ideaData.title}</h1>
-                <p className="text-sm text-gray-600">Análise detalhada da ideia</p>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 truncate">{ideaData.title}</h1>
+                <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Análise detalhada da ideia</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full">
+            <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+              <span className="px-2 sm:px-3 py-1 bg-yellow-100 text-yellow-800 text-xs sm:text-sm rounded-full whitespace-nowrap">
                 Pendente
               </span>
             </div>
@@ -384,8 +388,8 @@ const IdeaDetailsPage = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 md:py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
           
           {/* Left Side - Form Data */}
           <div className="lg:col-span-7 space-y-4">
@@ -394,45 +398,45 @@ const IdeaDetailsPage = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4"
+              className="bg-white rounded-lg md:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4"
             >
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
+              <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+                  <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <div>
-                  <h3 className="text-base font-semibold text-gray-900">Informações do Autor</h3>
-                  <p className="text-sm text-gray-600">Dados do empregado responsável pela ideia</p>
+                <div className="min-w-0">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-900">Informações do Autor</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Dados do empregado responsável pela ideia</p>
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-center space-x-3">
-                  <User className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-600">Nome</p>
-                    <p className="font-medium text-gray-900">{ideaData.author.name}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-600">Nome</p>
+                    <p className="text-sm sm:text-base font-medium text-gray-900 truncate">{ideaData.author.name}</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <Mail className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-600">Email</p>
-                    <p className="font-medium text-gray-900">{ideaData.author.email}</p>
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-600">Email</p>
+                    <p className="text-sm sm:text-base font-medium text-gray-900 truncate">{ideaData.author.email}</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <Building className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-600">Departamento</p>
-                    <p className="font-medium text-gray-900">{ideaData.author.department}</p>
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <Building className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-600">Departamento</p>
+                    <p className="text-sm sm:text-base font-medium text-gray-900 truncate">{ideaData.author.department}</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <Calendar className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-600">Submetido em</p>
-                    <p className="font-medium text-gray-900">{ideaData.submittedAt}</p>
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-600">Submetido em</p>
+                    <p className="text-sm sm:text-base font-medium text-gray-900">{ideaData.submittedAt}</p>
                   </div>
                 </div>
               </div>
@@ -443,20 +447,20 @@ const IdeaDetailsPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4"
+              className="bg-white rounded-lg md:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4"
             >
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-white" />
+              <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <div>
-                  <h3 className="text-base font-semibold text-gray-900">Informações de Ideação</h3>
-                  <p className="text-sm text-gray-600">Explore os detalhes da proposta</p>
+                <div className="min-w-0">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-900">Informações de Ideação</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Explore os detalhes da proposta</p>
                 </div>
               </div>
               
               {/* Steps Navigation */}
-              <div className="flex space-x-2 mb-4">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mb-3 sm:mb-4">
                 {steps.map((step, index) => {
                   const Icon = step.icon;
                   const isActive = currentStep === index;
@@ -466,15 +470,15 @@ const IdeaDetailsPage = () => {
                       onClick={() => setCurrentStep(index)}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className={`flex-1 p-3 rounded-lg transition-all ${
+                      className={`flex-1 p-2 sm:p-3 rounded-lg transition-all ${
                         isActive
                           ? 'bg-caixa-blue text-white shadow-lg'
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
-                      <div className="flex items-center justify-center space-x-2">
-                        <Icon className="w-5 h-5" />
-                        <span className="font-medium text-sm">{step.title}</span>
+                      <div className="flex items-center justify-center space-x-1 sm:space-x-2">
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="font-medium text-xs sm:text-sm">{step.title}</span>
                       </div>
                     </motion.button>
                   );
@@ -504,16 +508,16 @@ const IdeaDetailsPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4"
+              className="bg-white rounded-lg md:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4"
             >
-              <div className="flex items-center space-x-2 mb-4">
-                <Bot className="w-5 h-5 text-blue-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Análise de IA</h3>
+              <div className="flex items-center space-x-2 mb-3 sm:mb-4">
+                <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">Análise de IA</h3>
               </div>
 
               {/* Sentiment Analysis */}
-              <div className="mb-4">
-                <h4 className="font-medium text-gray-900 mb-2">Análise de Sentimento</h4>
+              <div className="mb-3 sm:mb-4">
+                <h4 className="text-sm sm:text-base font-medium text-gray-900 mb-2">Análise de Sentimento</h4>
                 <div className={`p-4 rounded-lg border-l-4 ${
                   aiAnalysis.sentiment.score > 0.7 ? 'bg-green-50 border-green-500' :
                   aiAnalysis.sentiment.score > 0.4 ? 'bg-yellow-50 border-yellow-500' : 'bg-red-50 border-red-500'
@@ -535,8 +539,8 @@ const IdeaDetailsPage = () => {
               </div>
 
               {/* Feasibility Score */}
-              <div className="mb-4">
-                <h4 className="font-medium text-gray-900 mb-2">Viabilidade</h4>
+              <div className="mb-3 sm:mb-4">
+                <h4 className="text-sm sm:text-base font-medium text-gray-900 mb-2">Viabilidade</h4>
                 <div className="space-y-2">
                   {aiAnalysis.feasibility.factors.map((factor, index) => (
                     <div key={index}>
@@ -560,54 +564,86 @@ const IdeaDetailsPage = () => {
               </div>
 
               {/* Impact Estimation */}
-              <div className="mb-4">
-                <h4 className="font-medium text-gray-900 mb-2">Impacto Estimado</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="text-center p-3 bg-green-50 rounded-lg">
-                    <div className="text-lg font-bold text-green-600">
-                      {aiAnalysis.estimatedImpact.customerSatisfaction}
+              <div className="mb-3 sm:mb-4">
+                <h4 className="text-sm sm:text-base font-medium text-gray-900 mb-2">Impacto Estimado</h4>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="group text-center p-2 sm:p-3 bg-green-50 rounded-lg cursor-help border border-green-100 hover:border-green-300 transition-all relative"
+                    title={aiAnalysis.estimatedImpact.potentialReason}
+                  >
+                    <div className="text-base sm:text-lg font-bold text-green-600">
+                      {aiAnalysis.estimatedImpact.potential}
                     </div>
-                    <div className="text-xs text-gray-600">Satisfação</div>
-                  </div>
-                  <div className="text-center p-3 bg-blue-50 rounded-lg">
-                    <div className="text-lg font-bold text-blue-600">
+                    <div className="text-[10px] sm:text-xs text-gray-600 font-medium">Potencial</div>
+                    <div className="hidden sm:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity w-48 pointer-events-none z-10">
+                      {aiAnalysis.estimatedImpact.potentialReason}
+                    </div>
+                  </motion.div>
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="group text-center p-2 sm:p-3 bg-blue-50 rounded-lg cursor-help border border-blue-100 hover:border-blue-300 transition-all relative"
+                    title={aiAnalysis.estimatedImpact.costReductionReason}
+                  >
+                    <div className="text-base sm:text-lg font-bold text-blue-600">
                       {aiAnalysis.estimatedImpact.costReduction}
                     </div>
-                    <div className="text-xs text-gray-600">Redução de Custos</div>
-                  </div>
-                  <div className="text-center p-3 bg-purple-50 rounded-lg">
-                    <div className="text-lg font-bold text-purple-600">
+                    <div className="text-[10px] sm:text-xs text-gray-600 font-medium">Redução de Custos</div>
+                    <div className="hidden sm:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity w-48 pointer-events-none z-10">
+                      {aiAnalysis.estimatedImpact.costReductionReason}
+                    </div>
+                  </motion.div>
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="group text-center p-2 sm:p-3 bg-purple-50 rounded-lg cursor-help border border-purple-100 hover:border-purple-300 transition-all relative"
+                    title={aiAnalysis.estimatedImpact.efficiencyReason}
+                  >
+                    <div className="text-base sm:text-lg font-bold text-purple-600">
                       {aiAnalysis.estimatedImpact.efficiencyGain}
                     </div>
-                    <div className="text-xs text-gray-600">Eficiência</div>
-                  </div>
-                  <div className="text-center p-3 bg-orange-50 rounded-lg">
-                    <div className="text-lg font-bold text-orange-600">
-                      {aiAnalysis.estimatedImpact.implementationTime}
+                    <div className="text-[10px] sm:text-xs text-gray-600 font-medium">Eficiência</div>
+                    <div className="hidden sm:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity w-48 pointer-events-none z-10">
+                      {aiAnalysis.estimatedImpact.efficiencyReason}
                     </div>
-                    <div className="text-xs text-gray-600">Implementação</div>
-                  </div>
+                  </motion.div>
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="group text-center p-2 sm:p-3 bg-orange-50 rounded-lg cursor-help border border-orange-100 hover:border-orange-300 transition-all relative"
+                    title={aiAnalysis.estimatedImpact.feasibilityReason}
+                  >
+                    <div className="text-base sm:text-lg font-bold text-orange-600">
+                      {aiAnalysis.estimatedImpact.feasibility}
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-gray-600 font-medium">Viabilidade</div>
+                    <div className="hidden sm:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity w-48 pointer-events-none z-10">
+                      {aiAnalysis.estimatedImpact.feasibilityReason}
+                    </div>
+                  </motion.div>
                 </div>
               </div>
 
-              {/* Keywords */}
-              <div className="mb-4">
-                <h4 className="font-medium text-gray-900 mb-2">Palavras-chave</h4>
+              {/* Categories */}
+              <div className="mb-3 sm:mb-4">
+                <h4 className="text-sm sm:text-base font-medium text-gray-900 mb-2">Categorias</h4>
                 <div className="flex flex-wrap gap-2">
                   {aiAnalysis.keywords.map((keyword, index) => (
-                    <span 
+                    <motion.span 
                       key={index}
-                      className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ scale: 1.1 }}
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-[10px] sm:text-xs font-medium rounded-full border border-blue-300 shadow-sm hover:shadow-md transition-all cursor-default"
                     >
                       {keyword}
-                    </span>
+                    </motion.span>
                   ))}
                 </div>
               </div>
 
               {/* Recommendations */}
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Recomendações</h4>
+                <h4 className="text-sm sm:text-base font-medium text-gray-900 mb-2">Recomendações</h4>
                 <ul className="space-y-2">
                   {aiAnalysis.recommendations.map((rec, index) => (
                     <li key={index} className="flex items-start space-x-2">
@@ -624,23 +660,23 @@ const IdeaDetailsPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-4 text-white"
+              className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg md:rounded-xl p-3 sm:p-4 text-white"
             >
               <div className="text-center">
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Globe className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                  <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <h3 className="text-lg font-bold mb-2">Pronto para Classificar?</h3>
-                <p className="text-emerald-100 mb-3 text-sm">
-                  Analise os dados ao lado e classifique esta ideia na fase adequada do Sandbox
+                <h3 className="text-base sm:text-lg font-bold mb-2">Pronto para Classificar?</h3>
+                <p className="text-emerald-100 mb-3 text-xs sm:text-sm">
+                  Analise os dados e classifique esta ideia na fase adequada do Sandbox
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowClassificationModal(true)}
-                  className="w-full py-3 px-6 bg-white text-emerald-600 rounded-lg font-bold hover:bg-emerald-50 transition-all shadow-lg"
+                  className="w-full py-2 sm:py-3 px-4 sm:px-6 bg-white text-emerald-600 rounded-lg font-bold hover:bg-emerald-50 transition-all shadow-lg text-sm sm:text-base"
                 >
-                  <Sparkles className="w-5 h-5 inline mr-2" />
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 inline mr-2" />
                   Classificar Ideia
                 </motion.button>
               </div>
@@ -665,30 +701,30 @@ const IdeaDetailsPage = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-lg md:rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto m-4"
             >
-              <div className="p-6 border-b border-gray-200">
+              <div className="p-3 sm:p-4 md:p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
-                      <Globe className="w-6 h-6 text-white" />
+                  <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Globe className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                     </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-gray-900">Classificar Ideia</h2>
-                      <p className="text-gray-600">Defina a fase de desenvolvimento desta proposta</p>
+                    <div className="min-w-0">
+                      <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">Classificar Ideia</h2>
+                      <p className="text-xs sm:text-sm md:text-base text-gray-600 hidden sm:block">Defina a fase de desenvolvimento desta proposta</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setShowClassificationModal(false)}
-                    className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
+                    className="p-2 text-gray-400 hover:text-gray-600 rounded-lg flex-shrink-0"
                   >
                     ✕
                   </button>
                 </div>
               </div>
 
-              <div className="p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="p-3 sm:p-4 md:p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
                   
                   {/* Left Side - Data Summary */}
                   <div className="space-y-6">
@@ -717,11 +753,13 @@ const IdeaDetailsPage = () => {
                       </div>
 
                       {/* Impact Preview */}
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <h5 className="font-medium text-gray-900 mb-2">Impacto Estimado</h5>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div>Satisfação: <span className="font-medium">{aiAnalysis.estimatedImpact.customerSatisfaction}</span></div>
-                          <div>Eficiência: <span className="font-medium">{aiAnalysis.estimatedImpact.efficiencyGain}</span></div>
+                      <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                        <h5 className="text-sm sm:text-base font-medium text-gray-900 mb-2">Impacto Estimado</h5>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
+                          <div>Potencial: <span className="font-medium text-green-600">{aiAnalysis.estimatedImpact.potential}</span></div>
+                          <div>Eficiência: <span className="font-medium text-purple-600">{aiAnalysis.estimatedImpact.efficiencyGain}</span></div>
+                          <div>Redução de Custos: <span className="font-medium text-blue-600">{aiAnalysis.estimatedImpact.costReduction}</span></div>
+                          <div>Viabilidade: <span className="font-medium text-orange-600">{aiAnalysis.estimatedImpact.feasibility}</span></div>
                         </div>
                       </div>
                     </div>
@@ -783,10 +821,10 @@ const IdeaDetailsPage = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex space-x-3 mt-8 pt-6 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mt-4 sm:mt-6 md:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
                   <button
                     onClick={() => setShowClassificationModal(false)}
-                    className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all"
+                    className="flex-1 py-2 sm:py-3 px-3 sm:px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all text-sm sm:text-base"
                   >
                     Cancelar
                   </button>
@@ -795,14 +833,15 @@ const IdeaDetailsPage = () => {
                     whileTap={{ scale: 0.98 }}
                     onClick={handleClassifyIdea}
                     disabled={!selectedPhase}
-                    className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
+                    className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-all text-sm sm:text-base ${
                       selectedPhase
                         ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                   >
-                    <Save className="w-5 h-5 inline mr-2" />
-                    Classificar no Sandbox CAIXA
+                    <Save className="w-4 h-4 sm:w-5 sm:h-5 inline mr-2" />
+                    <span className="hidden sm:inline">Classificar no Sandbox CAIXA</span>
+                    <span className="sm:hidden">Classificar</span>
                   </motion.button>
                 </div>
               </div>

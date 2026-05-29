@@ -2,18 +2,25 @@
  * Cliente HTTP para API do Backend
  * Centraliza todas as chamadas de API
  */
+import { auth } from '../config/firebase';
+
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 /**
- * Função auxiliar para fazer requisições com timeout
+ * Obtém token de autenticação do Firebase
  */
-function fetchWithTimeout(url, options, timeout = 15000) {
-  return Promise.race([
-    fetch(url, options),
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Timeout: A requisição demorou muito para responder')), timeout)
-    )
-  ]);
+async function getAuthToken() {
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      const token = await user.getIdToken();
+      return token;
+    }
+    return null;
+  } catch (error) {
+    console.error('Erro ao obter token de autenticação:', error);
+    return null;
+  }
 }
 
 /**
@@ -21,9 +28,14 @@ function fetchWithTimeout(url, options, timeout = 15000) {
  */
 async function fetchAPI(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
+  
+  // Obter token de autenticação
+  const token = await getAuthToken();
+  
   const config = {
     headers: {
       'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
       ...options.headers,
     },
     ...options,
@@ -34,16 +46,38 @@ async function fetchAPI(endpoint, options = {}) {
   }
 
   try {
-    console.log(`[API] Fazendo requisição para: ${url}`);
-    const response = await fetchWithTimeout(url, config, 15000); // 15 segundos de timeout
-    
-    console.log(`[API] Resposta recebida: ${response.status} ${response.statusText}`);
+    const response = await fetch(url, config);
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ detail: 'Erro desconhecido' }));
       const errorMessage = errorData.detail || `Erro ${response.status}: ${response.statusText}`;
       
-      console.error(`[API] Erro na resposta: ${errorMessage}`);
+      // Tratamento especial para erro 401 (Unauthorized) - Token expirado ou inválido
+      if (response.status === 401) {
+        const authError = new Error('Sua sessão expirou. Por favor, faça login novamente.');
+        authError.status = 401;
+        authError.isAuthError = true;
+        authError.originalMessage = errorMessage;
+        // Tentar renovar token se possível
+        try {
+          const user = auth.currentUser;
+          if (user) {
+            await user.getIdToken(true); // Força renovação do token
+          }
+        } catch (refreshError) {
+          console.error('Erro ao renovar token:', refreshError);
+        }
+        throw authError;
+      }
+      
+      // Tratamento especial para erro 403 (Forbidden) - Sem permissão
+      if (response.status === 403) {
+        const forbiddenError = new Error('Você não tem permissão para acessar este recurso.');
+        forbiddenError.status = 403;
+        forbiddenError.isForbiddenError = true;
+        forbiddenError.originalMessage = errorMessage;
+        throw forbiddenError;
+      }
       
       // Tratamento especial para erro 503 (Service Unavailable) - Banco não criado
       if (response.status === 503 && errorMessage.includes('Firestore')) {
@@ -56,32 +90,95 @@ async function fetchAPI(endpoint, options = {}) {
         throw friendlyError;
       }
       
+      // Tratamento especial para erro 500 com índice faltante do Firestore
+      if (response.status === 500 && (errorMessage.includes('index') || errorMessage.includes('índice') || errorMessage.includes('requires an index'))) {
+        // Extrair link do índice se presente
+        let indexLink = null;
+        
+        // Tentar diferentes padrões de extração
+        const linkPatterns = [
+          'Link:',
+          'link:',
+          'Acesse:',
+          'acesse:',
+          'https://console.firebase.google.com',
+          'https://console.cloud.google.com'
+        ];
+        
+        for (const pattern of linkPatterns) {
+          if (errorMessage.includes(pattern)) {
+            const parts = errorMessage.split(pattern);
+            if (parts.length > 1) {
+              // Pegar a parte após o padrão e extrair a URL
+              const remaining = parts[1].trim();
+              // Procurar por URL completa
+              const urlMatch = remaining.match(/https?:\/\/[^\s\)]+/);
+              if (urlMatch) {
+                indexLink = urlMatch[0];
+                break;
+              }
+              // Se não encontrar URL completa, pegar até o próximo espaço
+              const firstPart = remaining.split(/\s/)[0];
+              if (firstPart.startsWith('http')) {
+                indexLink = firstPart;
+                break;
+              }
+            }
+          }
+        }
+        
+        // Se ainda não encontrou, procurar diretamente por URLs no erro
+        if (!indexLink) {
+          const urlMatch = errorMessage.match(/https?:\/\/[^\s\)]+/);
+          if (urlMatch) {
+            indexLink = urlMatch[0];
+          }
+        }
+        
+        // Mensagem de erro amigável
+        let errorText = 'O banco de dados precisa de um índice composto no Firestore.';
+        if (indexLink) {
+          errorText += ` Clique aqui para criar o índice: ${indexLink}`;
+        } else {
+          errorText += ' Por favor, acesse o console do Firebase para criar o índice necessário.';
+        }
+        
+        const indexError = new Error(errorText);
+        indexError.status = 500;
+        indexError.isIndexError = true;
+        indexError.originalMessage = errorMessage;
+        indexError.indexLink = indexLink || `https://console.firebase.google.com/project/sandboxcaixa-84951/firestore/indexes`;
+        throw indexError;
+      }
+      
       // Tratamento especial para erro 400 (Bad Request) - Moderação de conteúdo
-      if (response.status === 400 && errorMessage.includes('inapropriado')) {
-        const moderationError = new Error(errorMessage);
-        moderationError.status = 400;
-        moderationError.isModerationError = true;
-        moderationError.originalMessage = errorMessage;
-        throw moderationError;
+      if (response.status === 400) {
+        try {
+          const errorData = await response.json();
+          if (errorData.detail && typeof errorData.detail === 'object' && errorData.detail.error === 'moderation_failed') {
+            const moderationError = new Error(errorData.detail.justificativa_geral || 'Conteúdo precisa ser revisado');
+            moderationError.status = 400;
+            moderationError.isModerationError = true;
+            moderationError.detail = errorData.detail;
+            throw moderationError;
+          }
+        } catch (e) {
+          // Se não conseguir parsear JSON, usar mensagem original
+          if (errorMessage.includes('inapropriado') || errorMessage.includes('moderation')) {
+            const moderationError = new Error(errorMessage);
+            moderationError.status = 400;
+            moderationError.isModerationError = true;
+            throw moderationError;
+          }
+        }
       }
       
       throw new Error(errorMessage);
     }
 
-    const data = await response.json();
-    console.log(`[API] Dados recebidos:`, data);
-    return data;
+    return await response.json();
   } catch (error) {
-    console.error(`[API] Erro na requisição ${endpoint}:`, error);
-    
-    // Se for erro de timeout ou conexão, fornecer mensagem mais amigável
-    if (error.message.includes('Timeout') || error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-      const networkError = new Error('Erro de conexão. Verifique se o servidor está rodando e tente novamente.');
-      networkError.status = 0;
-      networkError.isNetworkError = true;
-      throw networkError;
-    }
-    
+    console.error(`Erro na API ${endpoint}:`, error);
     throw error;
   }
 }
@@ -111,36 +208,17 @@ export const getIdea = async (userId, ideaId) => {
  * Lista todas as ideias de um usuário
  */
 export const listIdeas = async (userId, limit = 50) => {
-  if (!userId) {
-    console.error('[API] listIdeas: userId não fornecido');
-    throw new Error('ID do usuário não fornecido');
-  }
-  
-  try {
-    console.log('[API] listIdeas: Buscando ideias para usuário', userId);
-    const response = await fetchAPI(`/api/ideas/${userId}?limit=${limit}`);
-    console.log('[API] listIdeas: Resposta recebida', response);
-    
-    // Garantir que sempre retorna um array
-    if (Array.isArray(response)) {
-      return response;
-    }
-    
-    // Se a resposta não for um array, retornar array vazio
-    console.warn('[API] listIdeas: Resposta não é um array, retornando array vazio', response);
-    return [];
-  } catch (error) {
-    console.error('[API] listIdeas: Erro ao buscar ideias', error);
-    
-    // Se for erro 503 (banco não criado), retornar array vazio ao invés de lançar erro
-    if (error.status === 503) {
-      console.warn('[API] listIdeas: Banco de dados não criado, retornando array vazio');
-      return [];
-    }
-    
-    // Para outros erros, lançar novamente
-    throw error;
-  }
+  return fetchAPI(`/api/ideas/${userId}?limit=${limit}`);
+};
+
+/**
+ * Valida campos antes de salvar (moderação)
+ */
+export const validateFields = async (userId, data) => {
+  return fetchAPI(`/api/ideas/${userId}/validate`, {
+    method: 'POST',
+    body: data,
+  });
 };
 
 /**
@@ -168,6 +246,15 @@ export const deleteIdea = async (userId, ideaId) => {
 export const updateIdeaStatus = async (userId, ideaId, newStatus) => {
   return fetchAPI(`/api/ideas/${userId}/${ideaId}/status?new_status=${newStatus}`, {
     method: 'PUT',
+  });
+};
+
+/**
+ * Submete uma ideia (com validação do Agente Guardião e análise do Agente Analista)
+ */
+export const submitIdea = async (userId, ideaId) => {
+  return fetchAPI(`/api/ideas/${userId}/${ideaId}/submit`, {
+    method: 'POST',
   });
 };
 
