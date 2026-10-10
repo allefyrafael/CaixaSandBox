@@ -9,6 +9,7 @@ update('src/App.js', source => source
   .replace('BrowserRouter as Router', 'HashRouter as Router')
   .replace('<Router basename="/CaixaSandBox">', '<Router>'));
 update('src/components/HeroSection.jsx', source => source.replace("from './ThreeModelViewer'", "from './SafeThreeModelViewer'"));
+['src/components/HeroSection.jsx', 'src/pages/HomePage.jsx'].forEach(file => update(file, source => source.replaceAll('to="/formulario"', 'to="/demo"')));
 update('src/services/api.js', source => source
   .replace("const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';", "const API_URL = process.env.REACT_APP_API_URL || ''; ")
   .replace('async function fetchAPI(endpoint, options = {}) {', "async function fetchAPI(endpoint, options = {}) {\n  if (!API_URL) throw new Error('Esta demonstração não está conectada ao serviço de dados.');"));
